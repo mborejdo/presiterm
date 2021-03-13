@@ -1,0 +1,17 @@
+[package]
+name = "presiterm"
+version = "0.1.0"
+authors = ["Michael Borejdo <mib@electronic-minds.de>"]
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0"
+termimad = "0.8"
+syntect = "4.1"
+ron = "0.5"
+figlet-rs = "0.1"
+serde = { version = "1.0", features = ["serde_derive"] }
+clap = "2.33"
+termwiz = { path = "c:\\Users\\mib\\.tools\\src\\wezterm\\termwiz" }
+filedescriptor = { version="0.7", path = "c:\\Users\\mib\\.tools\\src\\wezterm\\filedescriptor" }
+image =  "*"
