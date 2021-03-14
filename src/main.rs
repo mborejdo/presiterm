@@ -13,7 +13,6 @@ use image::GenericImageView;
 use std::sync::Arc;
 use termwiz::surface::change::ImageData;
 use termwiz::surface::TextureCoordinate;
-
 use termwiz::Error;
 use std::{
     fs,
@@ -29,13 +28,6 @@ use syntect::highlighting::{Style, ThemeSet};
 use syntect::parsing::SyntaxSet;
 use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
 
-
-fn text_size(s: &str) -> (usize,usize) {
-    let w = 1 + s.lines().fold(0, |acc, l| acc.max(l.len()));
-
-    (w,s.lines().count())
-}
-
 #[derive(Debug, Deserialize)]
 struct Slides {
     files: Vec<FileTypes>,
@@ -48,8 +40,13 @@ enum FileTypes {
     Code(String, String),
 }
 
-impl FileTypes {
+fn text_size(s: &str) -> (usize,usize) {
+    let w = 1 + s.lines().fold(0, |acc, l| acc.max(l.len()));
 
+    (w,s.lines().count())
+}
+
+impl FileTypes {
     fn write_text(buf: &mut Surface, txt:&String) -> Result<(), Error> {
         let (width, height) =  buf.dimensions();
         let top = height.saturating_sub(txt.lines().count())  /2;
@@ -60,20 +57,16 @@ impl FileTypes {
                 x: Position::Absolute(x),
                 y: Position::Absolute(top + idx),
             });
-            // w.queue(cursor::MoveTo(x,top + idx as u16))?;
             buf.add_change(format!("{}", l));
         }
-        
         buf.flush_changes_older_than(0);
-        
         Ok(())
     }
 
     fn render(&self, buf: &mut Surface, margin: usize) -> Result<(), Error> {
         match self {
             FileTypes::Text(txt) => {
-                // buf.add_change(Change::ClearScreen(Default::default()));
-                // buf.add_change(Change::ClearScreen(ColorAttribute::Default));
+                buf.add_change(Change::ClearScreen(ColorAttribute::Default));
                 buf.add_change(Change::CursorVisibility(CursorVisibility::Hidden));
                 
                 const DATA: &'static [u8] = include_bytes!("../assets/giphy3.gif");
@@ -91,17 +84,15 @@ impl FileTypes {
                     image: Arc::clone(&image_data),
                 }));
                 buf.flush_changes_older_than(0);
+
                 // Self::write_text(buf, txt)?;
             }
             FileTypes::Markdown(path) => {
-
                 let (width, height) = buf.dimensions();
                 let markdown = fs::read_to_string(Path::new(path))?;
                 let (text_w,_) = text_size(markdown.as_str());
-
                 let area_w = text_w.min(width - (margin*2)) ;
                 let area_h = height / 2;
-
                 let x = 0.max((width - area_w) / 2) as u16;
                 let y = 0.max((height - area_h) / 2) as u16;
 
@@ -115,8 +106,6 @@ impl FileTypes {
                 let text_size = text_size(content.as_str()); 
                 let x = (width - text_size.0 )/2;
                 let y = (height - text_size.1 )/2;
-
-                // Load these once at the start of your program
                 let ps = SyntaxSet::load_defaults_newlines();
                 let ts = ThemeSet::load_defaults();
 
@@ -170,7 +159,6 @@ fn main() -> Result<(), Error> {
     let terminal = new_terminal(caps)?;
     let mut buf = BufferedTerminal::new(terminal)?;
 
-
     buf.terminal().set_raw_mode()?;
     buf.add_change(Change::CursorVisibility(CursorVisibility::Hidden));
     buf.flush()?;
@@ -193,8 +181,7 @@ fn main() -> Result<(), Error> {
                     key: KeyCode::Escape,
                     ..
                 }) => {
-                    // buf.add_change(Change::ClearScreen(Default::default()));
-
+                    buf.add_change(Change::ClearScreen(Default::default()));
                     break;
                 }
                 InputEvent::Key(KeyEvent {
@@ -220,13 +207,6 @@ fn main() -> Result<(), Error> {
             }
         }
     }
-
-    // buf.add_change(Change::ClearScreen(Default::default()));
-    // buf.add_change(Change::CursorPosition {
-    //     x: Position::Absolute(5),
-    //     y: Position::Absolute(5),
-    // });
-
 
     buf.add_change(Change::CursorVisibility(CursorVisibility::Visible));
     buf.terminal().set_cooked_mode()?;
