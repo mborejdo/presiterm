@@ -1,11 +1,15 @@
 use anyhow::{anyhow, Context};
 use clap::{App, Arg};
-use figlet_rs::FIGfont;
-use fs::File;
+// use figlet_rs::FIGfont;
 use image::GenericImageView;
+use termwiz::cell::AttributeChange;
+use termwiz::color::AnsiColor;
+use std::sync::Arc;
+use termwiz::surface::change::ImageData;
+use termwiz::surface::TextureCoordinate;
+use fs::File;
 use ron::de::from_reader;
 use serde::Deserialize;
-use std::sync::Arc;
 use std::{fs, path::Path, process::Command};
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Style, ThemeSet};
@@ -13,12 +17,8 @@ use syntect::parsing::SyntaxSet;
 use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
 use termimad::{Area, MadSkin};
 use termwiz::caps::Capabilities;
-use termwiz::cell::AttributeChange;
-use termwiz::color::AnsiColor;
 use termwiz::color::ColorAttribute;
 use termwiz::input::{InputEvent, KeyCode, KeyEvent};
-use termwiz::surface::change::ImageData;
-use termwiz::surface::TextureCoordinate;
 use termwiz::surface::{Change, CursorVisibility, Position, Surface};
 use termwiz::terminal::buffered::BufferedTerminal;
 use termwiz::terminal::{new_terminal, Terminal};
@@ -33,6 +33,7 @@ struct Slides {
 enum FileTypes {
     Text(String),
     Markdown(String),
+    Image(String),
     Code(String, String),
 }
 
@@ -59,28 +60,24 @@ impl FileTypes {
         Ok(())
     }
 
-    fn render(&self, buf: &mut Surface, margin: usize) -> Result<(), Error> {
+    fn render(&self, buf: &mut Surface, margin: usize, ps: &SyntaxSet, ts: &ThemeSet) -> Result<(), Error> {
         match self {
+            FileTypes::Image(path) => {
+                let data = fs::read(Path::new(path))?;
+                let image_data = Arc::new(ImageData::with_raw_data(data.into_boxed_slice()));
+
+                buf.add_change(Change::Image(termwiz::surface::change::Image {
+                    width: 15 as usize,
+                    height: 15 as usize,
+                    top_left: TextureCoordinate::new_f32(0.,0.),
+                    bottom_right: TextureCoordinate::new_f32(1.,1.),
+                    image: Arc::clone(&image_data),
+                }));
+                buf.flush_changes_older_than(0);
+            }
             FileTypes::Text(txt) => {
                 buf.add_change(Change::ClearScreen(ColorAttribute::Default));
                 buf.add_change(Change::CursorVisibility(CursorVisibility::Hidden));
-                // const DATA: &'static [u8] = include_bytes!("../assets/giphy3.gif");
-                // let image_data = Arc::new(ImageData::with_raw_data(DATA.to_vec().into_boxed_slice()));
-
-                // buf.resize(180, 40);
-                // buf.add_change(Change::CursorPosition {
-                //     x: Position::Absolute(0),
-                //     y: Position::Absolute(0),
-                // });
-                // buf.flush_changes_older_than(0);
-                // buf.add_change(Change::Image(termwiz::surface::change::Image {
-                //     width: 15 as usize,
-                //     height: 15 as usize,
-                //     top_left: TextureCoordinate::new_f32(0.,0.),
-                //     bottom_right: TextureCoordinate::new_f32(1.,1.),
-                //     image: Arc::clone(&image_data),
-                // }));
-                // buf.flush_changes_older_than(0);
 
                 Self::write_text(buf, txt)?;
             }
@@ -103,8 +100,7 @@ impl FileTypes {
                 let text_size = text_size(content.as_str());
                 let x = (width - text_size.0) / 2;
                 let y = (height - text_size.1) / 2;
-                let ps = SyntaxSet::load_defaults_newlines();
-                let ts = ThemeSet::load_defaults();
+                
 
                 let syntax = ps.find_syntax_by_extension(syntax).unwrap();
                 let mut highlighter = HighlightLines::new(syntax, &ts.themes["Solarized (light)"]);
@@ -118,12 +114,14 @@ impl FileTypes {
                         y: Position::Absolute(y + idx),
                     });
                     buf.add_change(format!("{}", escaped.to_string()));
+                    // buf.flush_changes_older_than(0);
                 }
 
-                buf.add_change(Change::CursorPosition {
-                    x: Position::Absolute(0),
-                    y: Position::Absolute(0),
-                });
+                Self::write_text(buf, &format!("{}", "syntax"))?;
+                // buf.add_change(Change::CursorPosition {
+                //     x: Position::Absolute(0),
+                //     y: Position::Absolute(0),
+                // });
                 buf.flush_changes_older_than(0);
             }
         }
@@ -133,7 +131,7 @@ impl FileTypes {
 }
 
 fn main() -> Result<(), Error> {
-    let matches = App::new("presterm")
+    let matches = App::new("presiterm")
         .version("0.1.0")
         .author("@mib")
         .about("terminal presenting")
@@ -146,6 +144,10 @@ fn main() -> Result<(), Error> {
                 .help("input file (*.ron)"),
         )
         .get_matches();
+
+    
+    let ps = SyntaxSet::load_defaults_newlines();
+    let ts = ThemeSet::load_defaults();
 
     let mut idx = 0_usize;
     let margin = 2_usize;
@@ -166,7 +168,7 @@ fn main() -> Result<(), Error> {
         buf.flush()?;
 
         if let Some(file) = slides.files.get(idx) {
-            file.render(&mut buf, margin)?;
+            file.render(&mut buf, margin, &ps, &ts)?;
         } else {
             break;
         }
@@ -200,6 +202,8 @@ fn main() -> Result<(), Error> {
             },
             Ok(None) => {}
             Err(e) => {
+                buf.add_change(Change::ClearScreen(Default::default()));
+               
                 print!("{:?}\r\n", e);
                 break;
             }

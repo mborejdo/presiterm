@@ -1,5 +1,6 @@
 (
     files:[ 
+        Image("assets/giphy3.gif"),
         Text("hello world"),
         Markdown("assets/test.md"),
         Code("assets/test.rs", "rs"),
