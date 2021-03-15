@@ -1,5 +1,6 @@
 (
     files:[ 
+        // Command(["clock"]),
         Image("assets/giphy3.gif"),
         Text("hello world"),
         Markdown("assets/test.md"),

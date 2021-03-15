@@ -35,6 +35,7 @@ enum FileTypes {
     Markdown(String),
     Image(String),
     Code(String, String),
+    Command(Vec<String>),
 }
 
 fn text_size(s: &str) -> (usize, usize) {
@@ -80,6 +81,12 @@ impl FileTypes {
                 buf.add_change(Change::CursorVisibility(CursorVisibility::Hidden));
 
                 Self::write_text(buf, txt)?;
+            }
+            FileTypes::Command(arr) => {
+                Command::new("nu")
+                    .arg("-c")
+                    .args(arr)
+                    .output()?;
             }
             FileTypes::Markdown(path) => {
                 let (width, height) = buf.dimensions();
