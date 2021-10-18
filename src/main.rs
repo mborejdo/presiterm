@@ -1,16 +1,15 @@
 use anyhow::{anyhow, Context};
 use clap::{App, Arg};
 // use figlet_rs::FIGfont;
-use image::GenericImageView;
-use termwiz::cell::AttributeChange;
-use termwiz::color::AnsiColor;
 use std::sync::Arc;
+
+
 use termwiz::surface::change::ImageData;
 use termwiz::surface::TextureCoordinate;
 use fs::File;
 use ron::de::from_reader;
 use serde::Deserialize;
-use std::{fs, path::Path, process::Command};
+use std::{fs, path::Path, process::Command, process::Stdio};
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{Style, ThemeSet};
 use syntect::parsing::SyntaxSet;
@@ -67,9 +66,12 @@ impl FileTypes {
                 let data = fs::read(Path::new(path))?;
                 let image_data = Arc::new(ImageData::with_raw_data(data.into_boxed_slice()));
 
+                // suburl
+                println!("{}", " ");
+
                 buf.add_change(Change::Image(termwiz::surface::change::Image {
-                    width: 15 as usize,
-                    height: 15 as usize,
+                    width: 35 as usize,
+                    height: 35 as usize,
                     top_left: TextureCoordinate::new_f32(0.,0.),
                     bottom_right: TextureCoordinate::new_f32(1.,1.),
                     image: Arc::clone(&image_data),
@@ -83,10 +85,12 @@ impl FileTypes {
                 Self::write_text(buf, txt)?;
             }
             FileTypes::Command(arr) => {
-                Command::new("nu")
+                let txt = Command::new("nu")
                     .arg("-c")
                     .args(arr)
                     .output()?;
+
+                print!("{}", String::from_utf8_lossy(&txt.stdout))
             }
             FileTypes::Markdown(path) => {
                 let (width, height) = buf.dimensions();
@@ -139,9 +143,9 @@ impl FileTypes {
 
 fn main() -> Result<(), Error> {
     let matches = App::new("presiterm")
-        .version("0.1.0")
+        .version("0.2.0")
         .author("@mib")
-        .about("terminal presenting")
+        .about("terminal presenter")
         .arg(
             Arg::with_name("file")
                 .short("f")
@@ -163,6 +167,8 @@ fn main() -> Result<(), Error> {
     let slides: Slides = from_reader(f).expect("Failed to parse ron");
 
     let caps = Capabilities::new_from_env()?;
+    println!("{:?}", caps);
+
     let terminal = new_terminal(caps)?;
     let mut buf = BufferedTerminal::new(terminal)?;
 

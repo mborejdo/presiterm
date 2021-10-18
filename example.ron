@@ -1,15 +1,12 @@
 (
-    files:[
-        Print("hello world"),
-        Code("assets/test.rs"),
-        Markdown("assets/test2.md"),
-        Markdown("assets/test_table.md"),
-        FIGlet("hello world"),
-        GifAnimation("assets/giphy3.gif"),
+    files:[ 
+        Command(["ls"]),
+        Image("assets/giphy3.gif"),
+        Text("hello world"),
         Markdown("assets/test.md"),
-        Image("assets/logo.png"),
-        Open("assets/s00-diff.png"),
-        GifAnimation("assets/giphy.gif"),
-        Print("end"),
+        Code("assets/test.rs", "rs"),
+        Markdown("assets/test_table.md"),
+        Code("assets/test.js", "js"),
+        Text("hello world")
     ]
 )
