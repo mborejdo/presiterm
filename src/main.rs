@@ -64,7 +64,7 @@ impl FileTypes {
         match self {
             FileTypes::Image(path) => {
                 let data = fs::read(Path::new(path))?;
-                let image_data = Arc::new(ImageData::with_raw_data(data.into_boxed_slice()));
+                let image_data = Arc::new(ImageData::with_raw_data(data.into_boxed_slice().to_vec()));
 
                 // suburl
                 println!("{}", " ");
