@@ -128,7 +128,7 @@ impl FileTypes {
                     // buf.flush_changes_older_than(0);
                 }
 
-                Self::write_text(buf, &format!("{}", "syntax"))?;
+                Self::write_text(buf, &format!("{}", ""))?;
                 // buf.add_change(Change::CursorPosition {
                 //     x: Position::Absolute(0),
                 //     y: Position::Absolute(0),
