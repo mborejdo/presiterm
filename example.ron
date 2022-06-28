@@ -1,12 +1,12 @@
 (
     files:[ 
-        Command(["ls"]),
-        Image("assets/giphy3.gif"),
+        //Command(["ls"]),
+        //Image("assets/giphy3.gif"),
         Text("hello world"),
         Markdown("assets/test.md"),
         Code("assets/test.rs", "rs"),
         Markdown("assets/test_table.md"),
-        Code("assets/test.js", "js"),
+        Code("assets/test.ts", "js"),
         Text("hello world")
     ]
 )
