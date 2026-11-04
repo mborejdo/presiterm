@@ -1,0 +1,22 @@
+[package]
+name = "colonmark"
+description = "Markdown with MyST-style colon-fence directives (`:::{name} args`, `:key: value`) as a small owned tree, on comrak."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["markdown", "myst", "directives", "commonmark", "parser"]
+categories = ["parser-implementations", "text-processing"]
+
+[lints]
+workspace = true
+
+[dependencies]
+comrak.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
