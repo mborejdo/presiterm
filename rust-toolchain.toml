@@ -1,0 +1,5 @@
+# The toolchain for working on this repo (fmt, clippy, tests). The crates build on
+# `rust-version` in Cargo.toml and newer.
+[toolchain]
+channel = "1.99.1"
+components = ["rustfmt", "clippy"]

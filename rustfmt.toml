@@ -1,0 +1,13 @@
+# Shared formatting rules, stable rustfmt only. Same file in every one of my Rust repos, so
+# `cargo fmt` gives the same result everywhere. No `wrap_comments`: it reflows doc lists into
+# lazy continuations that `clippy::doc_lazy_continuation` rejects.
+
+style_edition = "2024"
+max_width = 100
+newline_style = "Unix"
+use_small_heuristics = "Default"
+reorder_imports = true
+reorder_modules = true
+use_field_init_shorthand = true
+use_try_shorthand = true
+match_block_trailing_comma = true

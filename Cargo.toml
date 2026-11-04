@@ -1,16 +1,89 @@
-[package]
-name = "presiterm"
-version = "0.1.0"
-edition = "2021"
+# presiterm: Markdown in, a terminal presentation out. A thin Markdown -> WezTerm renderer and a
+# tiny pager. WezTerm is the engine (its own font, its OSC 1337 inline images); presiterm lays text
+# out as plain ANSI lines and draws diagrams and pictures as inline images.
+[workspace]
+resolver = "3"
+members = ["crates/colonmark"]
+default-members = ["crates/colonmark"]
 
-[dependencies]
-anyhow = "1.0"
-termimad = "0.8"
-syntect = "4.1"
-ron = "0.5"
-figlet-rs = "0.1"
-serde = { version = "1.0", features = ["serde_derive"] }
-clap = "2.33"
-termwiz = { path = "c:\\Users\\MichaelBorejdo\\.tools\\src\\wezterm\\termwiz" }
-filedescriptor = { version="0.8", path = "c:\\Users\\MichaelBorejdo\\.tools\\src\\wezterm\\filedescriptor" }
-image =  "*"
+[workspace.package]
+version = "0.2.0"
+edition = "2024"
+rust-version = "1.92"
+authors = ["Michael Borejdo <mborejdo@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/mborejdo/presiterm"
+homepage = "https://github.com/mborejdo/presiterm"
+readme = "README.md"
+
+[workspace.dependencies]
+anyhow = "1"
+clap = { version = "4", default-features = false, features = ["std", "derive", "help", "usage", "error-context", "suggestions"] }
+# Raw mode, window size in cells and pixels, poll and read on stdin: a safe API over libc.
+rustix = { version = "1", default-features = false, features = ["std", "termios", "event", "stdio"] }
+unicode-width = { version = "0.2", default-features = false }
+serde = { version = "1", features = ["derive"] }
+toml = { version = "1", default-features = false, features = ["std", "serde", "parse"] }
+# Markdown: CommonMark + GFM tables, the AST the colon-fence directives sit on.
+comrak = { version = "0.56", default-features = false }
+# Diagrams, pure Rust: mermaid in-process, drawn to PNG by resvg.
+mermaid-rs-renderer = { version = "=0.3.1", default-features = false }
+resvg = { version = "0.45", default-features = false, features = ["text"] }
+# In-process Typst (feature-gated in the app: about a thousand crates).
+typst = "0.15"
+typst-render = "0.15"
+typst-pdf = "0.15"
+typst-as-lib = { version = "0.17", default-features = false }
+
+# The workspace's own crates.
+colonmark = { path = "crates/colonmark", version = "0.2.0" }
+swatchbook = { path = "crates/swatchbook", version = "0.2.0" }
+typstkit = { path = "crates/typstkit", version = "0.2.0" }
+
+# Dev-dependencies, declared once; a crate takes them with `workspace = true`.
+vt100 = "0.15"
+proptest = "1"
+insta = { version = "1", features = ["json", "redactions"] }
+tempfile = "3"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unreachable_pub = "warn"
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+# Unavoidable with many transitive deps (the Typst stack trails ours in many crates).
+multiple_crate_versions = "allow"
+module_name_repetitions = "allow"
+# No required `# Errors` / `# Panics` sections, no doc-paragraph length limit.
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+too_long_first_doc_paragraph = "allow"
+# Contradicts rustc `unreachable_pub`, which is kept.
+redundant_pub_crate = "allow"
+# MyST directives are written `:::{name}`: every such literal looks like a format argument.
+literal_string_with_formatting_args = "allow"
+# Stricter than the groups: no panicking shortcuts or stray output in library code (tests are
+# exempt, see clippy.toml), and every `#[allow]` says why.
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "warn"
+print_stdout = "warn"
+print_stderr = "warn"
+allow_attributes_without_reason = "warn"
+
+[workspace.lints.rustdoc]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+lto = "thin"
+strip = true

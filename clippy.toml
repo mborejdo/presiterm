@@ -1,0 +1,7 @@
+# Tests may unwrap, expect, panic and print; library and CLI code may not (see Cargo.toml).
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+# Proper names `doc_markdown` should not require backticks for. ".." keeps clippy's defaults.
+doc-valid-idents = ["..", "WezTerm", "OSC", "GIF", "PNG", "SVG", "SGR", "TIOCGWINSZ", "CommonMark", "MyST", "GitHub", "TOML"]
