@@ -1,0 +1,3 @@
+[alias]
+# `cargo xtask qa` and friends: see xtask/src/main.rs.
+xtask = "run -q -p xtask --"

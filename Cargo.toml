@@ -3,7 +3,7 @@
 # out as plain ANSI lines and draws diagrams and pictures as inline images.
 [workspace]
 resolver = "3"
-members = ["apps/presiterm", "crates/colonmark", "crates/swatchbook", "crates/typstkit"]
+members = ["apps/presiterm", "crates/colonmark", "crates/swatchbook", "crates/typstkit", "xtask"]
 default-members = ["apps/presiterm", "crates/colonmark", "crates/swatchbook", "crates/typstkit"]
 
 [workspace.package]
