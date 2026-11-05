@@ -1,0 +1,24 @@
+---
+source: apps/presiterm/src/render/tests.rs
+expression: "canvas_text(&render(SAMPLE, 1, 2, VIEW))"
+---
+
+
+                           List
+                           ────
+
+  Text with bold and code.
+
+  • one
+  • two
+
+   ssh root@host ls
+
+
+
+
+
+
+
+
+  Sample                                           [2/2]

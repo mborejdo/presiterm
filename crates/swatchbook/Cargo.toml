@@ -1,0 +1,28 @@
+[package]
+name = "swatchbook"
+description = "Design tokens for terminal and document tools: two palettes, font families and sizes, overridable from TOML, with Inter and Fira Code vendored."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license = "(MIT OR Apache-2.0) AND OFL-1.1"
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["theme", "design-tokens", "palette", "fonts", "terminal"]
+categories = ["config", "rendering"]
+include = ["src/**", "fonts/**", "README.md", "Cargo.toml"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["fonts"]
+# The vendored Inter and Fira Code faces as bytes (about 2.4 MB).
+fonts = []
+
+[dependencies]
+serde.workspace = true
+
+[dev-dependencies]
+toml.workspace = true

@@ -1,0 +1,46 @@
+---
+source: apps/presiterm/src/lint.rs
+expression: "findings(&deck, view, Path::new(\".\"))"
+---
+[
+    Finding {
+        slide: 1,
+        heading: Some(
+            "A",
+        ),
+        level: Note,
+        message: "no speaker notes",
+    },
+    Finding {
+        slide: 2,
+        heading: Some(
+            "B",
+        ),
+        level: Error,
+        message: "nope.png: missing image: No such file or directory (os error 2)",
+    },
+    Finding {
+        slide: 2,
+        heading: Some(
+            "B",
+        ),
+        level: Note,
+        message: "no speaker notes",
+    },
+    Finding {
+        slide: 3,
+        heading: Some(
+            "C",
+        ),
+        level: Warning,
+        message: "12 body rows, more than 10 leave room to breathe",
+    },
+    Finding {
+        slide: 3,
+        heading: Some(
+            "C",
+        ),
+        level: Note,
+        message: "no speaker notes",
+    },
+]

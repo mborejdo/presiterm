@@ -1,0 +1,41 @@
+[package]
+name = "presiterm"
+description = "Markdown in, a WezTerm presentation out: real terminal text, diagrams and pictures as inline images."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords = ["presentation", "slides", "markdown", "wezterm", "terminal"]
+categories = ["command-line-utilities"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["typst"]
+# Typst (fletcher) diagrams and tables as pictures: in-process Typst. Heavy (about a thousand
+# crates); without it a typst fence is an error on the slide and tables are drawn as text.
+typst = ["dep:typstkit"]
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+colonmark.workspace = true
+mermaid-rs-renderer.workspace = true
+resvg.workspace = true
+rustix.workspace = true
+serde.workspace = true
+swatchbook.workspace = true
+toml.workspace = true
+typstkit = { workspace = true, optional = true, default-features = false, features = ["packages"] }
+unicode-width.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+proptest.workspace = true
+tempfile.workspace = true
+vt100.workspace = true

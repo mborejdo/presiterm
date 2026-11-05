@@ -1,0 +1,24 @@
+---
+source: apps/presiterm/src/render/tests.rs
+expression: "canvas_text(&render(SAMPLE, 0, 0, VIEW))"
+---
+
+
+
+
+
+
+
+                          Title
+                          ─────
+
+
+
+
+
+
+
+
+
+
+  Sample                                           [1/2]
