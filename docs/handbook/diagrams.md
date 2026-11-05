@@ -47,8 +47,3 @@ from Typst Universe once and cached where the typst CLI caches packages):
   drops bigger inline images.
 * Cargo feature `typst` (default): about a thousand crates. Built without it
   (`--no-default-features`) a typst fence is an error on the slide and tables are aligned text.
-
-## D2
-
-There is no in-process D2 engine: a ```` ```d2 ```` fence or a `.d2` file is an error on the slide
-that names the alternative (mermaid or a typst fence).

@@ -205,13 +205,6 @@ impl Options {
     }
 }
 
-/// The error a D2 diagram is: there is no in-process D2 engine.
-fn no_d2(origin: &str) -> Block {
-    Block::Error(format!(
-        "{origin}: d2 diagrams are not supported; draw it with mermaid or a typst fence"
-    ))
-}
-
 /// A fenced code block: a diagram for `mermaid`, `steps` and `typst`, else code.
 fn fence_block(info: &str, body: Vec<String>, line: usize) -> Block {
     let mut words = info
@@ -230,7 +223,6 @@ fn fence_block(info: &str, body: Vec<String>, line: usize) -> Block {
             }
             Block::Diagram(options.diagram(body.join("\n"), kind == "typst", origin))
         },
-        "d2" => no_d2(&origin),
         _ => Block::Code {
             lang: kind.to_string(),
             lines: body,
@@ -281,9 +273,6 @@ fn picture_line(source: &[Inline], base: &Path) -> Option<Block> {
                     .map(str::to_string),
             );
         }
-    }
-    if extension_is(path, &["d2"]) {
-        return Some(no_d2(path));
     }
     if extension_is(path, &["mmd", "mermaid"]) {
         return Some(match std::fs::read_to_string(base.join(path)) {

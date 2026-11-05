@@ -92,13 +92,6 @@ fn heading_markup_is_kept_as_spans() {
     assert_eq!(d.slides[0].title().as_deref(), Some("The one thing"));
 }
 
-#[test]
-fn d2_is_an_error_on_the_slide_not_a_silent_drop() {
-    let d = deck("# A\n```d2 h=9\na -> b\n```\n![x](net.d2)\n");
-    assert!(matches!(&d.slides[0].blocks[0], Block::Error(e) if e.contains("d2")));
-    assert!(matches!(&d.slides[0].blocks[1], Block::Error(e) if e.contains("net.d2")));
-}
-
 #[cfg(feature = "typst")]
 #[test]
 fn a_table_is_a_typst_picture_with_its_alignment() {

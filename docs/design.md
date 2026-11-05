@@ -45,7 +45,6 @@ The slide dialect sits on CommonMark with GitHub tables. Where it differs:
 ## Not done
 
 * An export (pptx, pdf, html). No window screenshot command.
-* D2: there is no in-process D2 engine in Rust; a d2 fence is an error that names the alternatives.
 * The highlighter colours a string spanning lines on its first line only.
 * Mermaid: `~~~` may reorder nodes and `sequenceDiagram` is not supported by the renderer.
 * The `+` and `-` keys and the first-start font application were exercised through the same code

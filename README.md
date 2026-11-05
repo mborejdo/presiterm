@@ -139,7 +139,6 @@ flowchart LR
 - A `typst` fence is Typst source. Calls to `diagram`, `node` or `edge` import
   [fletcher](https://typst.app/universe/package/fletcher), downloaded from Typst Universe on first
   use and cached. The palette tokens (`ink`, `accent`, `ok`, ...) are Typst colours in the fence.
-- D2 is not supported (there is no in-process D2 engine); a d2 fence is an error on the slide.
 
 `presiterm handbook diagrams` has the details.
 
