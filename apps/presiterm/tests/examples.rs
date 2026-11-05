@@ -3,7 +3,10 @@
 //! Read-only: the picture cache is switched off (`Assets::with_cache(.., None)`), so no test writes
 //! outside its own process.
 
-#![allow(clippy::expect_used, reason = "test helpers fail the test on a broken example")]
+#![allow(
+    clippy::expect_used,
+    reason = "test helpers fail the test on a broken example"
+)]
 
 use std::path::{Path, PathBuf};
 

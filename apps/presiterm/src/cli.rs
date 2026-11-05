@@ -24,10 +24,10 @@ Examples:
   presiterm --window talk/slides.md           present in a dedicated WezTerm window
   presiterm talk/slides.md --slide 7          present in the WezTerm you are in, from slide 7
   presiterm --window talk/slides.md --font-size 54 --cols 80 --rows 24
-                                          bigger text on a bigger grid
+                                              bigger text on a bigger grid
   presiterm --window talk/slides.md --reveal  every bullet is a key press
   presiterm --window talk/slides.md --no-watch --control /tmp/talk.sock
-                                          no reload on save, a socket of your own
+                                              no reload on save, a socket of your own
   presiterm talk/slides.md --cell-px 21x42    cell size in pixels, for a terminal that does not report it
   presiterm lint talk/slides.md               does every slide fit, is every file there
   presiterm config talk/slides.md             which presiterm.toml applies, and the effective settings
