@@ -156,9 +156,7 @@ fn reveal_bullets_appear_one_per_step_and_keep_their_rows() {
     let at = |step| render(src, 1, step, VIEW);
     assert_eq!(at(0).fragments, 3);
     assert!(!at(0).canvas.row_text(5).contains("one"));
-    assert!(
-        at(1).canvas.row_text(5).contains("one") && !at(1).canvas.row_text(6).contains("two")
-    );
+    assert!(at(1).canvas.row_text(5).contains("one") && !at(1).canvas.row_text(6).contains("two"));
     assert!(at(3).canvas.row_text(7).contains("three"));
 }
 
