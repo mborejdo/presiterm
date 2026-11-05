@@ -44,7 +44,6 @@ The slide dialect sits on CommonMark with GitHub tables. Where it differs:
 
 ## Supported
 
-* Output is the live window. `presiterm ctl` drives it, and the terminal takes screenshots of it.
 * The highlighter colours a string on the line where it starts. Keep strings on one line.
 * Mermaid draws flowchart, sequenceDiagram, classDiagram, stateDiagram, erDiagram, pie, gantt,
   journey, timeline, mindmap, gitGraph, quadrantChart, sankey, xychart, kanban, block,
