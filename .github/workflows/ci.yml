@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master, v2]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The toolchain (with rustfmt and clippy) comes from rust-toolchain.toml; rustup
+      # installs it on the first cargo call.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/master' }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - name: fmt
+        run: cargo fmt --all --check
+      - name: clippy
+        run: |
+          cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+          cargo clippy -p presiterm --all-targets --no-default-features --locked -- -D warnings
+      # The typst tests import fletcher from Typst Universe: the first run downloads it.
+      - name: test
+        run: |
+          cargo test --workspace --all-features --locked
+          cargo test -p presiterm --no-default-features --locked
+      - name: doc
+        run: cargo doc --workspace --no-deps --all-features --locked
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - name: no-shellout
+        run: cargo xtask no-shellout
+      - name: deny
+        run: cargo deny check
+      - name: lint the example decks
+        run: cargo xtask demo
