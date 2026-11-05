@@ -4,13 +4,13 @@ expression: "canvas_text(&render(SAMPLE, 1, 2, VIEW))"
 ---
 
 
-                          Liste
-                          ─────
+                           List
+                           ────
 
-  Text mit fett und code.
+  Text with bold and code.
 
-  • eins
-  • zwei
+  • one
+  • two
 
    ssh root@host ls
 
@@ -21,4 +21,4 @@ expression: "canvas_text(&render(SAMPLE, 1, 2, VIEW))"
 
 
 
-  Probe                                            [2/2]
+  Sample                                           [2/2]

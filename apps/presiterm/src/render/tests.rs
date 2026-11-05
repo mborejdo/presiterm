@@ -36,7 +36,7 @@ fn render(src: &str, index: usize, step: usize, view: View) -> Page {
 
 #[test]
 fn every_row_is_exactly_the_grid_wide_at_any_size() {
-    let src = "# Titel\n\nText mit **fett** und einem sehr langen Satz, der umbrochen werden muss, weil er nicht passt.\n\n```bash\nssh root@host 'docker compose ps --format \"{{.Names}} {{.Status}} und noch viel mehr\"'\n```\n\n| a | b |\n|---|---|\n| 1 | zwei |\n";
+    let src = "# Title\n\nText with **bold** and a very long sentence that has to wrap because it does not fit.\n\n```bash\nssh root@host 'docker compose ps --format \"{{.Names}} {{.Status}} and much more\"'\n```\n\n| a | b |\n|---|---|\n| 1 | two |\n";
     for (cols, rows) in [(58, 20), (38, 9), (80, 24), (120, 40), (20, 6)] {
         let page = render(
             src,
@@ -56,13 +56,13 @@ fn every_row_is_exactly_the_grid_wide_at_any_size() {
 
 #[test]
 fn body_sits_in_column_three_and_heading_is_centred() {
-    let page = render("# Eins\n\n# Zwei\n- punkt\n", 1, 0, VIEW);
+    let page = render("# One\n\n# Two\n- point\n", 1, 0, VIEW);
     let heading = page.canvas.row_text(2);
     let lead = heading.len() - heading.trim_start().len();
     let trail = heading.len() - heading.trim_end().len();
     assert!(lead.abs_diff(trail) <= 1, "{heading:?}");
     assert!(
-        page.canvas.row_text(5).starts_with("  • punkt"),
+        page.canvas.row_text(5).starts_with("  • point"),
         "{:?}",
         page.canvas.row_text(5)
     );
@@ -82,23 +82,23 @@ fn a_code_span_does_not_paint_the_space_after_it() {
 
 #[test]
 fn heading_markup_is_drawn_not_shown() {
-    let page = render("# Eins\n\n# Das ==Wort== hier\ntext\n", 1, 0, VIEW);
+    let page = render("# One\n\n# The ==word== here\ntext\n", 1, 0, VIEW);
     let rows: Vec<String> = (0..VIEW.rows).map(|r| page.canvas.row_text(r)).collect();
     let row = rows
         .iter()
-        .position(|r| r.contains("Das Wort hier"))
+        .position(|r| r.contains("The word here"))
         .expect("heading");
     assert!(!rows[row].contains("=="));
-    let col = rows[row].find("Wort").unwrap();
+    let col = rows[row].find("word").unwrap();
     assert!(page.canvas.style_at(col, row).underline.is_some());
     assert!(page.canvas.style_at(col - 2, row).underline.is_none());
 }
 
 #[test]
 fn footer_has_title_and_counter() {
-    let page = render("---\ntitle: Mein Deck\n---\n# A\n\n# B\ntext\n", 1, 0, VIEW);
+    let page = render("---\ntitle: My Deck\n---\n# A\n\n# B\ntext\n", 1, 0, VIEW);
     let footer = page.canvas.row_text(19);
-    assert!(footer.starts_with("  Mein Deck"), "{footer:?}");
+    assert!(footer.starts_with("  My Deck"), "{footer:?}");
     assert!(footer.trim_end().ends_with("[2/2]"), "{footer:?}");
 }
 
@@ -106,7 +106,7 @@ fn footer_has_title_and_counter() {
 fn footer_counter_survives_a_narrow_grid_and_a_long_note() {
     let deck = parse(
         "# A\n\n# B\ntext\n",
-        "Ein sehr langer Titel",
+        "A very long title",
         Path::new("."),
         false,
     );
@@ -123,7 +123,7 @@ fn footer_counter_survives_a_narrow_grid_and_a_long_note() {
         view,
         &mut assets,
         Mode::Slide,
-        "reload failed: etwas ist schiefgegangen",
+        "reload failed: something went wrong",
     );
     let footer = page.canvas.row_text(11);
     assert!(footer.trim_end().ends_with("[2/2]"), "{footer:?}");
@@ -132,7 +132,7 @@ fn footer_counter_survives_a_narrow_grid_and_a_long_note() {
 #[test]
 fn nothing_reaches_the_gutter() {
     let page = render(
-        "# A\n\n# B\nein wirklich sehr langes wort: Donaudampfschifffahrtsgesellschaftskapitän und mehr text dahinter\n",
+        "# A\n\n# B\na really very long word: Pneumonoultramicroscopicsilicovolcanoconiosisxyzä and more text behind it\n",
         1,
         0,
         VIEW,
@@ -152,14 +152,14 @@ fn nothing_reaches_the_gutter() {
 
 #[test]
 fn reveal_bullets_appear_one_per_step_and_keep_their_rows() {
-    let src = "# A\n\n# B\n+ eins\n+ zwei\n+ drei\n";
+    let src = "# A\n\n# B\n+ one\n+ two\n+ three\n";
     let at = |step| render(src, 1, step, VIEW);
     assert_eq!(at(0).fragments, 3);
-    assert!(!at(0).canvas.row_text(5).contains("eins"));
+    assert!(!at(0).canvas.row_text(5).contains("one"));
     assert!(
-        at(1).canvas.row_text(5).contains("eins") && !at(1).canvas.row_text(6).contains("zwei")
+        at(1).canvas.row_text(5).contains("one") && !at(1).canvas.row_text(6).contains("two")
     );
-    assert!(at(3).canvas.row_text(7).contains("drei"));
+    assert!(at(3).canvas.row_text(7).contains("three"));
 }
 
 #[test]
@@ -259,7 +259,7 @@ proptest::proptest! {
     }
 }
 
-const SAMPLE: &str = "---\ntitle: Probe\n---\n# Titel\n\n# Liste\nText mit **fett** und `code`.\n\n- eins\n- zwei\n\n```bash\nssh root@host ls\n```\n\n| a | b |\n|---|---|\n| 1 | zwei |\n";
+const SAMPLE: &str = "---\ntitle: Sample\n---\n# Title\n\n# List\nText with **bold** and `code`.\n\n- one\n- two\n\n```bash\nssh root@host ls\n```\n\n| a | b |\n|---|---|\n| 1 | two |\n";
 
 fn canvas_text(page: &Page) -> String {
     (0..page.canvas.rows)

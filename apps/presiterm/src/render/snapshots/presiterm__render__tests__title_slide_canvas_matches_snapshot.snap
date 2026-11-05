@@ -9,7 +9,7 @@ expression: "canvas_text(&render(SAMPLE, 0, 0, VIEW))"
 
 
 
-                          Titel
+                          Title
                           ─────
 
 
@@ -21,4 +21,4 @@ expression: "canvas_text(&render(SAMPLE, 0, 0, VIEW))"
 
 
 
-  Probe                                            [1/2]
+  Sample                                           [1/2]

@@ -8,7 +8,7 @@ use crate::deck::parse;
 use crate::render::Page;
 
 const SRC: &str =
-    "---\ntitle: Test\n---\n# Eins\n\n# Zwei\n+ a\n+ b\n\n# Drei\n```bash\nls -la\n```\n";
+    "---\ntitle: Test\n---\n# One\n\n# Two\n+ a\n+ b\n\n# Three\n```bash\nls -la\n```\n";
 
 #[test]
 fn ctl_without_a_command_names_the_commands() {
@@ -129,7 +129,7 @@ fn a_size_change_mid_run_leaves_no_stale_cells_and_the_same_slide() {
 #[test]
 fn a_soft_redraw_skips_the_rows_of_an_unchanged_image_and_resends_a_changed_one() {
     let deck = parse(
-        "# A\n\n# B\n```mermaid steps\nflowchart LR\n a[Eins] --> b[Zwei]\n```\n",
+        "# A\n\n# B\n```mermaid steps\nflowchart LR\n a[One] --> b[Two]\n```\n",
         "x",
         Path::new("."),
         false,
