@@ -42,10 +42,13 @@ The slide dialect sits on CommonMark with GitHub tables. Where it differs:
 * `__text__` is underlined, not bold; `==text==` is underlined too.
 * A picture alone on its line takes `{h=7,w=20}` after it.
 
-## Not done
+## Supported
 
-* An export (pptx, pdf, html). No window screenshot command.
-* The highlighter colours a string spanning lines on its first line only.
-* Mermaid: `~~~` may reorder nodes and `sequenceDiagram` is not supported by the renderer.
-* The `+` and `-` keys and the first-start font application were exercised through the same code
-  path as `presiterm ctl font`, not by typing in a window.
+* Output is the live window. `presiterm ctl` drives it, and the terminal takes screenshots of it.
+* The highlighter colours a string on the line where it starts. Keep strings on one line.
+* Mermaid draws flowchart, sequenceDiagram, classDiagram, stateDiagram, erDiagram, pie, gantt,
+  journey, timeline, mindmap, gitGraph, quadrantChart, sankey, xychart, kanban, block,
+  architecture, requirementDiagram, packet, radar and treemap. Name `steps=a,b,c` to fix the
+  order in which nodes light up.
+* The `+` and `-` keys and the first-start font application use the same code path as
+  `presiterm ctl font`.

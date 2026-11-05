@@ -22,7 +22,11 @@ the sans face (Inter by default).
   diagram once more per node with that node lit; every lit node is one key press.
 * `steps=a,b,c` names the nodes and their order (default: order of appearance).
 * `h=9 w=30` size it: ```` ```mermaid steps h=9 w=30 ````.
-* Not supported by the renderer: `sequenceDiagram`. `~~~` links may reorder nodes.
+* Drawn kinds: flowchart, sequenceDiagram, classDiagram, stateDiagram, erDiagram, pie, gantt,
+  journey, timeline, mindmap, gitGraph, quadrantChart, sankey, xychart, kanban, block,
+  architecture, requirementDiagram, packet, radar and treemap.
+* Nodes are placed in the order the renderer lays them out. For a fixed order of `steps`, name
+  the nodes with `steps=a,b,c`.
 
 ## Typst / fletcher
 
