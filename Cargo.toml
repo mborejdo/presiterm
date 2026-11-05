@@ -3,8 +3,8 @@
 # out as plain ANSI lines and draws diagrams and pictures as inline images.
 [workspace]
 resolver = "3"
-members = ["crates/colonmark", "crates/swatchbook"]
-default-members = ["crates/colonmark", "crates/swatchbook"]
+members = ["crates/colonmark", "crates/swatchbook", "crates/typstkit"]
+default-members = ["crates/colonmark", "crates/swatchbook", "crates/typstkit"]
 
 [workspace.package]
 version = "0.2.0"
@@ -33,6 +33,8 @@ resvg = { version = "0.45", default-features = false, features = ["text"] }
 typst = "0.15"
 typst-render = "0.15"
 typst-pdf = "0.15"
+typst-svg = "0.15"
+typst-layout = "0.15"
 typst-as-lib = { version = "0.17", default-features = false }
 
 # The workspace's own crates.

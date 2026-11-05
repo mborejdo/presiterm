@@ -1,0 +1,33 @@
+[package]
+name = "typstkit"
+description = "In-process Typst: compile a source string or a file to PNG, SVG or PDF with vendored fonts and Typst Universe packages."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["typst", "render", "png", "pdf", "diagrams"]
+categories = ["rendering", "text-processing"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["packages", "pdf"]
+# `@preview/...` imports, downloaded from packages.typst.org once and cached like the typst CLI does.
+packages = ["typst-as-lib/packages", "typst-as-lib/ureq"]
+# PDF export.
+pdf = ["dep:typst-pdf"]
+
+[dependencies]
+anyhow.workspace = true
+swatchbook.workspace = true
+typst.workspace = true
+typst-render.workspace = true
+typst-svg.workspace = true
+typst-layout.workspace = true
+typst-pdf = { workspace = true, optional = true }
+typst-as-lib.workspace = true
