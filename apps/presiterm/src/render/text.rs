@@ -1,7 +1,7 @@
 //! How a block of the slide becomes lines of styled cells: inline spans, wrapping, lists, code and tables.
 
 use super::{Geometry, Palette, text_style};
-use crate::canvas::{Canvas, Style, width};
+use crate::canvas::{Canvas, Style, char_width, width};
 use crate::deck::{Block, Item, Span};
 use crate::highlight::{self, Kind};
 
@@ -30,11 +30,7 @@ pub(super) fn paint(canvas: &mut Canvas, line: &Line, row: usize, geo: Geometry)
     if let Some(fill) = line.fill {
         canvas.fill(geo.left, row, geo.width, 1, fill);
     }
-    let w: usize = line
-        .cells
-        .iter()
-        .map(|(c, _)| unicode_width::UnicodeWidthChar::width(*c).unwrap_or(0))
-        .sum();
+    let w: usize = line.cells.iter().map(|(c, _)| char_width(*c)).sum();
     let col = if line.centre {
         geo.left + geo.width.saturating_sub(w) / 2
     } else {
@@ -46,7 +42,7 @@ pub(super) fn paint(canvas: &mut Canvas, line: &Line, row: usize, geo: Geometry)
 pub(super) fn put_cells(canvas: &mut Canvas, col: usize, row: usize, cells: &[(char, Style)]) {
     let mut x = col;
     for (ch, style) in cells {
-        let w = unicode_width::UnicodeWidthChar::width(*ch).unwrap_or(0);
+        let w = char_width(*ch);
         if w == 0 {
             continue;
         }
@@ -85,7 +81,6 @@ pub(super) fn wrap(cells: &[(char, Style)], max: usize) -> Vec<Vec<(char, Style)
     let mut lines: Vec<Vec<(char, Style)>> = Vec::new();
     let mut current: Vec<(char, Style)> = Vec::new();
     let mut current_w = 0;
-    let cell_w = |c: char| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0);
     // Words, each with the style of the space before it: a space keeps the look it had in the text, so
     // a code span does not paint the gap after it.
     let mut words: Vec<Word<'_>> = Vec::new();
@@ -98,7 +93,7 @@ pub(super) fn wrap(cells: &[(char, Style)], max: usize) -> Vec<Vec<(char, Style)
     }
     words.push((sep, &cells[start..]));
     for (sep, word) in words {
-        let word_w: usize = word.iter().map(|(c, _)| cell_w(*c)).sum();
+        let word_w: usize = word.iter().map(|(c, _)| char_width(*c)).sum();
         let needs_space = !current.is_empty();
         if needs_space && current_w + 1 + word_w > max {
             lines.push(std::mem::take(&mut current));
@@ -109,7 +104,7 @@ pub(super) fn wrap(cells: &[(char, Style)], max: usize) -> Vec<Vec<(char, Style)
             current_w += 1;
         }
         for cell in word {
-            let w = cell_w(cell.0);
+            let w = char_width(cell.0);
             if current_w + w > max {
                 lines.push(std::mem::take(&mut current));
                 current_w = 0;
@@ -245,10 +240,7 @@ pub(super) fn code_lines(
                 };
                 cells.extend(text.chars().map(|c| (c, style)));
             }
-            let w: usize = cells
-                .iter()
-                .map(|(c, _)| unicode_width::UnicodeWidthChar::width(*c).unwrap_or(0))
-                .sum();
+            let w: usize = cells.iter().map(|(c, _)| char_width(*c)).sum();
             if w > room + 1 {
                 problems.push(format!(
                     "code line is {} columns, {} fit: {}",
@@ -258,7 +250,7 @@ pub(super) fn code_lines(
                 ));
                 let mut kept = 0;
                 cells.retain(|(c, _)| {
-                    kept += unicode_width::UnicodeWidthChar::width(*c).unwrap_or(0);
+                    kept += char_width(*c);
                     kept < room + 1
                 });
                 cells.push(('…', panel.fg(pal.muted)));

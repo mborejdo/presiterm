@@ -136,7 +136,7 @@ impl Canvas {
     pub fn text(&mut self, col: usize, row: usize, text: &str, style: Style) -> usize {
         let mut x = col;
         for ch in text.chars() {
-            let width = ch.width().unwrap_or(0);
+            let width = char_width(ch);
             if width == 0 {
                 continue;
             }
@@ -198,6 +198,12 @@ impl Canvas {
     }
 }
 
+/// Measure the display width of one char in cells (0 for a control or combining char).
+#[must_use]
+pub fn char_width(c: char) -> usize {
+    c.width().unwrap_or(0)
+}
+
 /// Measure the display width of a string in cells.
 ///
 /// # Examples
@@ -208,7 +214,7 @@ impl Canvas {
 /// ```
 #[must_use]
 pub fn width(text: &str) -> usize {
-    text.chars().map(|c| c.width().unwrap_or(0)).sum()
+    text.chars().map(char_width).sum()
 }
 
 #[cfg(test)]

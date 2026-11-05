@@ -2,7 +2,7 @@
 
 use super::text::{clip, put_cells, spans_to_cells, wrap};
 use super::{Geometry, Palette, View, text_style};
-use crate::canvas::{Canvas, Style, width};
+use crate::canvas::{Canvas, Style, char_width, width};
 use crate::deck::{Deck, Slide, Span};
 
 pub(super) fn heading(
@@ -14,16 +14,15 @@ pub(super) fn heading(
 ) {
     let base = text_style(pal).fg(pal.accent).bold();
     let mut cells = spans_to_cells(text, pal, base);
-    let cell_w = |c: char| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0);
-    if cells.iter().map(|(c, _)| cell_w(*c)).sum::<usize>() > geo.width {
+    if cells.iter().map(|(c, _)| char_width(*c)).sum::<usize>() > geo.width {
         let mut used = 0;
         cells.retain(|(c, _)| {
-            used += cell_w(*c);
+            used += char_width(*c);
             used < geo.width
         });
         cells.push(('…', base));
     }
-    let w: usize = cells.iter().map(|(c, _)| cell_w(*c)).sum();
+    let w: usize = cells.iter().map(|(c, _)| char_width(*c)).sum();
     let col = geo.left + (geo.width - w) / 2;
     put_cells(canvas, col, row, &cells);
     canvas.text(
