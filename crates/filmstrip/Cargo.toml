@@ -1,0 +1,40 @@
+[package]
+name = "filmstrip"
+description = "Frames in, films out: RGB frames to an animated GIF with delta frames, an MP4 (pure-Rust H.264), a Word file that plays the GIF, or a PDF that plays the MP4 when the page opens."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["gif", "mp4", "docx", "pdf", "animation"]
+categories = ["multimedia::encoding", "multimedia::video"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["gif"]
+# The animated GIF: one learned palette, delta frames.
+gif = ["dep:gif", "dep:color_quant"]
+# H.264 in an MP4 container, pure Rust.
+mp4 = ["dep:rusty_h264-encoder", "dep:rusty_h264-common", "dep:mp4", "dep:bytes"]
+# An A4 landscape Word file with the GIF as its only picture.
+docx = ["gif", "dep:docx-rs", "dep:zip"]
+# A Screen annotation over a PDF page that plays the MP4 when the page opens.
+pdf = ["mp4", "dep:lopdf"]
+
+[dependencies]
+anyhow.workspace = true
+png.workspace = true
+gif = { workspace = true, optional = true }
+color_quant = { workspace = true, optional = true }
+rusty_h264-encoder = { workspace = true, optional = true }
+rusty_h264-common = { workspace = true, optional = true }
+mp4 = { workspace = true, optional = true }
+bytes = { workspace = true, optional = true }
+docx-rs = { workspace = true, optional = true }
+zip = { workspace = true, optional = true }
+lopdf = { workspace = true, optional = true }

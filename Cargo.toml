@@ -3,8 +3,8 @@
 # out as plain ANSI lines and draws diagrams and pictures as inline images.
 [workspace]
 resolver = "3"
-members = ["apps/presiterm", "crates/colonmark", "crates/swatchbook", "crates/typstkit", "xtask"]
-default-members = ["apps/presiterm", "crates/colonmark", "crates/swatchbook", "crates/typstkit"]
+members = ["apps/presiterm", "crates/colonmark", "crates/filmstrip", "crates/swatchbook", "crates/typstkit", "xtask"]
+default-members = ["apps/presiterm", "crates/colonmark", "crates/filmstrip", "crates/swatchbook", "crates/typstkit"]
 
 [workspace.package]
 version = "0.2.0"
@@ -37,8 +37,22 @@ typst-svg = "0.15"
 typst-layout = "0.15"
 typst-as-lib = { version = "0.17", default-features = false }
 
+# The film (filmstrip): the GIF, the MP4, the Word and the PDF containers, pure Rust.
+png = { version = "0.17", default-features = false }
+gif = { version = "0.13", default-features = false, features = ["std"] }
+color_quant = "1"
+rusty_h264-encoder = "0.17"
+rusty_h264-common = "0.17"
+mp4 = "0.14"
+bytes = "1"
+docx-rs = "0.4"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+lopdf = { version = "0.46", default-features = false }
+serde_json = "1"
+
 # The workspace's own crates.
 colonmark = { path = "crates/colonmark", version = "0.2.0" }
+filmstrip = { path = "crates/filmstrip", version = "0.2.0" }
 swatchbook = { path = "crates/swatchbook", version = "0.2.0" }
 typstkit = { path = "crates/typstkit", version = "0.2.0" }
 
