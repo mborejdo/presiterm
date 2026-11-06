@@ -68,9 +68,10 @@ Examples:
   presiterm film talk/slides.md --cards dist/cards   every card, fully built, as PNG (card03-007.png: slide 3, scene 7)
   presiterm film talk/slides.md --preview            play the GIF inline in this WezTerm
   presiterm film talk/slides.md --width 960 --fps 12 --hold 5 --enter 1.2 --fade 0.3 --colours 64
+  presiterm film talk/slides.md --transition wipe   # or push, pixelize, circle, split, cut
 
 Every key press of the talk is a build-in of the film: `enter` seconds of animation, then `hold`
-seconds of rest. The deck's frontmatter (fps, width, hold, enter, fade, colours) and a `[film]`
+seconds of rest. The deck's frontmatter (fps, width, hold, enter, fade, transition, pace, colours) and a `[film]`
 table in presiterm.toml set the same values; a flag typed here beats both. `links:` in the
 frontmatter go under the picture in the Word and PDF editions. A card that does not fit is an
 error naming the slide; `presiterm lint --film` finds them all first.
@@ -274,9 +275,13 @@ pub(crate) struct FilmArgs {
     /// Seconds of build-in at the start of every step (--enter 1.2); default 1.6.
     #[arg(long, value_name = "S")]
     pub(crate) enter: Option<f32>,
-    /// Seconds of crossfade between cards (--fade 0.3); default 0.4.
+    /// Seconds a transition between cards takes (--fade 0.3); default 0.4.
     #[arg(long, value_name = "S")]
     pub(crate) fade: Option<f32>,
+    /// How one card gives way to the next: fade, wipe, push, pixelize, circle, split or cut
+    /// (--transition wipe); default fade.
+    #[arg(long, value_name = "NAME")]
+    pub(crate) transition: Option<filmstrip::Transition>,
     /// Words per minute a wordy scene is held for, 0 for a fixed hold (--pace 160); default 200.
     #[arg(long, value_name = "WPM")]
     pub(crate) pace: Option<f32>,
@@ -295,6 +300,7 @@ impl FilmArgs {
             hold: self.hold,
             enter: self.enter,
             fade: self.fade,
+            transition: self.transition,
             pace: self.pace,
             colours: self.colours,
         }

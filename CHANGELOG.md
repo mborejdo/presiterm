@@ -16,6 +16,8 @@ A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and three 
 - `:::{metrics}` directive: `value | label` lines as big numbers in a row.
 - `pace` (film): words per minute; a scene with more words than `hold` covers stays for its
   reading time. `filmstrip::Scene` carries a hold per scene.
+- `transition` (film): `fade`, `wipe`, `push`, `pixelize`, `circle`, `split` or `cut` between
+  scenes, as a flag, a frontmatter key or a `[film]` key; `filmstrip::Transition`.
 - `fonts = [...]` in `presiterm.toml`: font files and folders Typst draws with, next to the
   vendored faces; `[theme.fonts] display` for the film's headings.
 - `filmstrip`: frames to GIF (delta frames, learned palette), MP4, DOCX and PDF, as a crate.

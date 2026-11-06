@@ -923,6 +923,7 @@ dependencies = [
  "png 0.17.16",
  "rusty_h264-common",
  "rusty_h264-encoder",
+ "serde",
  "zip",
 ]
 

@@ -35,7 +35,7 @@ Prints the Lua handler for your own `wezterm.lua`. WezTerm config is Lua: commen
 ## presiterm film DECK [--gif] [--mp4] [--docx] [--pdf] [--cards DIR] [--out DIR] [--preview]
 
 Renders the deck as a film: `presiterm handbook film`. Timing flags: `--fps`, `--width`,
-`--hold`, `--enter`, `--fade`, `--pace`, `--colours`.
+`--hold`, `--enter`, `--fade`, `--transition`, `--pace`, `--colours`.
 
 ## presiterm new NAME
 

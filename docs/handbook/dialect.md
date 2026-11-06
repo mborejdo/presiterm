@@ -16,7 +16,7 @@ font-size: 54        # points; --font-size beats it
 reveal: true         # every bullet is a key press
 tags: long, demo     # the active tags for {only} blocks
 links: https://example.org, mailto:me@example.org   # under the picture in the film's Word and PDF
-hold: 5              # film timing (fps, width, hold, enter, fade, colours): presiterm handbook film
+hold: 5              # film timing (fps, width, hold, enter, fade, transition, pace, colours): presiterm handbook film
 ---
 ```
 

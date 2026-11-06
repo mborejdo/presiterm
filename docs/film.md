@@ -29,9 +29,10 @@ same tokens.
 Frames in, files out. Knows nothing about Markdown or Typst.
 
 - `Frame { width, height, rgb }`, `Frame::png()`.
-- `Timing { fps, fade, ticks }`, `Scene { frames, hold }` and `sequence(scenes, timing) ->
-  Vec<Frame>`: every scene's build-in frames, its own hold on the last one, a crossfade into
-  the next scene.
+- `Timing { fps, fade, transition, ticks }`, `Scene { frames, hold }` and `sequence(scenes,
+  timing) -> Vec<Frame>`: every scene's build-in frames, its own hold on the last one, a
+  `Transition` into the next scene (fade, wipe, push, pixelize, circle, split, cut: CPU-drawn,
+  readable at 10 fps).
 - `gif::encode(frames, keyframes, fps, colours)`: one NeuQuant palette learned from the keyframes
   plus a transparent slot, delta frames (the changed rectangle only, unchanged pixels
   transparent), long holds split into legal delays. This is what keeps a 14-card film near 1 MB.
@@ -81,7 +82,7 @@ How the deck's semantics become motion:
 | `{only}` tags | the same `--tags` as the window |
 
 Timing lives in `presiterm.toml` (`[film] fps = 10, width = 640, hold = 7, enter = 1.6,
-fade = 0.4, pace = 200, colours = 48`) and in the frontmatter with the same keys; a flag beats
+fade = 0.4, transition = "fade", pace = 200, colours = 48`) and in the frontmatter with the same keys; a flag beats
 both, as everywhere. `hold` is the least a scene stays; a scene with more words than that covers
 at `pace` words per minute stays for its reading time. `presiterm lint --film` checks every slide at the film's geometry (a card that
 overflows is an error, with the rows that do not fit).
@@ -95,9 +96,9 @@ the window and need no new rendering idea there.
 
 `filmstrip` with tests per container; `typstkit::Engine::raster` and `Input::Bytes`; the card
 layout (`apps/presiterm/src/film/film.typ`) and the PDF page; `presiterm film` with
-`--gif --mp4 --docx --pdf --cards --out --preview` and the six timing flags; `presiterm lint
+`--gif --mp4 --docx --pdf --cards --out --preview` and the eight timing flags; `presiterm lint
 --film`; the `[film]` table and the frontmatter keys; `links:`; the `metrics` directive in the
 dialect, the window and the film; `examples/film`, rendered by `cargo xtask demo`.
 
 Left out on purpose: a `columns` directive (a picture above its text does the job), per-element
-timing in the Markdown, audio, transitions beyond the crossfade, any browser.
+timing in the Markdown, audio, a transition per slide, GPU transitions, any browser.

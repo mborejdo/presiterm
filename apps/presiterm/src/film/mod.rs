@@ -45,8 +45,10 @@ pub struct Options {
     pub hold: f32,
     /// Seconds of build-in at the start of every step.
     pub enter: f32,
-    /// Seconds of crossfade between cards.
+    /// Seconds a transition between cards takes.
     pub fade: f32,
+    /// How one card gives way to the next.
+    pub transition: filmstrip::Transition,
     /// Words per minute: a scene with more words than `hold` seconds cover at this pace stays
     /// longer, so a wordy card can be read; 0 holds every scene for `hold`.
     pub pace: f32,
@@ -62,6 +64,7 @@ impl Default for Options {
             hold: 7.0,
             enter: 1.6,
             fade: 0.4,
+            transition: filmstrip::Transition::Fade,
             pace: 200.0,
             colours: 48,
         }
@@ -82,6 +85,7 @@ impl Options {
             hold: set.hold.unwrap_or(base.hold),
             enter: set.enter.unwrap_or(base.enter),
             fade: set.fade.unwrap_or(base.fade),
+            transition: set.transition.unwrap_or(base.transition),
             pace: set.pace.unwrap_or(base.pace),
             colours: set.colours.unwrap_or(base.colours),
         })
@@ -286,6 +290,7 @@ pub fn render(loaded: &Loaded, options: &Options) -> Result<Rendered> {
     let timing = filmstrip::Timing {
         fps: options.fps,
         fade: options.fade,
+        transition: options.transition,
         ticks: TICKS,
     };
     let takes: Vec<filmstrip::Scene<'_>> = scenes
@@ -571,6 +576,7 @@ mod tests {
             hold: 0.5,
             enter: 0.5,
             fade: 0.25,
+            transition: filmstrip::Transition::Fade,
             pace: 0.0,
             colours: 16,
         }

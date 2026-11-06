@@ -3,7 +3,7 @@
 //! nothing started.
 //!
 //! [`sequence`] builds the frame list of a film from scenes: every scene's build-in frames, a
-//! hold on its last frame, a crossfade into the next scene.
+//! hold on its last frame, a [`Transition`] into the next scene.
 
 // Pixel and timing math: frames are a few hundred pixels wide and a film a few hundred frames
 // long, far inside every range.
@@ -81,6 +81,158 @@ impl Frame {
             rgb,
         }
     }
+
+    /// A frame drawn pixel by pixel.
+    fn drawn(width: u32, height: u32, pixel: impl Fn(u32, u32) -> [u8; 3]) -> Self {
+        let mut rgb = Vec::with_capacity((width * height * 3) as usize);
+        for y in 0..height {
+            for x in 0..width {
+                rgb.extend_from_slice(&pixel(x, y));
+            }
+        }
+        Self { width, height, rgb }
+    }
+
+    /// The pixel at `x`, `y`; both inside the frame.
+    fn pixel(&self, x: u32, y: u32) -> [u8; 3] {
+        let at = ((y * self.width + x) * 3) as usize;
+        [self.rgb[at], self.rgb[at + 1], self.rgb[at + 2]]
+    }
+
+    /// This frame with `other` showing wherever `take` says so.
+    fn composed(&self, other: &Self, take: impl Fn(u32, u32) -> bool) -> Self {
+        Self::drawn(self.width, self.height, |x, y| {
+            if take(x, y) {
+                other.pixel(x, y)
+            } else {
+                self.pixel(x, y)
+            }
+        })
+    }
+
+    /// This frame in blocks of `block` pixels, each the colour of its centre.
+    fn mosaic(&self, block: u32) -> Self {
+        let block = block.max(1);
+        let centre = |v: u32, end: u32| (v - v % block + block / 2).min(end - 1);
+        Self::drawn(self.width, self.height, |x, y| {
+            self.pixel(centre(x, self.width), centre(y, self.height))
+        })
+    }
+}
+
+/// How one scene gives way to the next. Every one reads at a low frame rate: four frames of
+/// it at 10 fps are enough.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "lowercase")
+)]
+pub enum Transition {
+    /// A crossfade.
+    #[default]
+    Fade,
+    /// The next scene wipes in from the left.
+    Wipe,
+    /// The next scene pushes this one out to the left.
+    Push,
+    /// This scene breaks into blocks that grow, the next one sharpens out of them.
+    Pixelize,
+    /// The next scene opens in a circle from the centre.
+    Circle,
+    /// The next scene opens from the centre line outwards, like barn doors.
+    Split,
+    /// No frames between: the next scene is just there.
+    Cut,
+}
+
+impl Transition {
+    /// Every transition by its name, in the order of the docs.
+    pub const ALL: [Self; 7] = [
+        Self::Fade,
+        Self::Wipe,
+        Self::Push,
+        Self::Pixelize,
+        Self::Circle,
+        Self::Split,
+        Self::Cut,
+    ];
+
+    /// The name the config, the frontmatter and the flag use.
+    #[must_use]
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::Fade => "fade",
+            Self::Wipe => "wipe",
+            Self::Push => "push",
+            Self::Pixelize => "pixelize",
+            Self::Circle => "circle",
+            Self::Split => "split",
+            Self::Cut => "cut",
+        }
+    }
+
+    /// The frame `t` of the way from `from` to `to`, `t` strictly between 0 and 1; both frames
+    /// the same size.
+    #[must_use]
+    pub fn frame(self, from: &Frame, to: &Frame, t: f32) -> Frame {
+        let (w, h) = (from.width as f32, from.height as f32);
+        match self {
+            Self::Fade => from.blend(to, t),
+            Self::Cut => to.clone(),
+            Self::Wipe => from.composed(to, |x, _| (x as f32) < t * w),
+            Self::Split => {
+                let (mid, half) = (w / 2.0, t * w / 2.0);
+                from.composed(to, |x, _| (x as f32 + 0.5 - mid).abs() < half)
+            },
+            Self::Circle => {
+                let (cx, cy) = (w / 2.0, h / 2.0);
+                let r = t * cx.hypot(cy);
+                from.composed(to, |x, y| {
+                    (x as f32 + 0.5 - cx).hypot(y as f32 + 0.5 - cy) < r
+                })
+            },
+            Self::Push => {
+                let shift = (t * w).round() as u32;
+                Frame::drawn(from.width, from.height, |x, y| {
+                    if x + shift < from.width {
+                        from.pixel(x + shift, y)
+                    } else {
+                        to.pixel(x + shift - from.width, y)
+                    }
+                })
+            },
+            Self::Pixelize => {
+                // Blocks grow towards the middle of the way, then shrink on the next scene.
+                let size = (1.0 - 2.0f32.mul_add(t, -1.0).abs()) * w / 16.0;
+                let source = if t < 0.5 { from } else { to };
+                source.mosaic(size.round() as u32)
+            },
+        }
+    }
+}
+
+impl std::str::FromStr for Transition {
+    type Err = anyhow::Error;
+
+    fn from_str(name: &str) -> Result<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|t| t.name().eq_ignore_ascii_case(name.trim()))
+            .ok_or_else(|| {
+                let names: Vec<_> = Self::ALL.iter().map(|t| t.name()).collect();
+                anyhow::anyhow!(
+                    "transition: expected one of {}, got \"{name}\"",
+                    names.join(", ")
+                )
+            })
+    }
+}
+
+impl std::fmt::Display for Transition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.name())
+    }
 }
 
 /// How the film runs.
@@ -88,8 +240,10 @@ impl Frame {
 pub struct Timing {
     /// Frames per second of the film.
     pub fps: u16,
-    /// Seconds of crossfade between scenes.
+    /// Seconds a transition between scenes takes; a cut takes none.
     pub fade: f32,
+    /// How one scene gives way to the next.
+    pub transition: Transition,
     /// Frames each build-in frame stays (2 at 10 fps gives the stop-motion look).
     pub ticks: usize,
 }
@@ -111,17 +265,17 @@ pub struct Scene<'a> {
 }
 
 /// The frames of the whole film. Every scene's build-in frames stay `ticks` frames each, the
-/// last one until the scene's `hold` is used up, then the scene crossfades into the next, the
+/// last one until the scene's `hold` is used up, then the transition into the next scene, the
 /// last into the first so the loop is seamless.
 ///
 /// # Examples
 ///
 /// ```
-/// use filmstrip::{Frame, Scene, Timing};
+/// use filmstrip::{Frame, Scene, Timing, Transition};
 ///
 /// let a = [Frame::solid(2, 2, [0, 0, 0])];
 /// let b = [Frame::solid(2, 2, [255, 255, 255])];
-/// let timing = Timing { fps: 10, fade: 0.0, ticks: 1 };
+/// let timing = Timing { fps: 10, fade: 0.0, transition: Transition::Fade, ticks: 1 };
 /// let scenes = [Scene { frames: &a, hold: 1.0 }, Scene { frames: &b, hold: 2.0 }];
 /// let frames = filmstrip::sequence(&scenes, timing).expect("frames");
 /// assert_eq!(frames.len(), 30);
@@ -142,7 +296,10 @@ pub fn sequence(scenes: &[Scene<'_>], timing: Timing) -> Result<Vec<Frame>> {
             odd.height
         );
     }
-    let fade = timing.frames(timing.fade);
+    let fade = match timing.transition {
+        Transition::Cut => 0,
+        _ => timing.frames(timing.fade),
+    };
     let ticks = timing.ticks.max(1);
     let mut out = Vec::new();
     for (i, scene) in scenes.iter().enumerate() {
@@ -162,7 +319,7 @@ pub fn sequence(scenes: &[Scene<'_>], timing: Timing) -> Result<Vec<Frame>> {
         let next = &scenes[(i + 1) % scenes.len()].frames[0];
         for k in 1..=fade {
             let t = k as f32 / (fade + 1) as f32;
-            out.push(last.blend(next, t));
+            out.push(timing.transition.frame(last, next, t));
         }
     }
     Ok(out)
@@ -180,6 +337,7 @@ mod tests {
         let timing = Timing {
             fps: 10,
             fade: 0.2,
+            transition: Transition::Fade,
             ticks: 2,
         };
         let one = [a.clone(), b.clone()];
@@ -213,6 +371,7 @@ mod tests {
         let timing = Timing {
             fps: 10,
             fade: 0.0,
+            transition: Transition::Fade,
             ticks: 1,
         };
         let (a, b) = ([a], [b]);
@@ -228,6 +387,60 @@ mod tests {
         ];
         assert!(sequence(&scenes, timing).is_err());
         assert!(sequence(&[], timing).is_err());
+    }
+
+    #[test]
+    fn a_cut_has_no_frames_between_and_the_others_reach_the_next_scene_from_the_left_or_centre() {
+        let black = Frame::solid(8, 4, [0; 3]);
+        let white = Frame::solid(8, 4, [255; 3]);
+        let left = |f: &Frame| f.pixel(0, 1)[0];
+        let centre = |f: &Frame| f.pixel(4, 2)[0];
+        let right = |f: &Frame| f.pixel(7, 1)[0];
+        for t in Transition::ALL {
+            let frame = t.frame(&black, &white, 0.5);
+            assert!(frame.is_consistent(), "{t}");
+            match t {
+                Transition::Cut | Transition::Pixelize => assert_eq!(frame, white),
+                Transition::Fade => assert_eq!(frame.pixel(3, 3), [128; 3]),
+                Transition::Wipe => assert_eq!((left(&frame), right(&frame)), (255, 0)),
+                Transition::Push => assert_eq!((left(&frame), right(&frame)), (0, 255)),
+                Transition::Circle | Transition::Split => {
+                    assert_eq!((left(&frame), centre(&frame)), (0, 255), "{t}");
+                },
+            }
+        }
+        let scene = [black];
+        let scenes = [Scene {
+            frames: &scene,
+            hold: 0.5,
+        }];
+        let cut = Timing {
+            fps: 10,
+            fade: 1.0,
+            transition: Transition::Cut,
+            ticks: 1,
+        };
+        assert_eq!(sequence(&scenes, cut).unwrap().len(), 5);
+        let wipe = Timing {
+            transition: Transition::Wipe,
+            ..cut
+        };
+        assert_eq!(sequence(&scenes, wipe).unwrap().len(), 15);
+    }
+
+    #[test]
+    fn a_mosaic_takes_the_colour_of_every_block_centre_and_a_name_reads_back() {
+        let mut frame = Frame::solid(4, 2, [0; 3]);
+        frame.rgb[15..18].copy_from_slice(&[9; 3]); // (1, 1): the centre of the first block
+        let mosaic = frame.mosaic(2);
+        assert_eq!(mosaic.pixel(0, 0), [9; 3]);
+        assert_eq!(mosaic.pixel(2, 0), [0; 3]);
+        assert_eq!(" Push ".parse::<Transition>().unwrap(), Transition::Push);
+        let error = "slide".parse::<Transition>().unwrap_err().to_string();
+        assert!(
+            error.contains("fade, wipe") && error.contains("slide"),
+            "{error}"
+        );
     }
 
     #[test]

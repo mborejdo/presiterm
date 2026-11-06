@@ -40,7 +40,7 @@ Every key press of the talk is a build-in step of the film:
 
 ## Timing and size
 
-Seven values, each a flag, a frontmatter key or a `[film]` key in `presiterm.toml`; a flag beats
+Eight values, each a flag, a frontmatter key or a `[film]` key in `presiterm.toml`; a flag beats
 the frontmatter, which beats the file:
 
 | value | flag | default | what |
@@ -49,7 +49,8 @@ the frontmatter, which beats the file:
 | width | `--width` | 640 | pixels; the height follows 16:9; even numbers only (the MP4 needs them) |
 | hold | `--hold` | 7 | seconds every scene stays, build-in included |
 | enter | `--enter` | 1.6 | seconds of build-in at the start of every scene |
-| fade | `--fade` | 0.4 | seconds of crossfade between scenes |
+| fade | `--fade` | 0.4 | seconds a transition between scenes takes |
+| transition | `--transition` | fade | how one scene gives way to the next: `fade`, `wipe`, `push`, `pixelize`, `circle`, `split` or `cut` |
 | pace | `--pace` | 200 | words per minute; a scene with more words than `hold` covers stays longer |
 | colours | `--colours` | 48 | colours of the GIF palette, 2 to 255 |
 
@@ -57,6 +58,13 @@ the frontmatter, which beats the file:
 (the heading and everything shown at once on the first step, the bullet of a `+` step after)
 stays as long as reading them takes, so a wordy card is not cut short and a title card does not
 linger. `pace: 0` holds every scene for exactly `hold`.
+
+The transitions are drawn frame by frame on the CPU and chosen to read at 10 fps, where a `fade`
+of 0.4 seconds is four frames: `wipe` brings the next scene in from the left, `push` shoves the
+current one out to the left, `pixelize` breaks the scene into blocks that grow and sharpen into
+the next, `circle` opens the next scene from the centre, `split` opens it from the centre line
+outwards like barn doors, `cut` has no frames between at all. One transition for the whole film;
+`fade` sets how long it takes, a cut takes none.
 
 ```markdown
 ---

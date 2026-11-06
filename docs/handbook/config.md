@@ -31,6 +31,7 @@ fps = 10
 hold = 7
 enter = 1.6
 fade = 0.4
+transition = "fade"   # or wipe, push, pixelize, circle, split, cut
 pace = 200
 colours = 48
 ```

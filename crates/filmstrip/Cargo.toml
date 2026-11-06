@@ -25,10 +25,13 @@ mp4 = ["dep:rusty_h264-encoder", "dep:rusty_h264-common", "dep:mp4", "dep:bytes"
 docx = ["gif", "dep:docx-rs", "dep:zip"]
 # A Screen annotation over a PDF page that plays the MP4 when the page opens.
 pdf = ["mp4", "dep:lopdf"]
+# `Transition` by name in a config file.
+serde = ["dep:serde"]
 
 [dependencies]
 anyhow.workspace = true
 png.workspace = true
+serde = { workspace = true, optional = true }
 gif = { workspace = true, optional = true }
 color_quant = { workspace = true, optional = true }
 rusty_h264-encoder = { workspace = true, optional = true }

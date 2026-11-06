@@ -119,8 +119,10 @@ pub struct FilmSettings {
     pub hold: Option<f32>,
     /// Seconds of build-in (1.6).
     pub enter: Option<f32>,
-    /// Seconds of crossfade (0.4).
+    /// Seconds a transition between cards takes (0.4).
     pub fade: Option<f32>,
+    /// How one card gives way to the next (fade).
+    pub transition: Option<filmstrip::Transition>,
     /// Words per minute the hold of a wordy scene is sized for (200); 0 turns it off.
     pub pace: Option<f32>,
     /// Colours of the GIF palette (48).
@@ -137,13 +139,15 @@ impl FilmSettings {
             hold: self.hold.or(under.hold),
             enter: self.enter.or(under.enter),
             fade: self.fade.or(under.fade),
+            transition: self.transition.or(under.transition),
             pace: self.pace.or(under.pace),
             colours: self.colours.or(under.colours),
         }
     }
 
     /// Read the film keys of a deck's frontmatter (`fps`, `width`, `hold`, `enter`, `fade`,
-    /// `pace`, `colours`); a value that is not a number is an error naming the key.
+    /// `transition`, `pace`, `colours`); a value that is not a number, or not a transition's
+    /// name, is an error naming the key.
     pub fn from_frontmatter(get: impl Fn(&str) -> Option<String>) -> Result<Self> {
         fn number<T: FromStr>(key: &str, value: Option<String>) -> Result<Option<T>> {
             value
@@ -160,6 +164,9 @@ impl FilmSettings {
             hold: number("hold", get("hold"))?,
             enter: number("enter", get("enter"))?,
             fade: number("fade", get("fade"))?,
+            transition: get("transition")
+                .map(|v| v.parse().context("frontmatter transition"))
+                .transpose()?,
             pace: number("pace", get("pace"))?,
             colours: number("colours", get("colours"))?,
         })

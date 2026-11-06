@@ -151,8 +151,8 @@ text underlines itself, `:::{metrics}` numbers count up, a title lands word by w
 diagrams light up). Out come a looping GIF (one learned palette, delta frames, about 1 MB for a
 dozen cards), with `--mp4` an H.264 MP4 (pure Rust), with `--docx` an A4 landscape Word file that
 plays the GIF in place, with `--pdf` a PDF that plays the MP4 when the page opens in Acrobat.
-Timing in the frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `fps`, `width`,
-`colours`); a card that does not fit is an error, `presiterm lint --film` finds them. The
+Timing in the frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `transition`, `pace`,
+`fps`, `width`, `colours`); a card that does not fit is an error, `presiterm lint --film` finds them. The
 encoders are the `filmstrip` crate (`crates/filmstrip`), usable on their own.
 
 ## Config
