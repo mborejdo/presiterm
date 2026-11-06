@@ -15,6 +15,8 @@ use typst::syntax::{FileId, RootedPath, Source, VirtualPath, VirtualRoot};
 use typst_as_lib::TypstEngine;
 use typst_as_lib::file_resolver::FileResolver;
 use typst_layout::PagedDocument;
+#[cfg(feature = "pdf")]
+pub use typst_pdf::PdfOptions;
 
 /// What to compile.
 #[derive(Clone, Copy, Debug)]
@@ -23,6 +25,28 @@ pub enum Main<'a> {
     Source(&'a str),
     /// A file, as a path relative to the root (`templates/cv.typ`).
     File(&'a str),
+}
+
+/// One `sys.inputs` value.
+#[derive(Clone, Copy, Debug)]
+pub enum Input<'a> {
+    /// A string (`sys.inputs.name`).
+    Text(&'a str),
+    /// Bytes, for `image(sys.inputs.picture)` and `json(sys.inputs.data)`.
+    Bytes(&'a [u8]),
+}
+
+/// The pixels of a compiled page.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Raster {
+    /// Width in pixels.
+    pub width: u32,
+    /// Height in pixels.
+    pub height: u32,
+    /// Row-major RGB, 3 bytes per pixel, drawn on white where the page is transparent.
+    pub rgb: Vec<u8>,
+    /// How many pages the document has (more than one means the content overflowed).
+    pub pages: usize,
 }
 
 /// Builds an [`Engine`].
@@ -136,11 +160,26 @@ impl Engine {
         Builder::default()
     }
 
-    /// Compile `main` with `inputs` as `sys.inputs` into a laid-out document.
+    /// Compile `main` with string `inputs` as `sys.inputs` into a laid-out document.
     pub fn document(&self, main: Main<'_>, inputs: &[(&str, &str)]) -> Result<PagedDocument> {
+        let inputs: Vec<(&str, Input<'_>)> =
+            inputs.iter().map(|(k, v)| (*k, Input::Text(v))).collect();
+        self.document_with(main, &inputs)
+    }
+
+    /// Compile `main` with `inputs` (strings or bytes) as `sys.inputs` into a laid-out document.
+    pub fn document_with(
+        &self,
+        main: Main<'_>,
+        inputs: &[(&str, Input<'_>)],
+    ) -> Result<PagedDocument> {
         let mut dict = Dict::new();
         for (key, value) in inputs {
-            dict.insert((*key).into(), Str::from(*value).into_value());
+            let value = match value {
+                Input::Text(text) => Str::from(*text).into_value(),
+                Input::Bytes(bytes) => Bytes::new(bytes.to_vec()).into_value(),
+            };
+            dict.insert((*key).into(), value);
         }
         // One compile at a time: the scratch source is shared. The resolver locks `scratch` itself
         // during the compile, so that lock is only held to swap the source.
@@ -165,6 +204,48 @@ impl Engine {
                 anyhow!("{}", describe(&diagnostics))
             },
             other => anyhow!("{other}"),
+        })
+    }
+
+    /// Compile `main` with `inputs` and draw its first page at `ppi` pixels per inch as RGB.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use typstkit::{Input, Main};
+    ///
+    /// let engine = typstkit::Engine::builder().build();
+    /// let source = "#set page(width: 1in, height: 1in, margin: 0pt, fill: black)\n#sys.inputs.word";
+    /// let raster = engine
+    ///     .raster(Main::Source(source), &[("word", Input::Text("hi"))], 10.0)
+    ///     .expect("compiles");
+    /// assert_eq!((raster.width, raster.height, raster.pages), (10, 10, 1));
+    /// assert_eq!(&raster.rgb[..3], &[0, 0, 0]);
+    /// ```
+    pub fn raster(&self, main: Main<'_>, inputs: &[(&str, Input<'_>)], ppi: f32) -> Result<Raster> {
+        let document = self.document_with(main, inputs)?;
+        let Some(page) = document.pages().first() else {
+            bail!("the document has no page");
+        };
+        let options = typst_render::RenderOptions {
+            pixel_per_pt: typst::utils::Scalar::new(f64::from(ppi) / 72.0),
+            render_bleed: false,
+        };
+        let pixmap = typst_render::render(page, &options);
+        let mut rgb = Vec::with_capacity(pixmap.pixels().len() * 3);
+        for px in pixmap.pixels() {
+            let c = px.demultiply();
+            // over white: a transparent page reads as paper, not as black
+            let a = u16::from(c.alpha());
+            let over =
+                |v: u8| u8::try_from((u16::from(v) * a + 255 * (255 - a)) / 255).unwrap_or(255);
+            rgb.extend_from_slice(&[over(c.red()), over(c.green()), over(c.blue())]);
+        }
+        Ok(Raster {
+            width: pixmap.width(),
+            height: pixmap.height(),
+            rgb,
+            pages: document.pages().len(),
         })
     }
 
@@ -205,15 +286,15 @@ impl Engine {
         Ok(typst_svg::svg(page, &typst_svg::SvgOptions::default()))
     }
 
-    /// Compile `main` with `inputs` to PDF bytes.
+    /// Compile `main` with `inputs` (strings or bytes) to PDF bytes.
     #[cfg(feature = "pdf")]
     pub fn pdf(
         &self,
         main: Main<'_>,
-        inputs: &[(&str, &str)],
-        options: &typst_pdf::PdfOptions,
+        inputs: &[(&str, Input<'_>)],
+        options: &PdfOptions,
     ) -> Result<Vec<u8>> {
-        let document = self.document(main, inputs)?;
+        let document = self.document_with(main, inputs)?;
         typst_pdf::pdf(&document, options)
             .map_err(|diagnostics| anyhow!("{}", describe(&diagnostics)))
     }

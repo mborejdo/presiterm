@@ -7,7 +7,7 @@ use std::path::Path;
 use colonmark::{Align, Inline, Kind};
 
 use super::spans::{line, lines};
-use super::{Block, Diagram, Item, Picture, Slide, Span, plain};
+use super::{Block, Diagram, Item, Metric, Picture, Slide, Span, plain};
 
 /// Turn the Markdown `blocks` of a slide into its blocks and notes.
 pub(super) fn fill(slide: &mut Slide, blocks: Vec<colonmark::Block>, reveal: bool, base: &Path) {
@@ -43,6 +43,9 @@ pub(super) fn fill(slide: &mut Slide, blocks: Vec<colonmark::Block>, reveal: boo
             )),
             Kind::Directive(directive) if directive.name.eq_ignore_ascii_case("notes") => {
                 push_note(&mut slide.notes, directive.raw.trim());
+            },
+            Kind::Directive(directive) if directive.name.eq_ignore_ascii_case("metrics") => {
+                slide.blocks.push(metrics(&directive.raw, block.line));
             },
             Kind::Directive(directive) => fill(slide, directive.blocks, reveal, base),
             Kind::Rule => {},
@@ -124,6 +127,26 @@ fn flatten(
             flatten(inner, level + 1, reveal, items, after);
         }
     }
+}
+
+/// `:::{metrics}`: one `value | label` per line, big numbers in a row.
+fn metrics(raw: &str, line: usize) -> Block {
+    let mut items = Vec::new();
+    for text in raw.lines().map(str::trim).filter(|l| !l.is_empty()) {
+        let Some((value, label)) = text.split_once('|') else {
+            return Block::Error(format!(
+                "line {line}: metrics read `value | label`, got `{text}`"
+            ));
+        };
+        items.push(Metric {
+            value: value.trim().to_string(),
+            label: label.trim().to_string(),
+        });
+    }
+    if items.is_empty() {
+        return Block::Error(format!("line {line}: an empty metrics block"));
+    }
+    Block::Metrics(items)
 }
 
 /// A block quote as quoted lines: its paragraphs line by line; anything else is named, not drawn.

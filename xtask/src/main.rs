@@ -40,7 +40,7 @@ enum Task {
     Deny,
     /// The only program presiterm starts is `wezterm`.
     NoShellout,
-    /// Lint every example deck; with --window, present examples/intro.
+    /// Lint every example deck and render the film example into target/demo; with --window, present examples/intro.
     Demo {
         /// Open examples/intro/slides.md in a WezTerm window afterwards.
         #[arg(long)]
@@ -99,6 +99,56 @@ fn shellouts() -> Result<Vec<String>> {
     Ok(found)
 }
 
+/// Lint every example deck, render the film example into target/demo, present intro on request.
+fn demo(window: bool) -> Result<()> {
+    for deck in ["intro", "diagrams", "media", "film"] {
+        cargo(
+            &[
+                "run",
+                "-q",
+                "-p",
+                "presiterm",
+                "--",
+                "lint",
+                &format!("examples/{deck}/slides.md"),
+            ],
+            &[],
+        )?;
+    }
+    cargo(
+        &[
+            "run",
+            "-q",
+            "-p",
+            "presiterm",
+            "--",
+            "film",
+            "examples/film/slides.md",
+            "--mp4",
+            "--docx",
+            "--pdf",
+            "--out",
+            "target/demo",
+        ],
+        &[],
+    )?;
+    if window {
+        cargo(
+            &[
+                "run",
+                "-q",
+                "-p",
+                "presiterm",
+                "--",
+                "--window",
+                "examples/intro/slides.md",
+            ],
+            &[],
+        )?;
+    }
+    Ok(())
+}
+
 fn run(task: Task) -> Result<()> {
     match task {
         Task::Fmt => cargo(&["fmt", "--all"], &[]),
@@ -150,37 +200,7 @@ fn run(task: Task) -> Result<()> {
             println!("no-shellout: ok (only wezterm)");
             Ok(())
         },
-        Task::Demo { window } => {
-            for deck in ["intro", "diagrams", "media"] {
-                cargo(
-                    &[
-                        "run",
-                        "-q",
-                        "-p",
-                        "presiterm",
-                        "--",
-                        "lint",
-                        &format!("examples/{deck}/slides.md"),
-                    ],
-                    &[],
-                )?;
-            }
-            if window {
-                cargo(
-                    &[
-                        "run",
-                        "-q",
-                        "-p",
-                        "presiterm",
-                        "--",
-                        "--window",
-                        "examples/intro/slides.md",
-                    ],
-                    &[],
-                )?;
-            }
-            Ok(())
-        },
+        Task::Demo { window } => demo(window),
         Task::Qa => [
             Task::FmtCheck,
             Task::Lint,

@@ -70,6 +70,8 @@ pub struct Sources {
     pub theme: Source,
     /// Source of the logo.
     pub logo: Source,
+    /// Source of the `[film]` table.
+    pub film: Source,
 }
 
 /// What happened to a config file that was looked at.
@@ -102,6 +104,62 @@ pub struct ConfigFile {
     pub state: FileState,
 }
 
+/// The `[film]` table: what `presiterm film` uses when neither a flag nor the frontmatter says.
+/// Every key is optional; a key left out keeps the built-in default.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct FilmSettings {
+    /// Frames per second (10).
+    pub fps: Option<u16>,
+    /// Width in pixels, even (640).
+    pub width: Option<u32>,
+    /// Seconds every card stays (7).
+    pub hold: Option<f32>,
+    /// Seconds of build-in (1.6).
+    pub enter: Option<f32>,
+    /// Seconds of crossfade (0.4).
+    pub fade: Option<f32>,
+    /// Colours of the GIF palette (48).
+    pub colours: Option<usize>,
+}
+
+impl FilmSettings {
+    /// These settings over `under`: a key set here wins.
+    #[must_use]
+    pub fn over(self, under: Self) -> Self {
+        Self {
+            fps: self.fps.or(under.fps),
+            width: self.width.or(under.width),
+            hold: self.hold.or(under.hold),
+            enter: self.enter.or(under.enter),
+            fade: self.fade.or(under.fade),
+            colours: self.colours.or(under.colours),
+        }
+    }
+
+    /// Read the film keys of a deck's frontmatter (`fps`, `width`, `hold`, `enter`, `fade`,
+    /// `colours`); a value that is not a number is an error naming the key.
+    pub fn from_frontmatter(get: impl Fn(&str) -> Option<String>) -> Result<Self> {
+        fn number<T: FromStr>(key: &str, value: Option<String>) -> Result<Option<T>> {
+            value
+                .map(|v| {
+                    v.trim().parse::<T>().ok().with_context(|| {
+                        format!("frontmatter {key}: expected a number, got \"{v}\"")
+                    })
+                })
+                .transpose()
+        }
+        Ok(Self {
+            fps: number("fps", get("fps"))?,
+            width: number("width", get("width"))?,
+            hold: number("hold", get("hold"))?,
+            enter: number("enter", get("enter"))?,
+            fade: number("fade", get("fade"))?,
+            colours: number("colours", get("colours"))?,
+        })
+    }
+}
+
 /// What presiterm uses when the flags and the deck say nothing.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
@@ -115,6 +173,8 @@ pub struct Config {
     pub theme: swatchbook::Theme,
     /// A picture for the top left corner of every slide, resolved against its config file.
     pub logo: Option<PathBuf>,
+    /// The `[film]` table.
+    pub film: FilmSettings,
     /// Where each of the values above came from.
     pub sources: Sources,
     /// The config files looked at, closest first.
@@ -129,6 +189,7 @@ impl Default for Config {
             grid: DEFAULT_GRID,
             theme: swatchbook::Theme::default(),
             logo: None,
+            film: FilmSettings::default(),
             sources: Sources::default(),
             files: Vec::new(),
         }
@@ -144,6 +205,7 @@ struct RawLayer {
     grid: Option<toml::Value>,
     theme: Option<toml::Value>,
     logo: Option<toml::Value>,
+    film: Option<toml::Value>,
 }
 
 /// The keys of one config file, checked.
@@ -154,6 +216,7 @@ struct Layer {
     grid: Option<(usize, usize)>,
     theme: Option<swatchbook::Theme>,
     logo: Option<PathBuf>,
+    film: Option<FilmSettings>,
 }
 
 /// How a TOML value reads in an error message.
@@ -245,12 +308,21 @@ impl RawLayer {
                 Ok(path.parent().unwrap_or_else(|| Path::new(".")).join(file))
             })
             .transpose()?;
+        let film = self
+            .film
+            .map(|value| {
+                value
+                    .try_into::<FilmSettings>()
+                    .with_context(|| format!("{}: film", path.display()))
+            })
+            .transpose()?;
         Ok(Layer {
             font_size,
             screen,
             grid,
             theme,
             logo,
+            film,
         })
     }
 }
@@ -412,6 +484,10 @@ impl Config {
             config.logo = Some(value);
             config.sources.logo = source;
         }
+        if let Some((value, source)) = first(&layers, |layer| layer.film.as_ref()) {
+            config.film = value;
+            config.sources.film = source;
+        }
         Ok(config)
     }
 
@@ -508,6 +584,16 @@ impl fmt::Display for Config {
                 "[theme] table"
             },
             self.sources.theme
+        )?;
+        writeln!(
+            out,
+            "  film      = {}  ({})",
+            if self.sources.film == Source::Default {
+                "built-in"
+            } else {
+                "[film] table"
+            },
+            self.sources.film
         )?;
         write!(
             out,

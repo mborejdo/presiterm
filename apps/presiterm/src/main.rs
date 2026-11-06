@@ -16,7 +16,7 @@ use anyhow::{Result, bail};
 use presiterm::config::{Config, deck_dir, pair};
 use presiterm::{handbook, lint, new_deck, pager, window};
 
-use crate::cli::{Command, Given, PresentArgs};
+use crate::cli::{Command, FilmArgs, Given, PresentArgs};
 
 fn run() -> Result<i32> {
     let (cli, given) = cli::parse();
@@ -26,6 +26,7 @@ fn run() -> Result<i32> {
             font_size,
             screen,
             grid,
+            film,
         }) => {
             let config = Config::load(&deck_dir(&file))?;
             let grid = grid.map(|g| pair(&g, "--grid")).transpose()?;
@@ -33,10 +34,14 @@ fn run() -> Result<i32> {
                 .screen
                 .then(|| pair(&screen, "--screen"))
                 .transpose()?;
-            let report = lint::run(&file, &config, font_size, screen, grid)?;
+            let mut report = lint::run(&file, &config, font_size, screen, grid)?;
+            if film {
+                report.findings.extend(film_findings(&file, &config)?);
+            }
             println!("{report}");
             Ok(i32::from(report.errors() > 0))
         },
+        Some(Command::Film(args)) => film(&args),
         Some(Command::Config { path }) => {
             let from = path.as_deref().unwrap_or_else(|| Path::new("."));
             println!("{}", Config::load(&deck_dir(from))?);
@@ -85,6 +90,96 @@ fn run() -> Result<i32> {
         },
         None => present(cli.file, cli.present, given),
     }
+}
+
+/// `presiterm lint --film`: the cards that overflow, at the deck's own film settings.
+#[cfg(feature = "film")]
+fn film_findings(file: &Path, config: &Config) -> Result<Vec<lint::Finding>> {
+    let source = std::fs::read_to_string(file)?;
+    let options = presiterm::film::Options::resolve(
+        presiterm::config::FilmSettings::default(),
+        &source,
+        config,
+    )?;
+    lint::film(file, config, &options)
+}
+
+#[cfg(not(feature = "film"))]
+fn film_findings(_file: &Path, _config: &Config) -> Result<Vec<lint::Finding>> {
+    bail!("this presiterm was built without the `film` feature")
+}
+
+/// `presiterm film`: render the deck and write the files asked for (the GIF when none is).
+#[cfg(feature = "film")]
+fn film(args: &FilmArgs) -> Result<i32> {
+    use presiterm::film::{self, output_path};
+
+    let config = Config::load(&deck_dir(&args.file))?;
+    let loaded = presiterm::deck::read(&args.file, false, &config)?;
+    let options = film::Options::resolve(args.settings(), &loaded.source, &config)?;
+    let rendered = film::render(&loaded, &options)?;
+    let out = args.out.as_deref();
+    let write = |path: PathBuf, bytes: &[u8]| -> Result<()> {
+        if let Some(dir) = path.parent() {
+            std::fs::create_dir_all(dir)?;
+        }
+        std::fs::write(&path, bytes)
+            .map_err(|e| anyhow::anyhow!("write {}: {e}", path.display()))?;
+        println!("{}  {} KB", path.display(), bytes.len() / 1024);
+        Ok(())
+    };
+    let any_other = args.mp4 || args.docx || args.pdf;
+    let gif = (args.gif || args.docx || args.preview || !any_other)
+        .then(|| rendered.gif())
+        .transpose()?;
+    if let Some(gif) = &gif {
+        if args.gif || !any_other {
+            write(output_path(&args.file, out, "gif"), gif)?;
+        }
+        if args.docx {
+            write(
+                output_path(&args.file, out, "docx"),
+                &rendered.docx(&loaded.deck, gif)?,
+            )?;
+        }
+    }
+    if args.mp4 || args.pdf {
+        let mp4 = rendered.mp4()?;
+        if args.mp4 {
+            write(output_path(&args.file, out, "mp4"), &mp4)?;
+        }
+        if args.pdf {
+            let note =
+                "The film plays in Acrobat when the page opens; other viewers show the still.";
+            write(
+                output_path(&args.file, out, "pdf"),
+                &rendered.pdf(&loaded.deck, &mp4, note)?,
+            )?;
+        }
+    }
+    if let Some(dir) = &args.cards {
+        for (n, scene) in rendered.scenes.iter().enumerate() {
+            if let Some(still) = scene.last() {
+                let slide = rendered.slide_of[n] + 1;
+                write(
+                    dir.join(format!("card{slide:02}-{n:03}.png")),
+                    &still.png()?,
+                )?;
+            }
+        }
+    }
+    if args.preview {
+        presiterm::term::require_wezterm()?;
+        if let Some(gif) = &gif {
+            println!("{}", presiterm::term::inline_image(gif, 18));
+        }
+    }
+    Ok(0)
+}
+
+#[cfg(not(feature = "film"))]
+fn film(_args: &FilmArgs) -> Result<i32> {
+    bail!("this presiterm was built without the `film` feature")
 }
 
 /// Present the deck: in a dedicated WezTerm window (`--window`) or in the terminal we are in.

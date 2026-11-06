@@ -3,7 +3,7 @@
 //! A thin Markdown -> WezTerm renderer and a tiny pager: [`deck`] parses the dialect, [`render`]
 //! lays a slide out as styled cells ([`canvas`]), [`pager`] shows it with the keys, reload and
 //! control socket, [`diagram`] draws mermaid, Typst and pictures, [`window`] is the WezTerm glue,
-//! [`lint`] checks a deck, [`handbook`] is the manual.
+//! [`lint`] checks a deck, [`film`] renders it as GIF, MP4, DOCX and PDF, [`handbook`] is the manual.
 
 // Cell and pixel arithmetic converts between usize, u32, f32 and f64; a slide is a few hundred
 // cells, so no value gets near a truncating or precision-losing range. Allowed for this crate
@@ -20,6 +20,8 @@ pub mod canvas;
 pub mod config;
 pub mod deck;
 pub mod diagram;
+#[cfg(feature = "film")]
+pub mod film;
 pub mod handbook;
 pub mod highlight;
 pub mod keys;

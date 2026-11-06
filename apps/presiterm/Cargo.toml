@@ -16,10 +16,12 @@ categories = ["command-line-utilities"]
 workspace = true
 
 [features]
-default = ["typst"]
+default = ["typst", "film"]
 # Typst (fletcher) diagrams and tables as pictures: in-process Typst. Heavy (about a thousand
 # crates); without it a typst fence is an error on the slide and tables are drawn as text.
 typst = ["dep:typstkit"]
+# `presiterm film`: the deck as GIF, MP4, DOCX and PDF (cards drawn by Typst, encoded by filmstrip).
+film = ["typst", "typstkit/pdf", "dep:filmstrip", "dep:serde_json"]
 
 [dependencies]
 anyhow.workspace = true
@@ -32,6 +34,8 @@ serde.workspace = true
 swatchbook.workspace = true
 toml.workspace = true
 typstkit = { workspace = true, optional = true, default-features = false, features = ["packages"] }
+filmstrip = { workspace = true, optional = true, features = ["gif", "mp4", "docx", "pdf"] }
+serde_json = { workspace = true, optional = true }
 unicode-width.workspace = true
 
 [dev-dependencies]

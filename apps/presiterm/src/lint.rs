@@ -261,6 +261,22 @@ pub fn run(
     })
 }
 
+/// The cards that overflow when the deck is drawn as a film, as error findings
+/// (`presiterm lint --film`).
+#[cfg(feature = "film")]
+pub fn film(file: &Path, config: &Config, options: &crate::film::Options) -> Result<Vec<Finding>> {
+    let loaded = deck::read(file, false, config)?;
+    Ok(crate::film::check(&loaded, options)?
+        .into_iter()
+        .map(|o| Finding {
+            slide: o.slide + 1,
+            heading: Some(o.title).filter(|t| !t.is_empty()),
+            level: Level::Error,
+            message: format!("film: the card overflows onto {} pages; trim it", o.pages),
+        })
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

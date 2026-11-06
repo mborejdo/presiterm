@@ -13,6 +13,12 @@ ignore = [
     "RUSTSEC-2026-0194", # quick-xml, trusted XML only
     "RUSTSEC-2026-0195", # quick-xml, trusted XML only
     "RUSTSEC-2024-0449", # unsafe-libyaml (typst)
+    # zip (filmstrip's DOCX pass, docx-rs): the advisories concern extracting archives to disk
+    # (SUID bits, symlink targets, permissions); filmstrip only reads and writes zip bytes in memory.
+    "RUSTSEC-2026-0367",
+    "RUSTSEC-2026-0368",
+    "RUSTSEC-2026-0369",
+    "RUSTSEC-2026-0429",
 ]
 
 [bans]

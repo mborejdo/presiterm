@@ -22,7 +22,7 @@ use anyhow::{Context, Result, ensure};
 use crate::config::Config;
 
 pub use blocks::extension_is;
-pub use model::{Block, Deck, Diagram, Item, Picture, Slide, Span, Theme};
+pub use model::{Block, Deck, Diagram, Item, Metric, Picture, Slide, Span, Theme};
 pub use spans::{inline, plain};
 
 /// The comma-separated values of a frontmatter key, trimmed, empty ones left out.
@@ -56,6 +56,7 @@ pub fn parse(source: &str, name: &str, base: &Path, force_reveal: bool) -> Deck 
     let mut deck = Deck {
         title: front.get("title").unwrap_or(name).to_string(),
         author: front.get("author").unwrap_or_default().to_string(),
+        links: list(front.get("links")),
         theme: if front.get("theme") == Some("light") {
             Theme::Light
         } else {

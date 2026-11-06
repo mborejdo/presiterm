@@ -22,11 +22,19 @@ mono = "Fira Code"      # typst diagrams and tables
 [theme.sizes]
 text = 13               # points of diagram text
 label = 11              # points of edge labels
+
+[film]                  # presiterm film (presiterm handbook film); every key optional
+width = 640
+fps = 10
+hold = 7
+enter = 1.6
+fade = 0.4
+colours = 48
 ```
 
 The palette tokens of `[theme.dark]` and `[theme.light]` are `ground`, `ink`, `muted`, `accent`,
 `surface`, `border`, `ok`, `warn` and `stop`, each a `"#rrggbb"` colour. The whole `[theme]` table
-is one key for the rule below: the closest file that has one decides all of it.
+is one key for the rule below: the closest file that has one decides all of it; so is `[film]`.
 
 An unknown key is an error that names the file and the key (`font_sise` does not silently fall
 back). A value in the wrong form is an error that names the file, the key and the form it expects.

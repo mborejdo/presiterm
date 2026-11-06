@@ -1,10 +1,12 @@
 //! What a parsed deck is made of: spans, blocks, slides and the theme.
 
+use serde::Serialize;
+
 /// Which ground a deck stands on: `theme: dark` (default) or `theme: light` in the frontmatter.
 pub use swatchbook::Mode as Theme;
 
 /// A run of inline text with its emphasis.
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize)]
 #[allow(clippy::struct_excessive_bools, reason = "independent inline switches")]
 pub struct Span {
     /// The text.
@@ -20,7 +22,7 @@ pub struct Span {
 }
 
 /// A bullet or numbered item.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Item {
     /// Nesting depth, 0 for the top level.
     pub level: usize,
@@ -33,7 +35,7 @@ pub struct Item {
 }
 
 /// A mermaid or Typst diagram with its options.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Diagram {
     /// The mermaid source, or Typst (fletcher) source when `typst` is set.
     pub source: String,
@@ -52,7 +54,7 @@ pub struct Diagram {
 }
 
 /// A picture file.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Picture {
     /// Alt text.
     pub alt: String,
@@ -64,8 +66,18 @@ pub struct Picture {
     pub width: Option<usize>,
 }
 
+/// One big number of a `:::{metrics}` block.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct Metric {
+    /// The number as written (`2 800`, `60 %`).
+    pub value: String,
+    /// What it counts.
+    pub label: String,
+}
+
 /// One block of a slide.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "lowercase")]
 pub enum Block {
     /// Lines of prose, one entry per source line.
     Paragraph(Vec<Vec<Span>>),
@@ -91,6 +103,8 @@ pub enum Block {
     Quote(Vec<Vec<Span>>),
     /// A `###` heading inside a slide.
     SubHeading(String),
+    /// Big numbers in a row: `:::{metrics}` with `value | label` lines.
+    Metrics(Vec<Metric>),
     /// A picture file.
     Picture(Picture),
     /// A mermaid or Typst diagram (a table is one too, when built with Typst).
@@ -100,7 +114,7 @@ pub enum Block {
 }
 
 /// One slide.
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize)]
 pub struct Slide {
     /// The heading, with its inline markup.
     pub heading: Option<Vec<Span>>,
@@ -133,6 +147,8 @@ pub struct Deck {
     pub title: String,
     /// `author:`.
     pub author: String,
+    /// `links:`, comma-separated URLs; the film's Word and PDF editions show them.
+    pub links: Vec<String>,
     /// `theme:`.
     pub theme: Theme,
     /// The design tokens the deck is drawn in (the config file's `[theme]`, else the defaults).

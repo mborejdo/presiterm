@@ -4,6 +4,7 @@
 presiterm new talk                      # talk/slides.md and talk/assets/flow.mmd
 presiterm --window talk/slides.md       # a dedicated WezTerm window, 58x20 cells at 42 pt
 presiterm lint talk/slides.md           # does every slide fit, is every file there
+presiterm film talk/slides.md           # the deck as a looping GIF (--mp4 --docx --pdf for the others)
 ```
 
 Edit `talk/slides.md` in your editor and save: the window reloads and jumps to the slide of the
@@ -23,7 +24,7 @@ presiterm talk/slides.md --no-watch                  # do not reload on save (ke
 Settings you always want (font size, screen, grid) can live in a `presiterm.toml` next to the deck
 instead of in flags; `presiterm config` shows which file applies (`presiterm handbook config`).
 
-Where to look next: `presiterm handbook keys`, `dialect`, `diagrams`, `window`, `config`, `tools`,
+Where to look next: `presiterm handbook keys`, `dialect`, `diagrams`, `window`, `film`, `config`, `tools`,
 `troubleshooting`; `presiterm tldr <words>` searches all of it; `presiterm <command> --help` has examples
 and exit codes for each command.
 

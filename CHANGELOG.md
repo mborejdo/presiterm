@@ -8,6 +8,14 @@ A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and three 
 
 ### Added
 
+- `presiterm film`: the deck as a looping GIF, an MP4 (pure-Rust H.264), an A4 landscape Word
+  file that plays the GIF and a PDF that plays the MP4 on page open; every key press a build-in
+  (bullets appear, marked text underlines itself, metrics count up, titles land word by word,
+  `steps` diagrams light up); `presiterm lint --film`; `[film]` in `presiterm.toml` and the
+  same keys in the frontmatter; `links:` in the frontmatter.
+- `:::{metrics}` directive: `value | label` lines as big numbers in a row.
+- `filmstrip`: frames to GIF (delta frames, learned palette), MP4, DOCX and PDF, as a crate.
+- `typstkit::Engine::raster` (pixels with string and byte inputs) and `Input::Bytes`.
 - Markdown slides in a WezTerm window: real terminal text, pictures and diagrams as OSC 1337
   inline images, a live font size (`+`, `-`, `--font-size`), reload on save that jumps to the
   edited slide, speaker notes, `+` bullets that appear per key press, a control socket

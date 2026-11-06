@@ -46,6 +46,10 @@ pub const TOPICS: &[Topic] = &[
     ),
     topic!("window", "The window and the font size"),
     topic!(
+        "film",
+        "presiterm film: the deck as GIF, MP4, DOCX and PDF, with build-ins"
+    ),
+    topic!(
         "config",
         "The config file presiterm.toml: closest wins, per key, theme and logo"
     ),

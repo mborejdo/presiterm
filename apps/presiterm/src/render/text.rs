@@ -163,6 +163,25 @@ pub(super) fn block_lines(
             .iter()
             .flat_map(|item| item_lines(item, pal, geo, counter))
             .collect(),
+        Block::Metrics(items) => {
+            // one line: `2 800 registered  |  1 000 a month`, the numbers in the accent
+            let mut cells: Vec<(char, Style)> = Vec::new();
+            for (i, m) in items.iter().enumerate() {
+                if i > 0 {
+                    cells.extend("   ".chars().map(|c| (c, base)));
+                }
+                cells.extend(m.value.chars().map(|c| (c, base.fg(pal.accent).bold())));
+                cells.push((' ', base));
+                cells.extend(m.label.chars().map(|c| (c, base.fg(pal.muted))));
+            }
+            wrap(&cells, geo.width)
+                .into_iter()
+                .map(|cells| Line {
+                    centre: title,
+                    ..Line::new(cells)
+                })
+                .collect()
+        },
         Block::Code { lang, lines } => code_lines(lang, lines, pal, geo, problems),
         Block::Table { head, rows, align } => table_lines(head, rows, align, pal, geo, problems),
         Block::Error(message) => {

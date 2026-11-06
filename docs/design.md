@@ -6,9 +6,9 @@ Why presiterm looks the way it does. The user manual is `presiterm handbook` (so
 ## Decisions
 
 * **Workspace:** the binary in `apps/presiterm` (a library plus a thin `main.rs` for dispatch and
-  `cli.rs` for the clap CLI and its help texts) and three library crates meant to be reused:
+  `cli.rs` for the clap CLI and its help texts) and four library crates meant to be reused:
   `colonmark` (Markdown and MyST colon-fence directives), `swatchbook` (design tokens and the
-  vendored fonts) and `typstkit` (in-process Typst).
+  vendored fonts), `typstkit` (in-process Typst) and `filmstrip` (frames to GIF, MP4, DOCX, PDF).
 * **WezTerm only, OSC 1337 (iTerm2 inline image protocol):** WezTerm's native, robust image path;
   it sizes an image by cell height with the aspect kept, and plays animated GIFs through it. Its
   kitty graphics support is partial, so kitty is not used. Not WezTerm: exit with one line, no

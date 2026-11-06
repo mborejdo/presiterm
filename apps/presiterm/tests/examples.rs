@@ -78,3 +78,26 @@ fn every_example_slide_lays_out_exactly_the_grid_wide() {
         }
     }
 }
+
+#[cfg(feature = "film")]
+#[test]
+fn the_film_example_fits_its_cards() {
+    use presiterm::config::Config;
+    use presiterm::film::{self, Options};
+
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/film/slides.md");
+    let loaded = deck::read(&path, false, &Config::default()).expect("read the film example");
+    let options = Options::resolve(
+        presiterm::config::FilmSettings::default(),
+        &loaded.source,
+        &Config::default(),
+    )
+    .expect("options");
+    let overflows = film::check(&loaded, &options).expect("draw the cards");
+    assert!(overflows.is_empty(), "{overflows:?}");
+    assert_eq!(
+        (options.hold, options.enter),
+        (4.0, 1.2),
+        "from the frontmatter"
+    );
+}

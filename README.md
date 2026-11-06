@@ -33,6 +33,7 @@ presiterm new talk                     # talk/slides.md and an example diagram
 presiterm --window talk/slides.md      # a dedicated WezTerm window, 58x20 cells at 42 pt
 presiterm talk/slides.md               # present in the WezTerm you are in
 presiterm lint talk/slides.md          # does every slide fit, is every file there
+presiterm film talk/slides.md          # the same deck as a looping GIF; --mp4 --docx --pdf for the others
 presiterm ctl goto 5                   # drive a running presentation from another terminal
 ```
 
@@ -141,6 +142,18 @@ flowchart LR
   use and cached. The palette tokens (`ink`, `accent`, `ok`, ...) are Typst colours in the fence.
 
 `presiterm handbook diagrams` has the details.
+
+## Film
+
+`presiterm film deck.md` renders the deck as a film: every slide a 16:9 card in the deck's tokens,
+drawn by Typst in process, every key press of the talk a build-in (bullets appear, `==marked==`
+text underlines itself, `:::{metrics}` numbers count up, a title lands word by word, `steps`
+diagrams light up). Out come a looping GIF (one learned palette, delta frames, about 1 MB for a
+dozen cards), with `--mp4` an H.264 MP4 (pure Rust), with `--docx` an A4 landscape Word file that
+plays the GIF in place, with `--pdf` a PDF that plays the MP4 when the page opens in Acrobat.
+Timing in the frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `fps`, `width`,
+`colours`); a card that does not fit is an error, `presiterm lint --film` finds them. The
+encoders are the `filmstrip` crate (`crates/filmstrip`), usable on their own.
 
 ## Config
 
