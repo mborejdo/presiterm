@@ -16,7 +16,7 @@ use serde_json::{Value, json};
 use typstkit::{Engine, Input, Main};
 
 use crate::config::{Config, FilmSettings};
-use crate::deck::{Block, Deck, Loaded, Slide};
+use crate::deck::{Block, Deck, Loaded, Slide, Span};
 use crate::diagram::Assets;
 use crate::render::fragments;
 
@@ -47,6 +47,9 @@ pub struct Options {
     pub enter: f32,
     /// Seconds of crossfade between cards.
     pub fade: f32,
+    /// Words per minute: a scene with more words than `hold` seconds cover at this pace stays
+    /// longer, so a wordy card can be read; 0 holds every scene for `hold`.
+    pub pace: f32,
     /// Colours of the GIF palette (2 to 255).
     pub colours: usize,
 }
@@ -59,6 +62,7 @@ impl Default for Options {
             hold: 7.0,
             enter: 1.6,
             fade: 0.4,
+            pace: 200.0,
             colours: 48,
         }
     }
@@ -78,8 +82,18 @@ impl Options {
             hold: set.hold.unwrap_or(base.hold),
             enter: set.enter.unwrap_or(base.enter),
             fade: set.fade.unwrap_or(base.fade),
+            pace: set.pace.unwrap_or(base.pace),
             colours: set.colours.unwrap_or(base.colours),
         })
+    }
+
+    /// Seconds a scene with `words` words stays: `hold`, or longer when reading them at `pace`
+    /// takes more.
+    fn hold_for(&self, words: usize) -> f32 {
+        if self.pace <= 0.0 {
+            return self.hold;
+        }
+        self.hold.max(words as f32 * 60.0 / self.pace)
     }
 }
 
@@ -90,6 +104,8 @@ pub struct Rendered {
     pub scenes: Vec<Vec<Frame>>,
     /// Which slide each scene shows.
     pub slide_of: Vec<usize>,
+    /// Seconds each scene stays.
+    pub holds: Vec<f32>,
     /// The whole film, in order.
     pub sequence: Vec<Frame>,
     /// The options it was rendered with.
@@ -227,10 +243,12 @@ pub fn render(loaded: &Loaded, options: &Options) -> Result<Rendered> {
     let n = ((options.enter * f32::from(options.fps)).round() as usize).max(1);
     let mut scenes = Vec::new();
     let mut slide_of = Vec::new();
+    let mut holds = Vec::new();
     let mut overflows = Vec::new();
     for (index, slide) in loaded.deck.slides.iter().enumerate() {
         let steps = fragments(slide);
         for step in 0..=steps {
+            holds.push(options.hold_for(words(slide, step)));
             let mut frames = Vec::with_capacity(n);
             for frame in 0..n {
                 let (raster, pages) = card(
@@ -267,17 +285,67 @@ pub fn render(loaded: &Loaded, options: &Options) -> Result<Rendered> {
     }
     let timing = filmstrip::Timing {
         fps: options.fps,
-        hold: options.hold,
         fade: options.fade,
         ticks: TICKS,
     };
-    let sequence = filmstrip::sequence(&scenes, timing)?;
+    let takes: Vec<filmstrip::Scene<'_>> = scenes
+        .iter()
+        .zip(&holds)
+        .map(|(frames, &hold)| filmstrip::Scene { frames, hold })
+        .collect();
+    let sequence = filmstrip::sequence(&takes, timing)?;
     Ok(Rendered {
         scenes,
         slide_of,
+        holds,
         sequence,
         options: options.clone(),
     })
+}
+
+/// The words that come in at `step` of `slide`: at step 0 the heading and everything shown at
+/// once, at step k the k-th `+` bullet; a lit diagram node brings none.
+fn words(slide: &Slide, step: usize) -> usize {
+    fn count(text: &str) -> usize {
+        text.split_whitespace().count()
+    }
+    fn spans(spans: &[Span]) -> usize {
+        count(&crate::deck::plain(spans))
+    }
+    let mut reveal = 0;
+    let mut total = if step == 0 {
+        slide.heading.as_deref().map_or(0, spans)
+    } else {
+        0
+    };
+    for block in &slide.blocks {
+        total += match block {
+            Block::List(items) => items
+                .iter()
+                .filter(|item| {
+                    if item.reveal {
+                        reveal += 1;
+                        reveal == step
+                    } else {
+                        step == 0
+                    }
+                })
+                .map(|item| spans(&item.spans))
+                .sum(),
+            _ if step != 0 => 0,
+            Block::Paragraph(lines) | Block::Quote(lines) => lines.iter().map(|l| spans(l)).sum(),
+            Block::Code { lines, .. } => lines.iter().map(|l| count(l)).sum(),
+            Block::Table { head, rows, .. } => head
+                .iter()
+                .chain(rows.iter().flatten())
+                .map(|c| count(c))
+                .sum(),
+            Block::SubHeading(text) | Block::Error(text) => count(text),
+            Block::Metrics(items) => items.iter().map(|m| count(&m.label) + 1).sum(),
+            Block::Picture(_) | Block::Diagram(_) => 0,
+        };
+    }
+    total
 }
 
 /// Draw only the fully built card of every slide and report the ones that overflow; what
@@ -503,8 +571,36 @@ mod tests {
             hold: 0.5,
             enter: 0.5,
             fade: 0.25,
+            pace: 0.0,
             colours: 16,
         }
+    }
+
+    #[test]
+    fn a_wordy_scene_is_held_for_its_reading_time_and_a_short_one_for_the_hold() {
+        let loaded = load(
+            "# Short
+
+---
+# Long
+
+one two three four five six seven eight nine ten
+
+- eleven twelve
++ thirteen fourteen fifteen
+",
+        );
+        let options = Options {
+            hold: 2.0,
+            pace: 60.0, // one word a second
+            ..quick()
+        };
+        let rendered = render(&loaded, &options).unwrap();
+        // "Short" alone: one word, so the hold; "Long" at step 0: 13 words; step 1: 3 words
+        assert_eq!(rendered.holds, vec![2.0, 13.0, 3.0]);
+        assert_eq!(words(&loaded.deck.slides[1], 0), 13);
+        assert_eq!(words(&loaded.deck.slides[1], 1), 3);
+        assert_eq!(words(&loaded.deck.slides[1], 2), 0);
     }
 
     #[test]

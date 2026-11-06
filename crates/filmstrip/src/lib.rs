@@ -83,13 +83,11 @@ impl Frame {
     }
 }
 
-/// How long things stay on screen.
+/// How the film runs.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Timing {
     /// Frames per second of the film.
     pub fps: u16,
-    /// Seconds a scene stays, build-in included.
-    pub hold: f32,
     /// Seconds of crossfade between scenes.
     pub fade: f32,
     /// Frames each build-in frame stays (2 at 10 fps gives the stop-motion look).
@@ -97,38 +95,45 @@ pub struct Timing {
 }
 
 impl Timing {
-    fn hold_frames(self) -> usize {
-        (self.hold * f32::from(self.fps)).round().max(1.0) as usize
-    }
-
-    fn fade_frames(self) -> usize {
-        (self.fade * f32::from(self.fps)).round() as usize
+    fn frames(self, seconds: f32) -> usize {
+        (seconds * f32::from(self.fps)).round() as usize
     }
 }
 
-/// The frames of the whole film. A scene is its build-in frames in order (one frame for a still);
-/// each stays `ticks` frames, the last one until the scene's `hold` is used up, then the scene
-/// crossfades into the next, the last into the first so the loop is seamless.
+/// One scene of the film: its build-in frames in order (one frame for a still) and how long it
+/// stays.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Scene<'a> {
+    /// The build-in frames, the last one fully built.
+    pub frames: &'a [Frame],
+    /// Seconds the scene stays, build-in included.
+    pub hold: f32,
+}
+
+/// The frames of the whole film. Every scene's build-in frames stay `ticks` frames each, the
+/// last one until the scene's `hold` is used up, then the scene crossfades into the next, the
+/// last into the first so the loop is seamless.
 ///
 /// # Examples
 ///
 /// ```
-/// use filmstrip::{Frame, Timing};
+/// use filmstrip::{Frame, Scene, Timing};
 ///
-/// let a = Frame::solid(2, 2, [0, 0, 0]);
-/// let b = Frame::solid(2, 2, [255, 255, 255]);
-/// let timing = Timing { fps: 10, hold: 1.0, fade: 0.0, ticks: 1 };
-/// let frames = filmstrip::sequence(&[vec![a], vec![b]], timing).expect("frames");
-/// assert_eq!(frames.len(), 20);
+/// let a = [Frame::solid(2, 2, [0, 0, 0])];
+/// let b = [Frame::solid(2, 2, [255, 255, 255])];
+/// let timing = Timing { fps: 10, fade: 0.0, ticks: 1 };
+/// let scenes = [Scene { frames: &a, hold: 1.0 }, Scene { frames: &b, hold: 2.0 }];
+/// let frames = filmstrip::sequence(&scenes, timing).expect("frames");
+/// assert_eq!(frames.len(), 30);
 /// ```
-pub fn sequence(scenes: &[Vec<Frame>], timing: Timing) -> Result<Vec<Frame>> {
-    let Some(first) = scenes.first().and_then(|s| s.first()) else {
+pub fn sequence(scenes: &[Scene<'_>], timing: Timing) -> Result<Vec<Frame>> {
+    let Some(first) = scenes.first().and_then(|s| s.frames.first()) else {
         bail!("no scene frames");
     };
     let (w, h) = (first.width, first.height);
     if let Some(odd) = scenes
         .iter()
-        .flatten()
+        .flat_map(|s| s.frames)
         .find(|f| f.width != w || f.height != h || !f.is_consistent())
     {
         bail!(
@@ -137,11 +142,11 @@ pub fn sequence(scenes: &[Vec<Frame>], timing: Timing) -> Result<Vec<Frame>> {
             odd.height
         );
     }
-    let (hold, fade) = (timing.hold_frames(), timing.fade_frames());
+    let fade = timing.frames(timing.fade);
     let ticks = timing.ticks.max(1);
     let mut out = Vec::new();
     for (i, scene) in scenes.iter().enumerate() {
-        let Some((last, build)) = scene.split_last() else {
+        let Some((last, build)) = scene.frames.split_last() else {
             bail!("scene {} has no frames", i + 1);
         };
         for f in build {
@@ -149,11 +154,12 @@ pub fn sequence(scenes: &[Vec<Frame>], timing: Timing) -> Result<Vec<Frame>> {
                 out.push(f.clone());
             }
         }
+        let hold = timing.frames(scene.hold).max(1);
         let rest = hold.saturating_sub(build.len() * ticks).max(ticks);
         for _ in 0..rest {
             out.push(last.clone());
         }
-        let next = &scenes[(i + 1) % scenes.len()][0];
+        let next = &scenes[(i + 1) % scenes.len()].frames[0];
         for k in 1..=fade {
             let t = k as f32 / (fade + 1) as f32;
             out.push(last.blend(next, t));
@@ -173,19 +179,31 @@ mod tests {
         let c = Frame::solid(2, 1, [200, 200, 200]);
         let timing = Timing {
             fps: 10,
-            hold: 1.0,
             fade: 0.2,
             ticks: 2,
         };
-        let frames = sequence(&[vec![a.clone(), b.clone()], vec![c.clone()]], timing).unwrap();
-        // scene 1: a a (build-in, 2 ticks), b x 8 (hold 10 - 2), 2 blends; scene 2: c x 10, 2 blends
-        assert_eq!(frames.len(), 2 + 8 + 2 + 10 + 2);
+        let one = [a.clone(), b.clone()];
+        let two = [c.clone()];
+        let scenes = [
+            Scene {
+                frames: &one,
+                hold: 1.0,
+            },
+            Scene {
+                frames: &two,
+                hold: 1.5,
+            },
+        ];
+        let frames = sequence(&scenes, timing).unwrap();
+        // scene 1: a a (build-in, 2 ticks), b x 8 (hold 10 - 2), 2 blends; scene 2: c x 15, 2 blends
+        assert_eq!(frames.len(), 2 + 8 + 2 + 15 + 2);
         assert_eq!(frames[0], a);
         assert_eq!(frames[2], b);
         assert_eq!(frames[9], b);
         assert!(frames[10].rgb[0] > 100 && frames[10].rgb[0] < 200);
         assert_eq!(frames[12], c);
-        assert!(frames[23].rgb[0] < 200);
+        assert_eq!(frames[26], c);
+        assert!(frames[28].rgb[0] < 200);
     }
 
     #[test]
@@ -194,11 +212,21 @@ mod tests {
         let b = Frame::solid(1, 1, [0; 3]);
         let timing = Timing {
             fps: 10,
-            hold: 1.0,
             fade: 0.0,
             ticks: 1,
         };
-        assert!(sequence(&[vec![a], vec![b]], timing).is_err());
+        let (a, b) = ([a], [b]);
+        let scenes = [
+            Scene {
+                frames: &a,
+                hold: 1.0,
+            },
+            Scene {
+                frames: &b,
+                hold: 1.0,
+            },
+        ];
+        assert!(sequence(&scenes, timing).is_err());
         assert!(sequence(&[], timing).is_err());
     }
 

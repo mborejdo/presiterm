@@ -277,6 +277,9 @@ pub(crate) struct FilmArgs {
     /// Seconds of crossfade between cards (--fade 0.3); default 0.4.
     #[arg(long, value_name = "S")]
     pub(crate) fade: Option<f32>,
+    /// Words per minute a wordy scene is held for, 0 for a fixed hold (--pace 160); default 200.
+    #[arg(long, value_name = "WPM")]
+    pub(crate) pace: Option<f32>,
     /// Colours of the GIF palette, 2 to 255 (--colours 64); default 48.
     #[arg(long, value_name = "N")]
     pub(crate) colours: Option<usize>,
@@ -292,6 +295,7 @@ impl FilmArgs {
             hold: self.hold,
             enter: self.enter,
             fade: self.fade,
+            pace: self.pace,
             colours: self.colours,
         }
     }

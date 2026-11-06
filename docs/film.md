@@ -29,9 +29,9 @@ same tokens.
 Frames in, files out. Knows nothing about Markdown or Typst.
 
 - `Frame { width, height, rgb }`, `Frame::png()`.
-- `Timing { fps, hold, fade }` and `sequence(scenes: &[Vec<Frame>], timing) -> Vec<Frame>`:
-  every scene's build-in frames, a hold on the last one, a crossfade into the next scene;
-  identical neighbours collapse.
+- `Timing { fps, fade, ticks }`, `Scene { frames, hold }` and `sequence(scenes, timing) ->
+  Vec<Frame>`: every scene's build-in frames, its own hold on the last one, a crossfade into
+  the next scene.
 - `gif::encode(frames, keyframes, fps, colours)`: one NeuQuant palette learned from the keyframes
   plus a transparent slot, delta frames (the changed rectangle only, unchanged pixels
   transparent), long holds split into legal delays. This is what keeps a 14-card film near 1 MB.
@@ -81,8 +81,9 @@ How the deck's semantics become motion:
 | `{only}` tags | the same `--tags` as the window |
 
 Timing lives in `presiterm.toml` (`[film] fps = 10, width = 640, hold = 7, enter = 1.6,
-fade = 0.4, colours = 48`) and in the frontmatter with the same keys; a flag beats both, as
-everywhere. `presiterm lint --film` checks every slide at the film's geometry (a card that
+fade = 0.4, pace = 200, colours = 48`) and in the frontmatter with the same keys; a flag beats
+both, as everywhere. `hold` is the least a scene stays; a scene with more words than that covers
+at `pace` words per minute stays for its reading time. `presiterm lint --film` checks every slide at the film's geometry (a card that
 overflows is an error, with the rows that do not fit).
 
 Two directives join the dialect because talks want them and the film gives them motion:

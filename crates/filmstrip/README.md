@@ -10,18 +10,17 @@ Frames in, films out. A list of RGB frames (whatever drew them) becomes:
 - a Screen annotation on a PDF page that plays the MP4 when the page opens in Acrobat; other
   viewers show the page as it is, feature `pdf`.
 
-`sequence` turns scenes (each a list of build-in frames) into the frame list: every scene's
-build-in, a hold on its last frame, a crossfade into the next scene, the last scene fading back
-into the first so the loop is seamless.
+`sequence` turns scenes (each its build-in frames and a hold of its own) into the frame list:
+every scene's build-in, the hold on its last frame, a crossfade into the next scene, the last
+scene fading back into the first so the loop is seamless.
 
 ```rust
-use filmstrip::{Frame, Timing};
+use filmstrip::{Frame, Scene, Timing};
 
-let scenes = vec![
-    vec![Frame::solid(4, 2, [0; 3]), Frame::solid(4, 2, [40; 3])],
-    vec![Frame::solid(4, 2, [200; 3])],
-];
-let timing = Timing { fps: 10, hold: 1.0, fade: 0.2, ticks: 2 };
+let one = [Frame::solid(4, 2, [0; 3]), Frame::solid(4, 2, [40; 3])];
+let two = [Frame::solid(4, 2, [200; 3])];
+let scenes = [Scene { frames: &one, hold: 1.0 }, Scene { frames: &two, hold: 2.0 }];
+let timing = Timing { fps: 10, fade: 0.2, ticks: 2 };
 let frames = filmstrip::sequence(&scenes, timing)?;
 let stills = [Frame::solid(4, 2, [40; 3]), Frame::solid(4, 2, [200; 3])];
 let gif = filmstrip::gif::encode(&frames, &stills, 10, 16)?;

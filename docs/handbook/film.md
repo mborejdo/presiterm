@@ -40,7 +40,7 @@ Every key press of the talk is a build-in step of the film:
 
 ## Timing and size
 
-Six values, each a flag, a frontmatter key or a `[film]` key in `presiterm.toml`; a flag beats
+Seven values, each a flag, a frontmatter key or a `[film]` key in `presiterm.toml`; a flag beats
 the frontmatter, which beats the file:
 
 | value | flag | default | what |
@@ -50,7 +50,13 @@ the frontmatter, which beats the file:
 | hold | `--hold` | 7 | seconds every scene stays, build-in included |
 | enter | `--enter` | 1.6 | seconds of build-in at the start of every scene |
 | fade | `--fade` | 0.4 | seconds of crossfade between scenes |
+| pace | `--pace` | 200 | words per minute; a scene with more words than `hold` covers stays longer |
 | colours | `--colours` | 48 | colours of the GIF palette, 2 to 255 |
+
+`hold` is the least a scene stays. A scene that brings more words than that covers at `pace`
+(the heading and everything shown at once on the first step, the bullet of a `+` step after)
+stays as long as reading them takes, so a wordy card is not cut short and a title card does not
+linger. `pace: 0` holds every scene for exactly `hold`.
 
 ```markdown
 ---

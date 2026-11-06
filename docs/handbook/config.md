@@ -31,6 +31,7 @@ fps = 10
 hold = 7
 enter = 1.6
 fade = 0.4
+pace = 200
 colours = 48
 ```
 
