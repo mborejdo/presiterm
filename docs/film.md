@@ -1,6 +1,7 @@
 # The film: a deck as GIF, MP4, DOCX and PDF
 
-Design note, 06.11.2026. `presiterm film` renders a deck to files that play on their own: a
+Design note, 06.11.2026, built the same day (`presiterm film`, `crates/filmstrip`,
+`presiterm handbook film`). `presiterm film` renders a deck to files that play on their own: a
 looping GIF for a README or a chat, an MP4 for a post, a Word file for a mail attachment, a PDF
 that starts the film when the page opens in Acrobat. Every key press of the talk becomes a
 build-in of the film.
@@ -89,15 +90,14 @@ Two directives join the dialect because talks want them and the film gives them 
 the film counts them up) and `:::{columns}` for a picture beside text. Both are plain blocks in
 the window and need no new rendering idea there.
 
-## Plan
+## What was built
 
-1. `filmstrip` crate with tests.
-2. `typstkit::Engine::raster`.
-3. The film layout in Typst and `presiterm film --gif`, title and bullet build-ins, `steps`
-   for both diagram kinds, lint at film geometry.
-4. `--mp4 --docx --pdf --cards --preview`, `[film]` config, handbook topic `film`, an example
-   deck with a film, CI renders the example.
-5. `metrics` and `columns` directives in the dialect and the window.
+`filmstrip` with tests per container; `typstkit::Engine::raster` and `Input::Bytes`; the card
+layout (`apps/presiterm/src/film/film.typ`) and the PDF page; `presiterm film` with
+`--gif --mp4 --docx --pdf --cards --out --preview` and the six timing flags; `presiterm lint
+--film`; the `[film]` table and the frontmatter keys; `links:`; the `metrics` directive in the
+dialect, the window and the film; `examples/film`, rendered by `cargo xtask demo`.
 
-Not in scope: audio, transitions beyond the crossfade, per-element timing in the Markdown,
-any browser.
+Left out on purpose: a `columns` directive (a picture above its text does the job), extra font
+files (the vendored faces are the theme's), per-element timing in the Markdown, audio,
+transitions beyond the crossfade, any browser.
