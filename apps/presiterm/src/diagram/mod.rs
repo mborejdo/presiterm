@@ -51,6 +51,8 @@ pub struct Look {
     pub sizes: Sizes,
     /// A picture for the top left corner of every slide.
     pub logo: Option<PathBuf>,
+    /// Font files and folders Typst draws with.
+    pub faces: Vec<PathBuf>,
 }
 
 impl Look {
@@ -62,6 +64,7 @@ impl Look {
             fonts: deck.tokens.fonts.clone(),
             sizes: deck.tokens.sizes,
             logo: deck.logo.clone(),
+            faces: deck.faces.clone(),
         }
     }
 }
@@ -210,7 +213,10 @@ impl Assets {
             diagram.source.clone()
         };
         let source = typst_source(&body, &self.look, step);
-        let key = (fnv(&format!("{TYPST_PPI}|{source}")), 0);
+        let key = (
+            fnv(&format!("{TYPST_PPI}|{:?}|{source}", self.look.faces)),
+            0,
+        );
         if let Some(png) = self.pngs.get(&key) {
             return Ok(png.clone());
         }
@@ -228,7 +234,8 @@ impl Assets {
             return Ok(png);
         }
         let png = Arc::new(
-            typst_within_budget(&source).with_context(|| format!("{}: typst", diagram.origin))?,
+            typst_within_budget(&source, &self.look.faces)
+                .with_context(|| format!("{}: typst", diagram.origin))?,
         );
         if let Some(path) = on_disk {
             let _ = std::fs::create_dir_all(path.parent().unwrap_or_else(|| Path::new(".")));

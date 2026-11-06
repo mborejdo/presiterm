@@ -1,6 +1,7 @@
 //! Typst (fletcher) diagrams: the preamble, the pixel budget and the compile call.
 
 use std::fmt::Write as _;
+use std::path::PathBuf;
 
 use anyhow::Result;
 
@@ -73,8 +74,8 @@ pub(super) fn within_budget(png: &[u8]) -> bool {
 
 /// Typst source as a PNG at `TYPST_PPI`, or at a lower density when that would pass `MAX_PIXELS` (a tall
 /// diagram drawn at a fixed width gets very large).
-pub(super) fn typst_within_budget(source: &str) -> Result<Vec<u8>> {
-    let png = compile_typst(source, TYPST_PPI)?;
+pub(super) fn typst_within_budget(source: &str, faces: &[PathBuf]) -> Result<Vec<u8>> {
+    let png = compile_typst(source, TYPST_PPI, faces)?;
     let Some((w, h)) = image_size(&png) else {
         return Ok(png);
     };
@@ -83,21 +84,19 @@ pub(super) fn typst_within_budget(source: &str) -> Result<Vec<u8>> {
         return Ok(png);
     }
     let scale = (MAX_PIXELS as f64 / pixels as f64).sqrt();
-    compile_typst(source, ((f64::from(TYPST_PPI) * scale) as u32).max(24))
+    compile_typst(
+        source,
+        ((f64::from(TYPST_PPI) * scale) as u32).max(24),
+        faces,
+    )
 }
 
 #[cfg(feature = "typst")]
-fn compile_typst(source: &str, ppi: u32) -> Result<Vec<u8>> {
-    use std::sync::OnceLock;
-
-    // Fonts are parsed and packages resolved once per process.
-    static ENGINE: OnceLock<typstkit::Engine> = OnceLock::new();
-    ENGINE
-        .get_or_init(|| typstkit::Engine::builder().build())
-        .png(typstkit::Main::Source(source), ppi as f32)
+fn compile_typst(source: &str, ppi: u32, faces: &[PathBuf]) -> Result<Vec<u8>> {
+    crate::faces::engine(faces)?.png(typstkit::Main::Source(source), ppi as f32)
 }
 
 #[cfg(not(feature = "typst"))]
-fn compile_typst(_source: &str, _ppi: u32) -> Result<Vec<u8>> {
+fn compile_typst(_source: &str, _ppi: u32, _faces: &[PathBuf]) -> Result<Vec<u8>> {
     anyhow::bail!("presiterm was built without the `typst` feature")
 }

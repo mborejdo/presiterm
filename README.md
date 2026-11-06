@@ -165,12 +165,14 @@ font_size = 48
 screen    = "1728x1117"   # what `presiterm lint` checks against
 grid      = "58x20"       # the --window grid, columns x rows
 logo      = "logo.svg"    # top left corner of every slide, relative to this file
+fonts     = ["fonts"]     # extra font files or folders, relative to this file
 
 [theme.dark]              # any design token; the rest keep their defaults
 accent = "#ff8800"
 
 [theme.fonts]
 mono = "Fira Code"        # typst diagrams and tables; Inter and Fira Code are built in
+display = "Inter"         # the film's headings
 ```
 
 `presiterm config talk/slides.md` shows which files apply and where each value comes from.

@@ -174,7 +174,7 @@ impl Rendered {
             ("note", Input::Text(note)),
             ("geometry", Input::Text(&geometry)),
         ];
-        let page = engine()
+        let page = crate::faces::engine(&deck.faces)?
             .pdf(
                 Main::Source(PAGE),
                 &inputs,
@@ -222,7 +222,7 @@ pub fn render(loaded: &Loaded, options: &Options) -> Result<Rendered> {
     if options.fps == 0 {
         bail!("film fps must be at least 1");
     }
-    let engine = engine();
+    let engine = crate::faces::engine(&loaded.deck.faces)?;
     let mut assets = Assets::new(&loaded.base, &loaded.deck);
     let n = ((options.enter * f32::from(options.fps)).round() as usize).max(1);
     let mut scenes = Vec::new();
@@ -283,7 +283,7 @@ pub fn render(loaded: &Loaded, options: &Options) -> Result<Rendered> {
 /// Draw only the fully built card of every slide and report the ones that overflow; what
 /// `presiterm lint --film` runs.
 pub fn check(loaded: &Loaded, options: &Options) -> Result<Vec<Overflow>> {
-    let engine = engine();
+    let engine = crate::faces::engine(&loaded.deck.faces)?;
     let mut assets = Assets::new(&loaded.base, &loaded.deck);
     let mut overflows = Vec::new();
     for (index, slide) in loaded.deck.slides.iter().enumerate() {
@@ -317,11 +317,6 @@ struct Shot {
     step: usize,
     frame: usize,
     frames: usize,
-}
-
-/// The Typst engine with the vendored faces.
-fn engine() -> Engine {
-    Engine::builder().build()
 }
 
 /// Draw one card; returns the pixels and how many pages the content took (1 = it fits).
@@ -456,6 +451,10 @@ fn theme_json(deck: &Deck) -> String {
     }
     map.insert("sans".into(), Value::String(deck.tokens.fonts.sans.clone()));
     map.insert("mono".into(), Value::String(deck.tokens.fonts.mono.clone()));
+    map.insert(
+        "display".into(),
+        Value::String(deck.tokens.fonts.display.clone()),
+    );
     Value::Object(map).to_string()
 }
 
@@ -511,7 +510,7 @@ mod tests {
     #[test]
     fn every_key_press_is_a_scene_and_the_film_loops_through_them() {
         let loaded = load(
-            "---\ntitle: T\n---\n# One\n\n**bold** and ==marked==\n\n---\n# Two\n\n- a\n+ b\n+ c\n\n:::{metrics}\n2 800 | things\n60 % | share\n:::\n",
+            "---\ntitle: T\n---\n# One\n\n**bold** and ==marked==\n\n---\n# Two\n\n- a\n+ b\n+ c\n\n:::{metrics}\n1 200 | things\n60 % | share\n:::\n",
         );
         let rendered = render(&loaded, &quick()).unwrap();
         // slide 1: one scene; slide 2: steps 0, 1, 2

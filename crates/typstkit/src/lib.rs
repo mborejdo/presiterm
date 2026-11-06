@@ -23,7 +23,7 @@ pub use typst_pdf::PdfOptions;
 pub enum Main<'a> {
     /// Typst source text.
     Source(&'a str),
-    /// A file, as a path relative to the root (`templates/cv.typ`).
+    /// A file, as a path relative to the root (`templates/report.typ`).
     File(&'a str),
 }
 

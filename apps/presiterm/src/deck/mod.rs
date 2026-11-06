@@ -64,6 +64,7 @@ pub fn parse(source: &str, name: &str, base: &Path, force_reveal: bool) -> Deck 
         },
         tokens: swatchbook::Theme::default(),
         logo: None,
+        faces: Vec::new(),
         font_size: front
             .get("font-size")
             .and_then(|v| v.trim_end_matches("pt").trim().parse().ok()),

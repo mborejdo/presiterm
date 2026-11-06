@@ -98,6 +98,5 @@ layout (`apps/presiterm/src/film/film.typ`) and the PDF page; `presiterm film` w
 --film`; the `[film]` table and the frontmatter keys; `links:`; the `metrics` directive in the
 dialect, the window and the film; `examples/film`, rendered by `cargo xtask demo`.
 
-Left out on purpose: a `columns` directive (a picture above its text does the job), extra font
-files (the vendored faces are the theme's), per-element timing in the Markdown, audio,
-transitions beyond the crossfade, any browser.
+Left out on purpose: a `columns` directive (a picture above its text does the job), per-element
+timing in the Markdown, audio, transitions beyond the crossfade, any browser.

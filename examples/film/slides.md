@@ -24,7 +24,7 @@ enter: 1.2
 # Numbers count up
 
 :::{metrics}
-2 800 | cards rendered
+1 200 | cards rendered
 60 % | smaller than video
 :::
 

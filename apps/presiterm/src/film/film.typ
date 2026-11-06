@@ -26,6 +26,7 @@
 #let stop = rgb(theme.stop)
 #let sans = theme.sans
 #let mono = theme.mono
+#let display = theme.display // headings, in the heaviest weight the family has
 
 // ---- the build-in: progress 0..1 with an ease-out cubic ----
 #let t = if frames > 1 { frame / (frames - 1) } else { 1 }
@@ -39,7 +40,7 @@
   let w = measure(body).width
   box(body + place(bottom + left, dy: 0.2em, line(length: w * ease, stroke: 1.3 * s * px + accent)))
 }
-// count-up: a value like "2 800" or "60 %" runs from 0 to its number, its grouping kept
+// count-up: a value like "1 200" or "60 %" runs from 0 to its number, its grouping kept
 #let group(n) = {
   let d = str(n)
   if d.len() <= 3 { d } else { group(int(d.slice(0, d.len() - 3))) + " " + d.slice(d.len() - 3) }
@@ -70,7 +71,7 @@
 #show raw.where(block: false): it => box(fill: surface, inset: (x: 0.3em, y: 0.1em), radius: 2 * s * px, it)
 
 #let small(body, fill: muted, size: 5.4) = text(font: mono, size: size * s * px, fill: fill, body)
-#let heading-text(body, size) = text(font: sans, weight: "bold", size: size * s * px, fill: accent, body)
+#let heading-text(body, size) = text(font: display, weight: "black", size: size * s * px, fill: accent, body)
 
 // ---- how many elements build in during this step, so they can be staggered ----
 #let fresh = {
@@ -101,7 +102,7 @@
       at-step(0, slot, fresh, par(b.lines.map(spans).join(linebreak())))
       if step == 0 { slot += 1 }
     } else if b.kind == "subheading" {
-      at-step(0, slot, fresh, block(above: 1.1em, below: 0.5em, text(font: sans, weight: "bold", size: 9.5 * s * px, fill: accent, b.text)))
+      at-step(0, slot, fresh, block(above: 1.1em, below: 0.5em, text(font: display, weight: "bold", size: 9.5 * s * px, fill: accent, b.text)))
       if step == 0 { slot += 1 }
     } else if b.kind == "quote" {
       at-step(0, slot, fresh, block(inset: (left: 0.7em, y: 0.2em), stroke: (left: 1.6 * s * px + accent), text(fill: muted, style: "italic", b.lines.map(spans).join(linebreak()))))
@@ -126,7 +127,7 @@
         column-gutter: 10 * s * px,
         ..b.items.enumerate().map(((i, m)) => block(inset: (left: 0.5em, y: 0.1em), stroke: (left: (1.6 * s * px + accent)), {
           set par(leading: 0.7em)
-          text(font: sans, weight: "bold", size: 17 * s * px, fill: ink, counted(m.value))
+          text(font: display, weight: "bold", size: 17 * s * px, fill: ink, counted(m.value))
           linebreak()
           at-step(0, slot + i, fresh, small(m.label))
         })),

@@ -69,7 +69,7 @@ pub struct Picture {
 /// One big number of a `:::{metrics}` block.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Metric {
-    /// The number as written (`2 800`, `60 %`).
+    /// The number as written (`1 200`, `60 %`).
     pub value: String,
     /// What it counts.
     pub label: String,
@@ -155,6 +155,9 @@ pub struct Deck {
     pub tokens: swatchbook::Theme,
     /// A picture for the top left corner of every slide (the config file's `logo`).
     pub logo: Option<std::path::PathBuf>,
+    /// Font files and folders Typst draws with, next to the vendored faces (the config file's
+    /// `fonts`).
+    pub faces: Vec<std::path::PathBuf>,
     /// `font-size:` in points.
     pub font_size: Option<f32>,
     /// `reveal: true`: every bullet appears on a key press.

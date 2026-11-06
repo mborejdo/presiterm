@@ -70,6 +70,8 @@ pub struct Sources {
     pub theme: Source,
     /// Source of the logo.
     pub logo: Source,
+    /// Source of the font files.
+    pub faces: Source,
     /// Source of the `[film]` table.
     pub film: Source,
 }
@@ -173,6 +175,9 @@ pub struct Config {
     pub theme: swatchbook::Theme,
     /// A picture for the top left corner of every slide, resolved against its config file.
     pub logo: Option<PathBuf>,
+    /// Font files and folders (`fonts = [...]`), resolved against their config file; Typst draws
+    /// with them next to the vendored Inter and Fira Code.
+    pub faces: Vec<PathBuf>,
     /// The `[film]` table.
     pub film: FilmSettings,
     /// Where each of the values above came from.
@@ -189,6 +194,7 @@ impl Default for Config {
             grid: DEFAULT_GRID,
             theme: swatchbook::Theme::default(),
             logo: None,
+            faces: Vec::new(),
             film: FilmSettings::default(),
             sources: Sources::default(),
             files: Vec::new(),
@@ -205,6 +211,7 @@ struct RawLayer {
     grid: Option<toml::Value>,
     theme: Option<toml::Value>,
     logo: Option<toml::Value>,
+    fonts: Option<toml::Value>,
     film: Option<toml::Value>,
 }
 
@@ -216,6 +223,7 @@ struct Layer {
     grid: Option<(usize, usize)>,
     theme: Option<swatchbook::Theme>,
     logo: Option<PathBuf>,
+    faces: Option<Vec<PathBuf>>,
     film: Option<FilmSettings>,
 }
 
@@ -244,9 +252,33 @@ fn size_pair(file: &Path, key: &str, value: &toml::Value, example: &str) -> Resu
     Ok((a, b))
 }
 
+/// The `fonts` list of a config file as paths next to it; `path` names the file in the error.
+fn font_paths(path: &Path, value: &toml::Value) -> Result<Vec<PathBuf>> {
+    let dir = path.parent().unwrap_or_else(|| Path::new("."));
+    let toml::Value::Array(items) = value else {
+        anyhow::bail!(
+            "{}: fonts: expected a list of files or folders like [\"fonts\"], got {}",
+            path.display(),
+            got(value)
+        )
+    };
+    items
+        .iter()
+        .map(|item| match item {
+            toml::Value::String(file) => Ok(dir.join(file)),
+            other => anyhow::bail!(
+                "{}: fonts: expected a path like \"fonts\", got {}",
+                path.display(),
+                got(other)
+            ),
+        })
+        .collect()
+}
+
 impl RawLayer {
     /// Check each key's value; `path` names the file in the error.
     fn check(self, path: &Path) -> Result<Layer> {
+        let dir = path.parent().unwrap_or_else(|| Path::new("."));
         let font_size = self
             .font_size
             .as_ref()
@@ -305,8 +337,13 @@ impl RawLayer {
                         got(value)
                     )
                 };
-                Ok(path.parent().unwrap_or_else(|| Path::new(".")).join(file))
+                Ok(dir.join(file))
             })
+            .transpose()?;
+        let faces = self
+            .fonts
+            .as_ref()
+            .map(|value| font_paths(path, value))
             .transpose()?;
         let film = self
             .film
@@ -322,6 +359,7 @@ impl RawLayer {
             grid,
             theme,
             logo,
+            faces,
             film,
         })
     }
@@ -484,6 +522,10 @@ impl Config {
             config.logo = Some(value);
             config.sources.logo = source;
         }
+        if let Some((value, source)) = first(&layers, |layer| layer.faces.as_ref()) {
+            config.faces = value;
+            config.sources.faces = source;
+        }
         if let Some((value, source)) = first(&layers, |layer| layer.film.as_ref()) {
             config.film = value;
             config.sources.film = source;
@@ -521,9 +563,10 @@ impl Config {
         matches!(self.sources.font_size, Source::File(_)).then_some(self.font_size)
     }
 
-    /// Give `deck` the configured design tokens and logo.
+    /// Give `deck` the configured design tokens, font files and logo.
     pub fn dress(&self, deck: &mut Deck) {
         deck.tokens = self.theme.clone();
+        deck.faces.clone_from(&self.faces);
         deck.logo.clone_from(&self.logo);
     }
 
@@ -595,13 +638,27 @@ impl fmt::Display for Config {
             },
             self.sources.film
         )?;
-        write!(
+        writeln!(
             out,
             "  logo      = {}  ({})",
             self.logo
                 .as_deref()
                 .map_or_else(|| "none".to_string(), |p| p.display().to_string()),
             self.sources.logo
+        )?;
+        write!(
+            out,
+            "  fonts     = {}  ({})",
+            if self.faces.is_empty() {
+                "built-in".to_string()
+            } else {
+                self.faces
+                    .iter()
+                    .map(|p| p.display().to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            },
+            self.sources.faces
         )
     }
 }

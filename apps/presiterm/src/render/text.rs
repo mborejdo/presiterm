@@ -164,7 +164,7 @@ pub(super) fn block_lines(
             .flat_map(|item| item_lines(item, pal, geo, counter))
             .collect(),
         Block::Metrics(items) => {
-            // one line: `2 800 registered  |  1 000 a month`, the numbers in the accent
+            // one line: `1 200 commits  |  40 releases`, the numbers in the accent
             let mut cells: Vec<(char, Style)> = Vec::new();
             for (i, m) in items.iter().enumerate() {
                 if i > 0 {

@@ -389,3 +389,45 @@ fn load_bad_theme_names_the_file_and_the_key() {
     );
     assert!(error.contains("logo: expected a path"), "{error}");
 }
+
+#[test]
+fn load_reads_font_files_next_to_the_file_and_dresses_the_deck_with_them() {
+    let (_root, deck) = tree();
+    write(
+        &deck,
+        "presiterm.toml",
+        "fonts = [\"fonts\", \"extra/Face.otf\"]\n[theme.fonts]\ndisplay = \"Inter Display\"\n",
+    );
+    let config = Config::load_from(&deck, None).expect("load");
+    assert_eq!(
+        config.faces,
+        [deck.join("fonts"), deck.join("extra/Face.otf")]
+    );
+    assert_eq!(config.theme.fonts.display, "Inter Display");
+    let mut parsed = crate::deck::parse("# A\n", "t", &deck, false);
+    config.dress(&mut parsed);
+    assert_eq!(parsed.faces, config.faces);
+    assert_eq!(parsed.tokens.fonts.display, "Inter Display");
+    assert!(config.to_string().contains("fonts     = "), "{config}");
+}
+
+#[test]
+fn load_bad_fonts_names_the_file_the_key_and_the_form() {
+    let (_root, deck) = tree();
+    for (text, form) in [
+        ("fonts = \"fonts\"\n", "a list"),
+        ("fonts = [1]\n", "a path"),
+    ] {
+        write(&deck, "presiterm.toml", text);
+        let error = format!(
+            "{:#}",
+            Config::load_from(&deck, None).expect_err("bad fonts")
+        );
+        assert!(
+            error.contains("presiterm.toml")
+                && error.contains("fonts: expected")
+                && error.contains(form),
+            "{error}"
+        );
+    }
+}

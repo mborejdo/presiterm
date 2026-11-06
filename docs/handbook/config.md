@@ -8,6 +8,7 @@ font_size = 48          # points
 screen    = "1728x1117" # points; what `presiterm lint` checks the deck against
 grid      = "58x20"     # the window in cells, columns x rows (`--window`; fixed grid for lint)
 logo      = "logo.svg"  # a picture in the top left corner of every slide, relative to this file
+fonts     = ["fonts"]   # font files or folders Typst draws with, relative to this file
 
 [theme.dark]            # the design tokens; any key left out keeps its default
 accent = "#ff8800"
@@ -16,8 +17,9 @@ accent = "#ff8800"
 ink = "#101010"
 
 [theme.fonts]
-sans = "Inter"          # mermaid labels; Inter and Fira Code are built in, others come from the system
-mono = "Fira Code"      # typst diagrams and tables
+sans = "Inter"          # text on the film's cards
+mono = "Fira Code"      # typst diagrams, tables, code
+display = "Inter"       # headings on the film's cards, in the heaviest weight the family has
 
 [theme.sizes]
 text = 13               # points of diagram text
@@ -34,7 +36,13 @@ colours = 48
 
 The palette tokens of `[theme.dark]` and `[theme.light]` are `ground`, `ink`, `muted`, `accent`,
 `surface`, `border`, `ok`, `warn` and `stop`, each a `"#rrggbb"` colour. The whole `[theme]` table
-is one key for the rule below: the closest file that has one decides all of it; so is `[film]`.
+is one key for the rule below: the closest file that has one decides all of it; so are `[film]`
+and `fonts`.
+
+Inter (regular, bold, italic) and Fira Code (regular, bold) are built in; a family `[theme.fonts]`
+names beyond those must come from `fonts`: a file is loaded as it is, a folder by its `.otf`,
+`.ttf` and `.ttc` files. A path that does not exist is an error. Typst picks the closest weight a
+family has, so `display = "Inter"` without extra files draws headings in Inter Bold.
 
 An unknown key is an error that names the file and the key (`font_sise` does not silently fall
 back). A value in the wrong form is an error that names the file, the key and the form it expects.

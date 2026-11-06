@@ -103,6 +103,8 @@ pub struct Fonts {
     pub sans: String,
     /// Monospaced text (code, diagrams drawn in a terminal's spirit).
     pub mono: String,
+    /// Headings, drawn in the heaviest weight the family has.
+    pub display: String,
 }
 
 impl Default for Fonts {
@@ -110,6 +112,7 @@ impl Default for Fonts {
         Self {
             sans: "Inter".into(),
             mono: "Fira Code".into(),
+            display: "Inter".into(),
         }
     }
 }
@@ -217,6 +220,7 @@ impl PaletteOverlay {
 struct FontsOverlay {
     sans: Option<String>,
     mono: Option<String>,
+    display: Option<String>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -235,6 +239,7 @@ impl From<Overlay> for Theme {
             fonts: Fonts {
                 sans: overlay.fonts.sans.unwrap_or(base.fonts.sans),
                 mono: overlay.fonts.mono.unwrap_or(base.fonts.mono),
+                display: overlay.fonts.display.unwrap_or(base.fonts.display),
             },
             sizes: Sizes {
                 text: overlay.sizes.text.unwrap_or(base.sizes.text),
@@ -264,6 +269,7 @@ mod tests {
         assert_eq!(theme.light.accent, Palette::LIGHT.accent);
         assert_eq!(theme.fonts.mono, "Hack");
         assert_eq!(theme.fonts.sans, "Inter");
+        assert_eq!(theme.fonts.display, "Inter");
         assert!((theme.sizes.text - 15.0).abs() < f32::EPSILON);
     }
 

@@ -79,5 +79,7 @@ slide.
 
 ## Fonts
 
-The cards use the theme's `sans` for text and `mono` for code and the footer (`[theme.fonts]`
-in presiterm.toml). Inter and Fira Code are built in and the only faces the film draws with.
+The cards use the theme's `sans` for text, `display` for headings (in the heaviest weight the
+family has, so a Black face lands there when you bring one) and `mono` for code and the footer
+(`[theme.fonts]` in presiterm.toml). Inter and Fira Code are built in; other families come from
+font files the config names (`fonts = ["fonts"]`, see `presiterm handbook config`).

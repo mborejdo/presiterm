@@ -20,6 +20,8 @@ pub mod canvas;
 pub mod config;
 pub mod deck;
 pub mod diagram;
+#[cfg(feature = "typst")]
+pub mod faces;
 #[cfg(feature = "film")]
 pub mod film;
 pub mod handbook;

@@ -47,7 +47,7 @@ lines, the body, and a closing `:::`. A fence with more colons holds one with fe
 knows three names; any other directive shows its body as if the fence were not there.
 
 * `::: notes` (or `:::{notes}`): speaker notes.
-* `:::{metrics}`: one `value | label` per line, big numbers in a row (`2 800 | pharmacies`);
+* `:::{metrics}`: one `value | label` per line, big numbers in a row (`1 200 | commits`);
   the film counts them up.
 * `:::{only} expr`: the body is on the slide only when `expr` holds for the `tags:` of the
   frontmatter. `expr` is tags joined by `and`, `or`, `not` and parentheses (`long and not demo`).

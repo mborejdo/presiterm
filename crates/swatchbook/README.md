@@ -1,7 +1,8 @@
 # swatchbook
 
 Design tokens for terminal and document tools: a dark and a light palette (ground, ink, muted,
-accent, surface, border, ok, warn, stop), the font families and the diagram text sizes, with open
+accent, surface, border, ok, warn, stop), the font families (`sans`, `mono`, `display` for
+headings) and the diagram text sizes, with open
 defaults and a serde overlay so a TOML table can change any single token:
 
 ```toml
@@ -10,6 +11,7 @@ accent = "#ff8800"
 
 [fonts]
 mono = "JetBrains Mono"
+display = "Inter Display"
 ```
 
 The `fonts` feature (on by default) carries the faces the defaults name, as bytes: Inter (regular,
