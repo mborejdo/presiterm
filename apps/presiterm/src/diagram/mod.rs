@@ -109,16 +109,6 @@ impl Assets {
         }
     }
 
-    /// Draw the frames of a diagram: one, or with `steps` one more than there are nodes.
-    pub fn frames(&mut self, diagram: &Diagram) -> Result<Vec<Arc<String>>> {
-        let count = if diagram.steps {
-            step_nodes(diagram).len() + 1
-        } else {
-            1
-        };
-        (0..count).map(|k| self.svg(diagram, k)).collect()
-    }
-
     /// Count the key presses a diagram takes (0 without steps).
     #[must_use]
     pub fn steps(diagram: &Diagram) -> usize {
@@ -295,12 +285,6 @@ impl Assets {
             bytes,
             aspect: f64::from(w) / f64::from(h),
         })
-    }
-
-    /// List the files the deck points at, to notice an edit.
-    #[must_use]
-    pub fn watched(&self) -> Vec<PathBuf> {
-        self.files.keys().cloned().collect()
     }
 }
 
