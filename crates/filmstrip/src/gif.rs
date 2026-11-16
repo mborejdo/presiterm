@@ -88,10 +88,13 @@ pub fn encode(frames: &[Frame], keyframes: &[Frame], fps: u16, colours: usize) -
         };
         // Frames are written late: identical neighbours fold into the delay of the frame on
         // screen, and every frame after the first is a delta against the previous.
+        let mut put = |buf: &[u8], shown: Option<&[u8]>, count: u32| {
+            write(&mut enc, w, h, buf, shown, transparent, count * tick)
+        };
         let mut shown: Option<Vec<u8>> = None;
         let mut pending: Option<(Vec<u8>, u32)> = None;
         for f in frames {
-            if f.width != first.width || f.height != first.height || !f.is_consistent() {
+            if !f.matches(first) {
                 bail!("frames differ in size");
             }
             let indexed = quantize(f);
@@ -99,15 +102,7 @@ pub fn encode(frames: &[Frame], keyframes: &[Frame], fps: u16, colours: usize) -
                 Some((buf, n)) if *buf == indexed => *n += 1,
                 _ => {
                     if let Some((buf, n)) = pending.take() {
-                        write(
-                            &mut enc,
-                            w,
-                            h,
-                            &buf,
-                            shown.as_deref(),
-                            transparent,
-                            n * tick,
-                        )?;
+                        put(&buf, shown.as_deref(), n)?;
                         shown = Some(buf);
                     }
                     pending = Some((indexed, 1));
@@ -115,15 +110,7 @@ pub fn encode(frames: &[Frame], keyframes: &[Frame], fps: u16, colours: usize) -
             }
         }
         if let Some((buf, n)) = pending.take() {
-            write(
-                &mut enc,
-                w,
-                h,
-                &buf,
-                shown.as_deref(),
-                transparent,
-                n * tick,
-            )?;
+            put(&buf, shown.as_deref(), n)?;
         }
     }
     Ok(out)

@@ -41,7 +41,7 @@ pub fn encode(frames: &[Frame], fps: u16) -> Result<Vec<u8>> {
     // Annex-B out of the encoder; collect it, then split into access units for the muxer.
     let mut stream = Vec::new();
     for f in frames {
-        if f.width != first.width || f.height != first.height || !f.is_consistent() {
+        if !f.matches(first) {
             bail!("frames differ in size");
         }
         stream.extend_from_slice(&enc.encode(&i420(f)));

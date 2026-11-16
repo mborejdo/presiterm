@@ -53,6 +53,12 @@ impl Frame {
         self.rgb.len() == (self.width * self.height * 3) as usize
     }
 
+    /// Whether this frame has the size of `first` and a buffer to match: what every encoder asks
+    /// of the frames after the first.
+    const fn matches(&self, first: &Self) -> bool {
+        self.width == first.width && self.height == first.height && self.is_consistent()
+    }
+
     /// The frame as a PNG.
     pub fn png(&self) -> Result<Vec<u8>> {
         let mut out = Vec::new();
@@ -288,7 +294,7 @@ pub fn sequence(scenes: &[Scene<'_>], timing: Timing) -> Result<Vec<Frame>> {
     if let Some(odd) = scenes
         .iter()
         .flat_map(|s| s.frames)
-        .find(|f| f.width != w || f.height != h || !f.is_consistent())
+        .find(|f| !f.matches(first))
     {
         bail!(
             "scene frames differ in size: {w}x{h} and {}x{}",
