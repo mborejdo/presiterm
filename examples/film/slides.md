@@ -45,7 +45,7 @@ flowchart LR
 
 ```rust
 let frames = filmstrip::sequence(&scenes, timing)?;
-let gif = filmstrip::gif::encode(&frames, &stills, 10, 48)?;
+let gif = filmstrip::gif::encode(&frames, &keys, 10, 48)?;
 ```
 
 ---
