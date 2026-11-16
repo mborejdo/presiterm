@@ -149,7 +149,8 @@ impl Context<'_> {
     }
 }
 
-/// `{name} argument` or `name argument` as (name, argument).
+/// `{name} argument` as (name, argument). An opener without `{name}` names no directive: the
+/// name is empty and the whole line is the argument.
 fn split_info(info: &str) -> (String, String) {
     let info = info.trim();
     if let Some(rest) = info.strip_prefix('{')
@@ -157,8 +158,7 @@ fn split_info(info: &str) -> (String, String) {
     {
         return (name.trim().to_string(), argument.trim().to_string());
     }
-    let (name, argument) = info.split_once(char::is_whitespace).unwrap_or((info, ""));
-    (name.to_string(), argument.trim().to_string())
+    (String::new(), info.to_string())
 }
 
 fn table_of<'a>(node: &'a AstNode<'a>, alignments: &[TableAlignment]) -> Table {

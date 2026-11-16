@@ -46,7 +46,7 @@ Colon fences in the MyST style group content: `:::{name} argument`, then `:key: 
 lines, the body, and a closing `:::`. A fence with more colons holds one with fewer. presiterm
 knows three names; any other directive shows its body as if the fence were not there.
 
-* `:::{notes}` (or `::: notes`): speaker notes.
+* `:::{notes}`: speaker notes.
 * `:::{metrics}`: one `value | label` per line, big numbers in a row (`1 200 | commits`);
   the film counts them up.
 * `:::{only} expr`: the body is on the slide only when `expr` holds for the `tags:` of the

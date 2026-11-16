@@ -23,7 +23,7 @@ Shown only when the tag `long` is active and `draft` is not.
 
 - `parse(source)` gives a `Document`: the frontmatter pairs and the blocks (headings, paragraphs,
   lists, code, tables, quotes, rules, HTML and directives), every block with its 1-based line.
-- A directive is `:::{name} argument` (or `::: name argument`), its `:key: value` option lines
+- A directive is `:::{name} argument`, its `:key: value` option lines
   directly after the opener, its body as blocks and as raw text. More colons on the outer fence
   nest one directive in another.
 - `only::apply` keeps or drops content by tags: `:::{only} expr` blocks and any directive with an

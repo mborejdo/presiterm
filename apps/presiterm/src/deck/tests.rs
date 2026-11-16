@@ -32,8 +32,15 @@ fn a_dashed_line_under_text_is_a_slide_break_not_a_heading() {
 
 #[test]
 fn notes_are_collected_and_never_blocks() {
-    let d = deck("# A\ntext\n\nNote: say this\nand this\n\n::: notes\nsecond\n:::\n");
+    let d = deck("# A\ntext\n\nNote: say this\nand this\n\n:::{notes}\nsecond\n:::\n");
     assert_eq!(d.slides[0].notes, "say this\nand this\nsecond");
+    assert_eq!(d.slides[0].blocks.len(), 1);
+}
+
+#[test]
+fn a_fence_without_braces_is_no_notes_block() {
+    let d = deck("# A\n\n::: notes\nshown\n:::\n");
+    assert_eq!(d.slides[0].notes, "");
     assert_eq!(d.slides[0].blocks.len(), 1);
 }
 

@@ -31,8 +31,8 @@ A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and three 
 - Typst diagrams with fletcher (feature `typst`, on by default), tables drawn as Typst pictures.
 - `presiterm.toml` (closest wins, then `~/.config/presiterm/config.toml`): font size, screen,
   grid, a `[theme]` table over the default design tokens, and a corner `logo`.
-- MyST colon-fence directives: `::: notes`, and `:::{only} expr` / `:only: expr` with the
-  frontmatter's `tags:`.
+- MyST colon-fence directives: `:::{notes}`, and `:::{only} expr` / `:only: expr` with the
+  frontmatter's `tags:`. A fence without `{name}` is no directive: its body shows on the slide.
 - `colonmark`: Markdown with MyST colon-fence directives on comrak, as an owned tree.
 - `swatchbook`: design tokens (two palettes, font families, sizes) with a TOML overlay, Inter and
   Fira Code vendored (OFL-1.1).

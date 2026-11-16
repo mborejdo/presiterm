@@ -487,7 +487,7 @@ mod tests {
             "logo",
             "w=",
             "h=",
-            "::: notes",
+            ":::{notes}",
             ":::{metrics}",
             "presiterm film",
             "presiterm ctl",

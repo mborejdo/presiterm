@@ -93,12 +93,13 @@ fn directives_nest_by_colon_count_and_keep_their_raw_body() {
 }
 
 #[test]
-fn a_directive_without_braces_takes_its_first_word_as_the_name() {
-    let Kind::Directive(notes) = &kinds("::: notes\nsay this\n:::\n")[0] else {
+fn a_fence_without_braces_names_no_directive() {
+    let Kind::Directive(fence) = &kinds("::: notes\nsay this\n:::\n")[0] else {
         panic!("directive")
     };
-    assert_eq!(notes.name, "notes");
-    assert_eq!(notes.raw, "say this\n");
+    assert_eq!(fence.name, "");
+    assert_eq!(fence.argument, "notes");
+    assert_eq!(fence.raw, "say this\n");
 }
 
 #[test]

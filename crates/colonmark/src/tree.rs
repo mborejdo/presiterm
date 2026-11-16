@@ -134,7 +134,7 @@ pub enum Align {
 /// A colon-fence directive: `:::{name} argument`, option lines, a body, `:::`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Directive {
-    /// The name between the braces (or the first word after `::: `).
+    /// The name between the braces. Empty for a fence whose opener has no `{name}`.
     pub name: String,
     /// The rest of the opening line, trimmed.
     pub argument: String,
