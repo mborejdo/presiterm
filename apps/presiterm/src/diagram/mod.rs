@@ -145,7 +145,7 @@ impl Assets {
                 p.ground
             )
         };
-        let key = fnv(&format!("{:?}|{source}", self.look));
+        let key = fnv(format!("{:?}|{source}", self.look).as_bytes());
         if let Some(svg) = self.svgs.get(&key) {
             return Ok(svg.clone());
         }
@@ -214,7 +214,7 @@ impl Assets {
         };
         let source = typst_source(&body, &self.look, step);
         let key = (
-            fnv(&format!("{TYPST_PPI}|{:?}|{source}", self.look.faces)),
+            fnv(format!("{TYPST_PPI}|{:?}|{source}", self.look.faces).as_bytes()),
             0,
         );
         if let Some(png) = self.pngs.get(&key) {
@@ -246,7 +246,7 @@ impl Assets {
     }
 
     fn rasterise(&mut self, svg: &Arc<String>, px_height: u32) -> Result<Arc<Vec<u8>>> {
-        let key = (fnv(&format!("{:?}|{svg}", self.look)), px_height);
+        let key = (fnv(format!("{:?}|{svg}", self.look).as_bytes()), px_height);
         if let Some(png) = self.pngs.get(&key) {
             return Ok(png.clone());
         }
@@ -308,8 +308,9 @@ impl Assets {
     }
 }
 
-fn fnv(text: &str) -> u64 {
-    text.bytes().fold(0xcbf2_9ce4_8422_2325, |h, b| {
-        (h ^ u64::from(b)).wrapping_mul(0x0100_0000_01b3)
+/// FNV-1a over `bytes`: the cache keys of pictures, and how the pager tells two images apart.
+pub(crate) fn fnv(bytes: &[u8]) -> u64 {
+    bytes.iter().fold(0xcbf2_9ce4_8422_2325, |h, b| {
+        (h ^ u64::from(*b)).wrapping_mul(0x0100_0000_01b3)
     })
 }

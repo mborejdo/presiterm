@@ -12,9 +12,7 @@ pub struct Drawn {
 }
 
 pub(super) fn key_of(image: &Placement) -> (usize, usize, usize, usize, u64) {
-    let hash = image.bytes.iter().fold(0xcbf2_9ce4_8422_2325_u64, |h, b| {
-        (h ^ u64::from(*b)).wrapping_mul(0x0100_0000_01b3)
-    });
+    let hash = crate::diagram::fnv(&image.bytes);
     (image.row, image.col, image.rows, image.cols, hash)
 }
 
