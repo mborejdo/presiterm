@@ -8,13 +8,13 @@ use std::borrow::Cow;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, PoisonError};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow};
 use typst::diag::{FileError, FileResult, SourceDiagnostic};
 use typst::foundations::{Bytes, Dict, IntoValue, Str};
 use typst::syntax::{FileId, RootedPath, Source, VirtualPath, VirtualRoot};
 use typst_as_lib::TypstEngine;
 use typst_as_lib::file_resolver::FileResolver;
-use typst_layout::PagedDocument;
+use typst_layout::{Page, PagedDocument};
 #[cfg(feature = "pdf")]
 pub use typst_pdf::PdfOptions;
 
@@ -224,14 +224,7 @@ impl Engine {
     /// ```
     pub fn raster(&self, main: Main<'_>, inputs: &[(&str, Input<'_>)], ppi: f32) -> Result<Raster> {
         let document = self.document_with(main, inputs)?;
-        let Some(page) = document.pages().first() else {
-            bail!("the document has no page");
-        };
-        let options = typst_render::RenderOptions {
-            pixel_per_pt: typst::utils::Scalar::new(f64::from(ppi) / 72.0),
-            render_bleed: false,
-        };
-        let pixmap = typst_render::render(page, &options);
+        let pixmap = typst_render::render(first_page(&document)?, &render_options(ppi));
         let mut rgb = Vec::with_capacity(pixmap.pixels().len() * 3);
         for px in pixmap.pixels() {
             let c = px.demultiply();
@@ -265,14 +258,7 @@ impl Engine {
     /// ```
     pub fn png(&self, main: Main<'_>, ppi: f32) -> Result<Vec<u8>> {
         let document = self.document(main, &[])?;
-        let Some(page) = document.pages().first() else {
-            bail!("the document has no page");
-        };
-        let options = typst_render::RenderOptions {
-            pixel_per_pt: typst::utils::Scalar::new(f64::from(ppi) / 72.0),
-            render_bleed: false,
-        };
-        typst_render::render(page, &options)
+        typst_render::render(first_page(&document)?, &render_options(ppi))
             .encode_png()
             .map_err(|e| anyhow!("encode the PNG: {e}"))
     }
@@ -280,10 +266,10 @@ impl Engine {
     /// Compile `main` and draw its first page as SVG.
     pub fn svg(&self, main: Main<'_>) -> Result<String> {
         let document = self.document(main, &[])?;
-        let Some(page) = document.pages().first() else {
-            bail!("the document has no page");
-        };
-        Ok(typst_svg::svg(page, &typst_svg::SvgOptions::default()))
+        Ok(typst_svg::svg(
+            first_page(&document)?,
+            &typst_svg::SvgOptions::default(),
+        ))
     }
 
     /// Compile `main` with `inputs` (strings or bytes) to PDF bytes.
@@ -297,6 +283,19 @@ impl Engine {
         let document = self.document_with(main, inputs)?;
         typst_pdf::pdf(&document, options)
             .map_err(|diagnostics| anyhow!("{}", describe(&diagnostics)))
+    }
+}
+
+/// The first page of `document`: the one every picture is drawn from.
+fn first_page(document: &PagedDocument) -> Result<&Page> {
+    document.pages().first().context("the document has no page")
+}
+
+/// How a page is drawn at `ppi` pixels per inch.
+fn render_options(ppi: f32) -> typst_render::RenderOptions {
+    typst_render::RenderOptions {
+        pixel_per_pt: typst::utils::Scalar::new(f64::from(ppi) / 72.0),
+        render_bleed: false,
     }
 }
 
