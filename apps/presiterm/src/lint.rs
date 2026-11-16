@@ -282,16 +282,23 @@ mod tests {
     use super::*;
     use crate::config::{DEFAULT_GRID, DEFAULT_SCREEN};
 
-    #[test]
-    fn a_missing_image_and_a_crowded_slide_are_found() {
-        let src = "# A\n\n# B\n![x](nope.png)\n\n# C\n- 1\n- 2\n- 3\n- 4\n- 5\n- 6\n- 7\n- 8\n- 9\n- 10\n- 11\n- 12\n";
-        let deck = deck::parse(src, "t", Path::new("."), false);
+    /// A deck with a missing picture on slide 2 and a crowded slide 3.
+    const BROKEN: &str = "# A\n\n# B\n![x](nope.png)\n\n# C\n- 1\n- 2\n- 3\n- 4\n- 5\n- 6\n- 7\n- 8\n- 9\n- 10\n- 11\n- 12\n";
+
+    /// The findings of [`BROKEN`] on the default grid.
+    fn broken_findings() -> Vec<Finding> {
+        let deck = deck::parse(BROKEN, "t", Path::new("."), false);
         let view = View {
             cols: DEFAULT_GRID.0,
             rows: DEFAULT_GRID.1,
             cell: (50.0, 111.0),
         };
-        let all = findings(&deck, view, Path::new("."));
+        findings(&deck, view, Path::new("."))
+    }
+
+    #[test]
+    fn a_missing_image_and_a_crowded_slide_are_found() {
+        let all = broken_findings();
         assert!(all.iter().any(|f| f.slide == 2 && f.level == Level::Error));
         assert!(
             all.iter()
@@ -310,17 +317,8 @@ mod tests {
 
     #[test]
     fn findings_of_a_missing_image_and_a_crowded_slide_match_snapshot() {
-        let src = "# A\n\n# B\n![x](nope.png)\n\n# C\n- 1\n- 2\n- 3\n- 4\n- 5\n- 6\n- 7\n- 8\n- 9\n- 10\n- 11\n- 12\n";
-        let deck = deck::parse(src, "t", Path::new("."), false);
-        let view = View {
-            cols: DEFAULT_GRID.0,
-            rows: DEFAULT_GRID.1,
-            cell: (50.0, 111.0),
-        };
-        insta::assert_debug_snapshot!(findings(&deck, view, Path::new(".")));
+        insta::assert_debug_snapshot!(broken_findings());
     }
-
-    const BROKEN: &str = "# A\n\n# B\n![x](nope.png)\n\n# C\n- 1\n- 2\n- 3\n- 4\n- 5\n- 6\n- 7\n- 8\n- 9\n- 10\n- 11\n- 12\n";
 
     fn report_of(source: &str) -> Report {
         let root = tempfile::tempdir().expect("temp dir");
