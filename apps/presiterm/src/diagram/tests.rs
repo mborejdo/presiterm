@@ -125,3 +125,30 @@ proptest::proptest! {
         proptest::prop_assert_eq!(again_steps, 0);
     }
 }
+
+#[test]
+fn a_drawn_diagram_is_kept_in_the_picture_cache_and_read_from_it() {
+    let cache = tempfile::tempdir().expect("tempdir");
+    let folder = cache.path().join("pictures");
+    let d = diagram("flowchart LR\n  a --> b\n", false);
+    let drawn = Assets::with_cache(Path::new("."), &dark(), Some(folder.clone()))
+        .diagram_png(&d, 0, 40)
+        .expect("drawn");
+    let files: Vec<PathBuf> = std::fs::read_dir(&folder)
+        .expect("cache folder")
+        .map(|entry| entry.expect("entry").path())
+        .collect();
+    let [file] = files.as_slice() else {
+        panic!("one file expected, got {files:?}");
+    };
+    let name = file.file_name().and_then(|n| n.to_str()).expect("name");
+    assert_eq!(name.len(), "0123456789abcdef-40.png".len(), "{name}");
+    assert!(name.ends_with("-40.png"), "{name}");
+    assert_eq!(std::fs::read(file).expect("read"), *drawn);
+    // A second run takes what is on disk and draws nothing.
+    std::fs::write(file, b"from the cache").expect("write");
+    let again = Assets::with_cache(Path::new("."), &dark(), Some(folder))
+        .diagram_png(&d, 0, 40)
+        .expect("cached");
+    assert_eq!(*again, b"from the cache");
+}
