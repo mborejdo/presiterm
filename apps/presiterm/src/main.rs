@@ -92,6 +92,10 @@ fn run() -> Result<i32> {
     }
 }
 
+/// What `presiterm film` and `presiterm lint --film` say in a build without the feature.
+#[cfg(not(feature = "film"))]
+const NO_FILM: &str = "this presiterm was built without the `film` feature";
+
 /// `presiterm lint --film`: the cards that overflow, at the deck's own film settings.
 #[cfg(feature = "film")]
 fn film_findings(file: &Path, config: &Config) -> Result<Vec<lint::Finding>> {
@@ -106,7 +110,7 @@ fn film_findings(file: &Path, config: &Config) -> Result<Vec<lint::Finding>> {
 
 #[cfg(not(feature = "film"))]
 fn film_findings(_file: &Path, _config: &Config) -> Result<Vec<lint::Finding>> {
-    bail!("this presiterm was built without the `film` feature")
+    bail!(NO_FILM)
 }
 
 /// `presiterm film`: render the deck and write the files asked for (the GIF when none is).
@@ -179,7 +183,7 @@ fn film(args: &FilmArgs) -> Result<i32> {
 
 #[cfg(not(feature = "film"))]
 fn film(_args: &FilmArgs) -> Result<i32> {
-    bail!("this presiterm was built without the `film` feature")
+    bail!(NO_FILM)
 }
 
 /// Present the deck: in a dedicated WezTerm window (`--window`) or in the terminal we are in.
