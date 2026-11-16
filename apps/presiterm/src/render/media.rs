@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use super::text::{Line, error_lines};
 use super::{Geometry, Page, Palette, Placement, Slot, View};
-use crate::deck::{Diagram, Picture};
+use crate::deck::{Diagram, Picture, extension_is};
 use crate::diagram::Assets;
 
 pub(super) struct Media {
@@ -120,7 +120,7 @@ pub(super) fn media_picture(
         view,
         geo,
     );
-    let loaded = if p.path.to_lowercase().ends_with(".svg") {
+    let loaded = if extension_is(&p.path, &["svg"]) {
         assets.picture(p, Some((rows as f64 * view.cell.1).round() as u32))?
     } else {
         first

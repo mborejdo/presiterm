@@ -21,7 +21,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result, ensure};
 use swatchbook::{Fonts, Palette, Sizes};
 
-use crate::deck::{Deck, Diagram, Picture};
+use crate::deck::{Deck, Diagram, Picture, extension_is};
 
 pub use colours::options;
 pub use raster::image_size;
@@ -276,13 +276,10 @@ impl Assets {
             let b = Arc::new(
                 std::fs::read(&path).with_context(|| format!("{}: missing image", picture.path))?,
             );
-            self.files.insert(path.clone(), b.clone());
+            self.files.insert(path, b.clone());
             b
         };
-        if path
-            .extension()
-            .is_some_and(|e| e.eq_ignore_ascii_case("svg"))
-        {
+        if extension_is(&picture.path, &["svg"]) {
             let svg = Arc::new(String::from_utf8_lossy(&bytes).into_owned());
             let (w, h) = svg_size(&svg, &self.look.fonts.sans)?;
             let png = self.rasterise(&svg, px_height.unwrap_or_else(|| h.ceil() as u32))?;

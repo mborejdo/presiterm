@@ -107,10 +107,7 @@ pub struct Loaded {
 pub fn read(file: &Path, reveal: bool, config: &Config) -> Result<Loaded> {
     let source =
         std::fs::read_to_string(file).with_context(|| format!("read {}", file.display()))?;
-    let base = file
-        .parent()
-        .filter(|p| !p.as_os_str().is_empty())
-        .map_or_else(|| PathBuf::from("."), Path::to_path_buf);
+    let base = crate::config::deck_dir(file);
     let name = file
         .file_stem()
         .and_then(|s| s.to_str())
