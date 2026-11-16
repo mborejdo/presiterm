@@ -85,7 +85,7 @@ the frontmatter says `tags: long`.
 The short version.
 :::
 
-::: notes
+:::{notes}
 `:::{only} expr` takes and, or, not and parentheses.
 :::
 

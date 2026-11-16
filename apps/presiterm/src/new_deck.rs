@@ -34,7 +34,7 @@ flowchart LR
   source[Source] --> collector[Collector] --> store[(Store)] --> view[View]
 ```
 
-::: notes
+:::{notes}
 Each key press lights one node.
 :::
 

@@ -33,7 +33,7 @@ hold: 5              # film timing (fps, width, hold, enter, fade, transition, p
   shown. Highlighting is per line (a string spanning lines is coloured on its first line only).
 * Tables are drawn as a picture with the theme's accent header (`:--`, `:-:`, `--:` set the
   alignment). `>` is a block quote.
-* Speaker notes: a `::: notes` ... `:::` block, or a `Note:` line (up to the next blank line).
+* Speaker notes: a `:::{notes}` ... `:::` block, or a `Note:` line (up to the next blank line).
   Never on the slide; key `n` shows them.
 * Every slide has a footer with the deck title and `[n/N]`; a `logo` in the config file sits in
   the top left corner.
@@ -46,7 +46,7 @@ Colon fences in the MyST style group content: `:::{name} argument`, then `:key: 
 lines, the body, and a closing `:::`. A fence with more colons holds one with fewer. presiterm
 knows three names; any other directive shows its body as if the fence were not there.
 
-* `::: notes` (or `:::{notes}`): speaker notes.
+* `:::{notes}` (or `::: notes`): speaker notes.
 * `:::{metrics}`: one `value | label` per line, big numbers in a row (`1 200 | commits`);
   the film counts them up.
 * `:::{only} expr`: the body is on the slide only when `expr` holds for the `tags:` of the

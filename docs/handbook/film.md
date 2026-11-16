@@ -22,7 +22,7 @@ Every key press of the talk is a build-in step of the film:
 | a `steps` diagram, mermaid or Typst | the node of the step lights up, as in the window |
 | `:::{metrics}` | the numbers count up from zero |
 | a picture, a table, a code block | drawn as in the window, in the card |
-| `::: notes` | never in the film |
+| `:::{notes}` | never in the film |
 | `{only}` blocks | follow the frontmatter's `tags:` |
 
 ## Files

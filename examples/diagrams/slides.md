@@ -24,7 +24,7 @@ Note: Each key press lights the next node.
 
 ![Request path](assets/request.mmd){h=9}
 
-::: notes
+:::{notes}
 A `.mmd` file is read next to the deck and reloads when it changes.
 :::
 

@@ -78,7 +78,7 @@ How the deck's semantics become motion:
 | a mermaid diagram with `steps` | drawn per step by the existing renderer, placed as a picture |
 | a Typst diagram with `steps` | the same `stepnode` preamble with `step` set per frame |
 | a table | the existing Typst table, rows appearing |
-| `::: notes` | never in the film |
+| `:::{notes}` | never in the film |
 | `{only}` tags | the same `--tags` as the window |
 
 Timing lives in `presiterm.toml` (`[film] fps = 10, width = 640, hold = 7, enter = 1.6,

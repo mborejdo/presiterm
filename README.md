@@ -98,7 +98,7 @@ cargo install --path apps/presiterm
 
 ![Pipeline](assets/pipeline.svg){h=6}
 
-::: notes
+:::{notes}
 Longer notes go in a notes block.
 :::
 
