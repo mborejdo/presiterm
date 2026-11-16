@@ -9,12 +9,14 @@ use anyhow::{Context, Result, bail};
 
 use crate::deck;
 
+/// The commands the control socket takes, as the errors of both ends name them.
+pub(super) const COMMANDS: &str =
+    "goto N | next | prev | reload | status | quit | font <pt|+N|-N|reset>";
+
 /// Talk to a running presenter: one command line out, one reply line back.
 pub fn ctl(control: Option<&Path>, command: &[String]) -> Result<String> {
     if command.is_empty() {
-        bail!(
-            "no command given: goto N | next | prev | reload | status | quit | font <pt|+N|-N|reset> (see `presiterm ctl --help`)"
-        );
+        bail!("no command given: {COMMANDS} (see `presiterm ctl --help`)");
     }
     let mut stream = match control {
         Some(p) => UnixStream::connect(p).with_context(|| format!("connect to {}", p.display()))?,

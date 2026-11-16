@@ -323,8 +323,10 @@ impl Pager {
                     self.quit = true;
                     "bye".to_string()
                 },
-                (Some("font"), Some(a)) => self.font_command(a, out).unwrap_or_else(|e| format!("error: {e}")),
-                _ => "error: use goto N | next | prev | reload | status | quit | font <pt|+N|-N|reset>".to_string(),
+                (Some("font"), Some(a)) => self
+                    .font_command(a, out)
+                    .unwrap_or_else(|e| format!("error: {e}")),
+                _ => format!("error: use {}", control::COMMANDS),
             };
             self.pending.clear();
             let _ = writeln!(stream, "{reply}");
