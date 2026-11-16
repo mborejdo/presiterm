@@ -3,7 +3,8 @@
 ## The gate
 
 `cargo xtask <task>` runs the checks (the alias is in `.cargo/config.toml`). `cargo xtask qa` is
-what must be green before a commit and what CI runs, plus `cargo deny check`.
+what must be green before a commit; CI runs the same steps, then `cargo deny check` and
+`cargo xtask demo`.
 
 | task | runs |
 |---|---|
@@ -14,7 +15,7 @@ what must be green before a commit and what CI runs, plus `cargo deny check`.
 | `doc` | rustdoc with warnings denied |
 | `deny` | `cargo deny check` (needs cargo-deny) |
 | `no-shellout` | every `Command::new` in `apps/presiterm/src/` starts `wezterm` and nothing else |
-| `demo` | `presiterm lint` on every example deck; `--window` then presents `examples/intro` |
+| `demo` | `presiterm lint` on every example deck, then `examples/film` as GIF, MP4, DOCX and PDF into `target/demo`; `--window` then presents `examples/intro` |
 
 Toolchain: `rust-toolchain.toml` (1.99.1). Lints: `[workspace.lints]` in `Cargo.toml` (clippy
 all, pedantic, nursery and cargo at warn, `-D warnings` in CI; no `unwrap`, `expect`, `panic` or

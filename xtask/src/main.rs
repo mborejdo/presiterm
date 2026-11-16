@@ -1,7 +1,7 @@
 //! presiterm's task runner: `cargo xtask <task>`.
 //!
 //! Each task is a list of cargo calls run from the workspace root; the first that fails stops the
-//! run with its exit code. `qa` is the gate CI runs.
+//! run with its exit code. `qa` is the gate; CI runs its steps, then `deny` and `demo`.
 
 // A task runner reports what it runs.
 #![allow(
@@ -46,7 +46,7 @@ enum Task {
         #[arg(long)]
         window: bool,
     },
-    /// Everything CI runs: fmt-check, lint, test, doc, no-shellout.
+    /// The gate: fmt-check, lint, test, doc, no-shellout (CI adds deny and demo).
     Qa,
 }
 

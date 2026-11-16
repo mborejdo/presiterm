@@ -12,7 +12,7 @@ you just edited. Pure Rust; the only program presiterm starts is `wezterm`.
 You need [WezTerm](https://wezterm.org) and a Rust toolchain.
 
 ```sh
-cargo install --git https://github.com/mborejdo/presiterm --branch v2 presiterm
+cargo install --git https://github.com/mborejdo/presiterm presiterm
 # or from a checkout
 cargo install --path apps/presiterm
 ```
@@ -45,7 +45,7 @@ Everything else is in the manual that ships in the binary:
 
 ```sh
 presiterm --help             # commands, examples, exit codes
-presiterm handbook           # topics: quickstart, keys, dialect, diagrams, window, config, tools
+presiterm handbook           # topics: quickstart, keys, dialect, diagrams, window, film, config, tools, troubleshooting
 presiterm handbook dialect   # one topic in full
 presiterm tldr font size     # search the manual
 ```
@@ -179,8 +179,8 @@ display = "Inter"         # the film's headings
 
 ## Examples
 
-`examples/` has three decks: `intro` (the dialect), `diagrams` (mermaid and fletcher) and `media`
-(a picture on the light theme).
+`examples/` has four decks: `intro` (the dialect), `diagrams` (mermaid and fletcher), `media`
+(a picture on the light theme) and `film` (the build-ins `presiterm film` animates).
 
 ```sh
 presiterm --window examples/intro/slides.md
@@ -192,6 +192,7 @@ presiterm --window examples/intro/slides.md
 |---|---|
 | [`apps/presiterm`](apps/presiterm) | the binary: layout, pager, WezTerm glue, lint, config, manual |
 | [`crates/colonmark`](crates/colonmark) | Markdown with MyST colon-fence directives on comrak, as an owned tree; `{only}` conditions |
+| [`crates/filmstrip`](crates/filmstrip) | frames to GIF (delta frames), MP4 (pure-Rust H.264), DOCX and PDF; scene transitions |
 | [`crates/swatchbook`](crates/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
 | [`crates/typstkit`](crates/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
 | [`xtask`](xtask) | `cargo xtask qa` and friends |
