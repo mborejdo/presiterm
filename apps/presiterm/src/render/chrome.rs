@@ -1,6 +1,6 @@
 //! The parts of a page that are not the slide's body: heading, speaker notes and footer.
 
-use super::text::{clip, put_cells, spans_to_cells, wrap};
+use super::text::{cells_width, clip, put_cells, spans_to_cells, wrap};
 use super::{Geometry, Palette, View, text_style};
 use crate::canvas::{Canvas, Style, char_width, width};
 use crate::deck::{Deck, Slide, Span};
@@ -14,7 +14,7 @@ pub(super) fn heading(
 ) {
     let base = text_style(pal).fg(pal.accent).bold();
     let mut cells = spans_to_cells(text, pal, base);
-    if cells.iter().map(|(c, _)| char_width(*c)).sum::<usize>() > geo.width {
+    if cells_width(&cells) > geo.width {
         let mut used = 0;
         cells.retain(|(c, _)| {
             used += char_width(*c);
@@ -22,7 +22,7 @@ pub(super) fn heading(
         });
         cells.push(('…', base));
     }
-    let w: usize = cells.iter().map(|(c, _)| char_width(*c)).sum();
+    let w = cells_width(&cells);
     let col = geo.left + (geo.width - w) / 2;
     put_cells(canvas, col, row, &cells);
     canvas.text(

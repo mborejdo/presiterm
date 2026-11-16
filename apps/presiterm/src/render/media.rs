@@ -2,9 +2,8 @@
 
 use std::sync::Arc;
 
-use super::text::{Line, wrap};
-use super::{Geometry, Page, Palette, Placement, Slot, View, text_style};
-use crate::canvas::Style;
+use super::text::{Line, error_lines};
+use super::{Geometry, Page, Palette, Placement, Slot, View};
 use crate::deck::{Diagram, Picture};
 use crate::diagram::Assets;
 
@@ -54,13 +53,7 @@ pub(super) fn error_slots(
     geo: Geometry,
 ) {
     page.problems.push(message.to_string());
-    let style = text_style(pal).fg(pal.stop).bold();
-    let cells: Vec<(char, Style)> = format!("⚠ {message}").chars().map(|c| (c, style)).collect();
-    slots.extend(
-        wrap(&cells, geo.width)
-            .into_iter()
-            .map(|l| Slot::Line(Line::new(l))),
-    );
+    slots.extend(error_lines(message, pal, geo).into_iter().map(Slot::Line));
 }
 
 pub(super) fn fit(

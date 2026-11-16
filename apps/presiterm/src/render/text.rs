@@ -30,13 +30,18 @@ pub(super) fn paint(canvas: &mut Canvas, line: &Line, row: usize, geo: Geometry)
     if let Some(fill) = line.fill {
         canvas.fill(geo.left, row, geo.width, 1, fill);
     }
-    let w: usize = line.cells.iter().map(|(c, _)| char_width(*c)).sum();
+    let w = cells_width(&line.cells);
     let col = if line.centre {
         geo.left + geo.width.saturating_sub(w) / 2
     } else {
         geo.left + line.indent
     };
     put_cells(canvas, col, row, &line.cells);
+}
+
+/// The display width of `cells`.
+pub(super) fn cells_width(cells: &[(char, Style)]) -> usize {
+    cells.iter().map(|(c, _)| char_width(*c)).sum()
 }
 
 pub(super) fn put_cells(canvas: &mut Canvas, col: usize, row: usize, cells: &[(char, Style)]) {
@@ -72,10 +77,10 @@ pub(super) fn spans_to_cells(spans: &[Span], pal: &Palette, base: Style) -> Vec<
     cells
 }
 
-/// Greedy word wrap on cells; a word longer than `max` is cut.
 /// A word of cells and the style of the space that preceded it.
-pub(super) type Word<'a> = (Option<Style>, &'a [(char, Style)]);
+type Word<'a> = (Option<Style>, &'a [(char, Style)]);
 
+/// Greedy word wrap on cells; a word longer than `max` is cut.
 pub(super) fn wrap(cells: &[(char, Style)], max: usize) -> Vec<Vec<(char, Style)>> {
     let max = max.max(1);
     let mut lines: Vec<Vec<(char, Style)>> = Vec::new();
@@ -93,7 +98,7 @@ pub(super) fn wrap(cells: &[(char, Style)], max: usize) -> Vec<Vec<(char, Style)
     }
     words.push((sep, &cells[start..]));
     for (sep, word) in words {
-        let word_w: usize = word.iter().map(|(c, _)| char_width(*c)).sum();
+        let word_w = cells_width(word);
         let needs_space = !current.is_empty();
         if needs_space && current_w + 1 + word_w > max {
             lines.push(std::mem::take(&mut current));
@@ -186,21 +191,20 @@ pub(super) fn block_lines(
         Block::Table { head, rows, align } => table_lines(head, rows, align, pal, geo, problems),
         Block::Error(message) => {
             problems.push(message.clone());
-            let style = base.fg(pal.stop).bold();
-            let cells: Vec<(char, Style)> =
-                format!("⚠ {message}").chars().map(|c| (c, style)).collect();
-            wrap(&cells, geo.width).into_iter().map(Line::new).collect()
+            error_lines(message, pal, geo)
         },
         Block::Picture(_) | Block::Diagram(_) => Vec::new(),
     }
 }
 
-pub(super) fn item_lines(
-    item: &Item,
-    pal: &Palette,
-    geo: Geometry,
-    counter: &mut usize,
-) -> Vec<Line> {
+/// What cannot be shown, as lines on the slide: a warning sign and the message in the stop colour.
+pub(super) fn error_lines(message: &str, pal: &Palette, geo: Geometry) -> Vec<Line> {
+    let style = text_style(pal).fg(pal.stop).bold();
+    let cells: Vec<(char, Style)> = format!("⚠ {message}").chars().map(|c| (c, style)).collect();
+    wrap(&cells, geo.width).into_iter().map(Line::new).collect()
+}
+
+fn item_lines(item: &Item, pal: &Palette, geo: Geometry, counter: &mut usize) -> Vec<Line> {
     let base = text_style(pal);
     let frag = item.reveal.then(|| {
         *counter += 1;
@@ -235,7 +239,7 @@ pub(super) fn item_lines(
         .collect()
 }
 
-pub(super) fn code_lines(
+fn code_lines(
     lang: &str,
     lines: &[String],
     pal: &Palette,
@@ -259,7 +263,7 @@ pub(super) fn code_lines(
                 };
                 cells.extend(text.chars().map(|c| (c, style)));
             }
-            let w: usize = cells.iter().map(|(c, _)| char_width(*c)).sum();
+            let w = cells_width(&cells);
             if w > room + 1 {
                 problems.push(format!(
                     "code line is {} columns, {} fit: {}",
@@ -282,7 +286,7 @@ pub(super) fn code_lines(
         .collect()
 }
 
-pub(super) fn table_lines(
+fn table_lines(
     head: &[String],
     rows: &[Vec<String>],
     align: &[char],
