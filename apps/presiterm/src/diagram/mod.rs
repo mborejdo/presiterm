@@ -217,53 +217,52 @@ impl Assets {
             fnv(format!("{TYPST_PPI}|{:?}|{source}", self.look.faces).as_bytes()),
             0,
         );
-        if let Some(png) = self.pngs.get(&key) {
-            return Ok(png.clone());
-        }
-        let on_disk = self
-            .cache
-            .as_ref()
-            .map(|c| c.join(format!("{:016x}-typst.png", key.0)));
-        if let Some(png) = on_disk
-            .as_ref()
-            .and_then(|p| std::fs::read(p).ok())
-            .filter(|png| within_budget(png))
-        {
-            let png = Arc::new(png);
-            self.pngs.insert(key, png.clone());
-            return Ok(png);
-        }
-        let png = Arc::new(
-            typst_within_budget(&source, &self.look.faces)
-                .with_context(|| format!("{}: typst", diagram.origin))?,
-        );
-        if let Some(path) = on_disk {
-            let _ = std::fs::create_dir_all(path.parent().unwrap_or_else(|| Path::new(".")));
-            let _ = std::fs::write(path, png.as_slice());
-        }
-        self.pngs.insert(key, png.clone());
-        Ok(png)
+        self.cached_png(key, "typst", within_budget, |look| {
+            typst_within_budget(&source, &look.faces)
+                .with_context(|| format!("{}: typst", diagram.origin))
+        })
     }
 
     fn rasterise(&mut self, svg: &Arc<String>, px_height: u32) -> Result<Arc<Vec<u8>>> {
         let key = (fnv(format!("{:?}|{svg}", self.look).as_bytes()), px_height);
+        self.cached_png(
+            key,
+            &px_height.to_string(),
+            |_| true,
+            |look| svg_to_png(svg, &look.fonts.sans, px_height),
+        )
+    }
+
+    /// The PNG behind `key`: from memory, else from the picture cache (`<hash>-<suffix>.png`, when
+    /// `usable` takes it), else drawn by `draw` and kept in both.
+    fn cached_png(
+        &mut self,
+        key: (u64, u32),
+        suffix: &str,
+        usable: impl Fn(&[u8]) -> bool,
+        draw: impl FnOnce(&Look) -> Result<Vec<u8>>,
+    ) -> Result<Arc<Vec<u8>>> {
         if let Some(png) = self.pngs.get(&key) {
             return Ok(png.clone());
         }
         let on_disk = self
             .cache
             .as_ref()
-            .map(|c| c.join(format!("{:016x}-{px_height}.png", key.0)));
-        if let Some(png) = on_disk.as_ref().and_then(|p| std::fs::read(p).ok()) {
-            let png = Arc::new(png);
-            self.pngs.insert(key, png.clone());
-            return Ok(png);
-        }
-        let png = Arc::new(svg_to_png(svg, &self.look.fonts.sans, px_height)?);
-        if let Some(path) = on_disk {
-            let _ = std::fs::create_dir_all(path.parent().unwrap_or_else(|| Path::new(".")));
-            let _ = std::fs::write(path, png.as_slice());
-        }
+            .map(|c| c.join(format!("{:016x}-{suffix}.png", key.0)));
+        let cached = on_disk
+            .as_ref()
+            .and_then(|p| std::fs::read(p).ok())
+            .filter(|png| usable(png));
+        let png = if let Some(png) = cached {
+            Arc::new(png)
+        } else {
+            let png = Arc::new(draw(&self.look)?);
+            if let Some(path) = on_disk {
+                let _ = std::fs::create_dir_all(path.parent().unwrap_or_else(|| Path::new(".")));
+                let _ = std::fs::write(path, png.as_slice());
+            }
+            png
+        };
         self.pngs.insert(key, png.clone());
         Ok(png)
     }
