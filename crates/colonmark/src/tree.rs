@@ -14,6 +14,8 @@ pub struct Document {
 pub struct Block {
     /// The 1-based line of the block's first line in the source.
     pub line: usize,
+    /// The 1-based line of its last line: a directive's closing fence, if it has one.
+    pub end: usize,
     /// What the block is.
     pub kind: Kind,
 }

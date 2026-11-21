@@ -66,7 +66,7 @@ impl Context<'_> {
 
     fn block<'a>(&self, node: &'a AstNode<'a>) -> Option<Block> {
         let data = node.data();
-        let line = data.sourcepos.start.line;
+        let (line, end) = (data.sourcepos.start.line, data.sourcepos.end.line);
         let kind = match &data.value {
             NodeValue::Heading(heading) => Kind::Heading {
                 level: heading.level,
@@ -100,12 +100,11 @@ impl Context<'_> {
             NodeValue::ThematicBreak => Kind::Rule,
             NodeValue::HtmlBlock(html) => Kind::Html(html.literal.clone()),
             NodeValue::BlockDirective(directive) => {
-                let end = data.sourcepos.end.line;
                 Kind::Directive(self.directive(node, &directive.info, line, end))
             },
             _ => return None,
         };
-        Some(Block { line, kind })
+        Some(Block { line, end, kind })
     }
 
     fn directive<'a>(
@@ -115,6 +114,7 @@ impl Context<'_> {
         line: usize,
         end: usize,
     ) -> Directive {
+        let info = self.prepared.infos.get(&line).map_or(info, String::as_str);
         let (name, argument) = split_info(info);
         let options = self
             .prepared

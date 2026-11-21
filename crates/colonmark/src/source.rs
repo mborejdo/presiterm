@@ -1,6 +1,7 @@
 //! The source as comrak sees it: frontmatter and directive option lines blanked out, so every
 //! line keeps its number and comrak reads only Markdown.
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 
 use crate::Frontmatter;
@@ -14,6 +15,8 @@ pub(crate) struct Prepared {
     pub(crate) frontmatter: Frontmatter,
     /// The option lines of each directive, by the 1-based line of its opener.
     pub(crate) options: HashMap<usize, Vec<(String, String)>>,
+    /// The info of each opener whose info has a `:` (comrak refuses those), by its line.
+    pub(crate) infos: HashMap<usize, String>,
 }
 
 /// The length of a run of `fence` characters at the start of `line`, if it is at least 3.
@@ -41,8 +44,9 @@ pub(crate) fn option_line(line: &str) -> Option<(String, String)> {
 /// Prepare `source` for comrak.
 pub(crate) fn prepare(source: &str) -> Prepared {
     let frontmatter = Frontmatter::read(source);
-    let mut out: Vec<&str> = Vec::new();
+    let mut out: Vec<Cow<'_, str>> = Vec::new();
     let mut options = HashMap::new();
+    let mut infos = HashMap::new();
     // The open code fence: its character and length.
     let mut code: Option<(char, usize)> = None;
     // The opener whose option lines are being read.
@@ -50,7 +54,7 @@ pub(crate) fn prepare(source: &str) -> Prepared {
     for (index, line) in source.lines().enumerate() {
         let number = index + 1;
         if number <= frontmatter.lines {
-            out.push("");
+            out.push(Cow::Borrowed(""));
             continue;
         }
         let trimmed = line.trim_start();
@@ -60,26 +64,33 @@ pub(crate) fn prepare(source: &str) -> Prepared {
             {
                 code = None;
             }
-            out.push(line);
+            out.push(Cow::Borrowed(line));
             continue;
         }
         if let Some(at) = opener
             && let Some(pair) = option_line(trimmed)
         {
             options.entry(at).or_insert_with(Vec::new).push(pair);
-            out.push("");
+            out.push(Cow::Borrowed(""));
             continue;
         }
         opener = None;
         if is_opener(trimmed) {
             opener = Some(number);
+            let info = trimmed.trim_start_matches(':');
+            if info.contains(':') {
+                infos.insert(number, info.trim().to_string());
+                let fence = &line[..line.len() - info.len()];
+                out.push(Cow::Owned(format!("{fence}{}", info.replace(':', " "))));
+                continue;
+            }
         } else if let Some(fence) = ['`', '~']
             .into_iter()
             .find(|f| fence_run(trimmed, *f).is_some())
         {
             code = fence_run(trimmed, fence).map(|run| (fence, run));
         }
-        out.push(line);
+        out.push(Cow::Borrowed(line));
     }
     let mut text = out.join("\n");
     text.push('\n');
@@ -87,6 +98,7 @@ pub(crate) fn prepare(source: &str) -> Prepared {
         text,
         frontmatter,
         options,
+        infos,
     }
 }
 
@@ -108,6 +120,19 @@ mod tests {
                 ("other-key".to_string(), "w x".to_string())
             ]
         );
+    }
+
+    #[test]
+    fn prepare_keeps_an_info_with_a_colon_aside() {
+        let doc = crate::parse(":::{project} AI: chat\n:only: x\nBody\n:::\n");
+        let crate::Kind::Directive(d) = &doc.blocks[0].kind else {
+            panic!("a directive: {doc:?}")
+        };
+        assert_eq!(
+            (d.name.as_str(), d.argument.as_str()),
+            ("project", "AI: chat")
+        );
+        assert_eq!((d.option("only"), d.raw.as_str()), (Some("x"), "Body\n"));
     }
 
     #[test]

@@ -238,6 +238,63 @@ pub fn apply<S: AsRef<str>>(blocks: Vec<Block>, active: &[S]) -> Result<Vec<Bloc
     Ok(out)
 }
 
+/// [`apply`] on the source text: drop the directives whose condition fails, unwrap the `{only}`
+/// blocks that hold and drop `:only:` option lines, at every depth. Every other line stays as
+/// written, so the result is Markdown again.
+///
+/// # Examples
+///
+/// ```
+/// let md = "a\n:::{only} long\nb\n:::\n:::{note}\n:only: short\nc\n:::\n";
+/// assert_eq!(colonmark::only::filter(md, &["long"]).expect("valid"), "a\nb\n");
+/// assert_eq!(colonmark::only::filter(md, &["short"]).expect("valid"), "a\n:::{note}\nc\n:::\n");
+/// ```
+pub fn filter<S: AsRef<str>>(source: &str, active: &[S]) -> Result<String, ExprError> {
+    let lines: Vec<&str> = source.lines().collect();
+    let span = |from: usize, to: usize| lines.get(from..to.min(lines.len())).unwrap_or_default();
+    let mut out: Vec<String> = Vec::new();
+    let mut done = 0;
+    for block in crate::parse(source).blocks {
+        let Kind::Directive(directive) = &block.kind else {
+            continue;
+        };
+        out.extend(span(done, block.line - 1).iter().map(ToString::to_string));
+        done = block.end;
+        if let Some(text) = condition(&block)
+            && !Expr::parse(text)?.eval(active)
+        {
+            continue;
+        }
+        let only = directive.name == "only";
+        let first = block.line + directive.options.len();
+        if !only {
+            // The opener and its options, without `:only:`.
+            out.extend(
+                span(block.line - 1, first)
+                    .iter()
+                    .filter(|line| {
+                        crate::source::option_line(line.trim()).is_none_or(|(key, _)| key != "only")
+                    })
+                    .map(ToString::to_string),
+            );
+        }
+        let body = filter(&directive.raw, active)?;
+        let body = body.strip_suffix('\n').unwrap_or(&body);
+        if !body.is_empty() {
+            out.push(body.to_string());
+        }
+        if !only && first + directive.raw.lines().count() < block.end {
+            out.extend(lines.get(block.end - 1).map(ToString::to_string));
+        }
+    }
+    out.extend(span(done, lines.len()).iter().map(ToString::to_string));
+    let mut text = out.join("\n");
+    if source.ends_with('\n') && !text.ends_with('\n') {
+        text.push('\n');
+    }
+    Ok(text)
+}
+
 /// A problem with a condition, found by [`check`].
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding {
@@ -324,6 +381,21 @@ mod tests {
             panic!("card")
         };
         assert_eq!(card.blocks.len(), 2, "{card:?}");
+    }
+
+    #[test]
+    fn filter_resolves_nested_conditions_and_keeps_everything_else_as_written() {
+        let md = "a\n\n::::{job} Role: x\n:only: not draft\n:org: O\n- one\n:::{only} long and not (short or draft)\n- two\n:::\n::::\n\n```\n:::{only} long\n```\n";
+        let long = filter(md, &["long"]).expect("valid");
+        assert_eq!(
+            long,
+            "a\n\n::::{job} Role: x\n:org: O\n- one\n- two\n::::\n\n```\n:::{only} long\n```\n"
+        );
+        assert_eq!(
+            filter(md, &["draft"]).expect("valid"),
+            "a\n\n\n```\n:::{only} long\n```\n"
+        );
+        assert!(filter(":::{only} a and\nx\n:::\n", &["a"]).is_err());
     }
 
     #[test]
