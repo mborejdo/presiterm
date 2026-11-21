@@ -49,7 +49,6 @@ Examples:
   presiterm lint talk/slides.md --font-size 54           check at 54 pt
   presiterm lint talk/slides.md --screen 1440x900        a smaller screen, in points
   presiterm lint talk/slides.md --grid 80x24             check on exactly this grid
-  presiterm lint talk/slides.md --film                   also: does every card of the film fit
 
 Prints one line per finding (`slide N (heading): error|warning|note: ...`), then the biggest font
 size at which the whole deck fits the screen.
@@ -58,27 +57,6 @@ Exit codes:
   0  no errors (warnings and notes do not fail)
   1  at least one error: a missing picture, a broken diagram, a slide that cannot be laid out
   2  the deck could not be read or has no slides";
-
-const FILM_FOOTER: &str = "\
-Examples:
-  presiterm film talk/slides.md                      talk/slides.gif
-  presiterm film talk/slides.md --gif --mp4 --docx --pdf
-                                                     all four: the GIF, the MP4, a Word file that plays the GIF, a PDF that plays the MP4
-  presiterm film talk/slides.md --out dist           write into dist/ instead of next to the deck
-  presiterm film talk/slides.md --cards dist/cards   every card, fully built, as PNG (card03-007.png: slide 3, scene 7)
-  presiterm film talk/slides.md --preview            play the GIF inline in this WezTerm
-  presiterm film talk/slides.md --width 960 --fps 12 --hold 5 --enter 1.2 --fade 0.3 --colours 64
-  presiterm film talk/slides.md --transition wipe   wipe instead of fade (or push, pixelize, circle, split, cut)
-
-Every key press of the talk is a build-in of the film: `enter` seconds of animation, then `hold`
-seconds of rest. The deck's frontmatter (fps, width, hold, enter, fade, transition, pace,
-colours) and a `[film]` table in presiterm.toml set the same values; a flag typed here beats both. `links:` in the
-frontmatter go under the picture in the Word and PDF editions. A card that does not fit is an
-error naming the slide; `presiterm lint --film` finds them all first.
-
-Exit codes:
-  0  written
-  2  a card overflows, a file cannot be drawn or written, or presiterm was built without `film`";
 
 const CONFIG_FOOTER: &str = "\
 Examples:
@@ -236,77 +214,6 @@ pub(crate) struct PresentArgs {
     pub(crate) window_font: Option<f32>,
 }
 
-/// The flags of `presiterm film`.
-#[derive(clap::Args)]
-#[allow(clippy::struct_excessive_bools, reason = "independent output switches")]
-pub(crate) struct FilmArgs {
-    /// The deck, e.g. talk/slides.md.
-    pub(crate) file: PathBuf,
-    /// Write the animated GIF (the default when no format is given).
-    #[arg(long)]
-    pub(crate) gif: bool,
-    /// Write the MP4 (pure-Rust H.264).
-    #[arg(long)]
-    pub(crate) mp4: bool,
-    /// Write an A4 landscape Word file with the GIF and the deck's links under it.
-    #[arg(long)]
-    pub(crate) docx: bool,
-    /// Write a PDF whose page plays the MP4 when it opens in Acrobat.
-    #[arg(long)]
-    pub(crate) pdf: bool,
-    /// Also write every card, fully built, as PNG into this folder (--cards dist/cards).
-    #[arg(long, value_name = "DIR")]
-    pub(crate) cards: Option<PathBuf>,
-    /// Write into this folder instead of next to the deck (--out dist).
-    #[arg(long, value_name = "DIR")]
-    pub(crate) out: Option<PathBuf>,
-    /// Play the GIF inline in this WezTerm after writing.
-    #[arg(long)]
-    pub(crate) preview: bool,
-    /// Frames per second (--fps 12); default 10.
-    #[arg(long, value_name = "N")]
-    pub(crate) fps: Option<u16>,
-    /// Width in pixels, even (--width 960); default 640, the height follows 16:9.
-    #[arg(long, value_name = "PX")]
-    pub(crate) width: Option<u32>,
-    /// Seconds every scene stays, build-in included (--hold 5); default 7.
-    #[arg(long, value_name = "S")]
-    pub(crate) hold: Option<f32>,
-    /// Seconds of build-in at the start of every scene (--enter 1.2); default 1.6.
-    #[arg(long, value_name = "S")]
-    pub(crate) enter: Option<f32>,
-    /// Seconds a transition between scenes takes (--fade 0.3); default 0.4.
-    #[arg(long, value_name = "S")]
-    pub(crate) fade: Option<f32>,
-    /// How one scene gives way to the next: fade, wipe, push, pixelize, circle, split or cut
-    /// (--transition wipe); default fade.
-    #[arg(long, value_name = "NAME")]
-    pub(crate) transition: Option<filmstrip::Transition>,
-    /// Words per minute a wordy scene is held for, 0 for a fixed hold (--pace 160); default 200.
-    #[arg(long, value_name = "WPM")]
-    pub(crate) pace: Option<f32>,
-    /// Colours of the GIF palette, 2 to 255 (--colours 64); default 48.
-    #[arg(long, value_name = "N")]
-    pub(crate) colours: Option<usize>,
-}
-
-#[cfg(feature = "film")]
-impl FilmArgs {
-    /// The timing and size flags as settings, to lay over the frontmatter and the config.
-    pub(crate) const fn settings(&self) -> presiterm::config::FilmSettings {
-        presiterm::config::FilmSettings {
-            fps: self.fps,
-            width: self.width,
-            hold: self.hold,
-            enter: self.enter,
-            fade: self.fade,
-            transition: self.transition,
-            pace: self.pace,
-            colours: self.colours,
-        }
-    }
-}
-
 /// The subcommands.
 #[derive(Subcommand)]
 pub(crate) enum Command {
@@ -324,13 +231,14 @@ pub(crate) enum Command {
         /// Check on exactly this grid of cells (--grid 80x24), not the one the screen gives.
         #[arg(long, value_name = "COLSxROWS")]
         grid: Option<String>,
-        /// Also draw every card of the film and report the ones that overflow.
-        #[arg(long)]
-        film: bool,
     },
-    /// Render the deck as a film: GIF, MP4, a Word file that plays the GIF, a PDF that plays the MP4.
-    #[command(after_help = FILM_FOOTER)]
-    Film(FilmArgs),
+    /// The film moved to flipcard; this hidden stub says where, for one release.
+    #[command(hide = true)]
+    Film {
+        /// Whatever was typed after `film`.
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
     /// Show which config files apply and the effective settings with their source.
     #[command(after_help = CONFIG_FOOTER)]
     Config {
@@ -399,7 +307,7 @@ mod tests {
         let mut commands = vec![root.clone()];
         commands.extend(
             root.get_subcommands()
-                .filter(|c| c.get_name() != "help")
+                .filter(|c| c.get_name() != "help" && !c.is_hide_set())
                 .cloned(),
         );
         for command in commands {
@@ -418,11 +326,10 @@ mod tests {
     }
 
     #[test]
-    fn every_flag_of_the_present_lint_and_film_commands_has_an_example_in_its_help() {
+    fn every_flag_of_the_present_and_lint_commands_has_an_example_in_its_help() {
         let root = Cli::command();
         let lint = root.find_subcommand("lint").expect("lint");
-        let film = root.find_subcommand("film").expect("film");
-        for command in [&root, lint, film] {
+        for command in [&root, lint] {
             for arg in command.get_arguments().filter(|a| !a.is_hide_set()) {
                 let Some(long) = arg.get_long() else {
                     continue;
@@ -456,8 +363,7 @@ mod tests {
         let text = handbook_text();
         let root = Cli::command();
         let lint = root.find_subcommand("lint").expect("lint");
-        let film = root.find_subcommand("film").expect("film");
-        for command in [&root, lint, film] {
+        for command in [&root, lint] {
             for arg in command.get_arguments().filter(|a| !a.is_hide_set()) {
                 if let Some(long) = arg.get_long().filter(|l| !matches!(*l, "help" | "version")) {
                     assert!(
@@ -467,7 +373,10 @@ mod tests {
                 }
             }
         }
-        for sub in root.get_subcommands().filter(|c| c.get_name() != "help") {
+        for sub in root
+            .get_subcommands()
+            .filter(|c| c.get_name() != "help" && !c.is_hide_set())
+        {
             let name = format!("presiterm {}", sub.get_name());
             assert!(text.contains(&name), "handbook lacks `{name}`");
         }
@@ -489,7 +398,6 @@ mod tests {
             "h=",
             ":::{notes}",
             ":::{metrics}",
-            "presiterm film",
             "presiterm ctl",
             "presiterm doctor",
             "presiterm lint",
@@ -498,6 +406,21 @@ mod tests {
         ] {
             assert!(text.contains(needle), "handbook lacks {needle}");
         }
+    }
+
+    #[test]
+    fn film_is_a_hidden_stub_that_takes_any_arguments() {
+        let cli = Cli::try_parse_from([
+            "presiterm",
+            "film",
+            "talk/slides.md",
+            "--mp4",
+            "--fps",
+            "12",
+        ])
+        .expect("parses");
+        assert!(matches!(cli.command, Some(Command::Film { ref args }) if args.len() == 4));
+        assert!(!help_of(&Cli::command()).contains("film"));
     }
 
     #[test]

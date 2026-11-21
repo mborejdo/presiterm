@@ -40,7 +40,7 @@ enum Task {
     Deny,
     /// The only program presiterm starts is `wezterm`.
     NoShellout,
-    /// Lint every example deck and render the film example into target/demo; with --window, present examples/intro.
+    /// Lint every example deck; with --window, present examples/intro.
     Demo {
         /// Open examples/intro/slides.md in a WezTerm window afterwards.
         #[arg(long)]
@@ -99,9 +99,9 @@ fn shellouts() -> Result<Vec<String>> {
     Ok(found)
 }
 
-/// Lint every example deck, render the film example into target/demo, present intro on request.
+/// Lint every example deck, present intro on request.
 fn demo(window: bool) -> Result<()> {
-    for deck in ["intro", "diagrams", "media", "film"] {
+    for deck in ["intro", "diagrams", "media"] {
         cargo(
             &[
                 "run",
@@ -115,23 +115,6 @@ fn demo(window: bool) -> Result<()> {
             &[],
         )?;
     }
-    cargo(
-        &[
-            "run",
-            "-q",
-            "-p",
-            "presiterm",
-            "--",
-            "film",
-            "examples/film/slides.md",
-            "--mp4",
-            "--docx",
-            "--pdf",
-            "--out",
-            "target/demo",
-        ],
-        &[],
-    )?;
     if window {
         cargo(
             &[
