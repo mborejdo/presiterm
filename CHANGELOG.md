@@ -4,7 +4,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follo
 
 ## 0.2.0 - unreleased
 
-A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and four library crates.
+A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and five library crates.
 
 ### Added
 
@@ -20,6 +20,8 @@ A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and four l
   scenes, as a flag, a frontmatter key or a `[film]` key; `filmstrip::Transition`.
 - `fonts = [...]` in `presiterm.toml`: font files and folders Typst draws with, next to the
   vendored faces; `[theme.fonts] display` for the film's headings.
+- `deckmark`: the deck dialect (slides of blocks, diagrams and pictures in the deck's tokens,
+  the Typst faces), as a crate.
 - `filmstrip`: frames to GIF (delta frames, learned palette), MP4, DOCX and PDF, as a crate.
 - `typstkit::Engine::raster` (pixels with string and byte inputs) and `Input::Bytes`.
 - Markdown slides in a WezTerm window: real terminal text, pictures and diagrams as OSC 1337

@@ -195,6 +195,7 @@ presiterm --window examples/intro/slides.md
 |---|---|
 | [`apps/presiterm`](apps/presiterm) | the binary: layout, pager, WezTerm glue, lint, config, manual |
 | [`packages/colonmark`](packages/colonmark) | Markdown with MyST colon-fence directives on comrak, as an owned tree; `{only}` conditions |
+| [`packages/deckmark`](packages/deckmark) | the deck dialect: slides of blocks, diagrams and pictures drawn in the deck's tokens, the Typst faces |
 | [`packages/filmstrip`](packages/filmstrip) | frames to GIF (delta frames), MP4 (pure-Rust H.264), DOCX and PDF; scene transitions |
 | [`packages/swatchbook`](packages/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
 | [`packages/typstkit`](packages/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
