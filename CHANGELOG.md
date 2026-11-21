@@ -2,7 +2,19 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow semver.
 
-## Unreleased
+## 0.3.0 - 2026-11-21
+
+### Changed
+
+- deckmark keeps the marks apart: `Span::highlight` (`==x==`), `Span::underline` (`__x__` only)
+  and `Span::strike` (`~~x~~`). The terminal draws `==` and `__` underlined, as before.
+- typstkit compiles side by side on one `Engine` and keeps Typst's cache until
+  `Engine::evict(max_age)`; deckmark evicts at 10 after a diagram, as the typst CLI does.
+
+### Added
+
+- `//` with spaces around it is a pause: gone from the text, `Span::pause` on what follows.
+  A URL or code keeps its `//`.
 
 ### Removed
 
@@ -10,7 +22,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follo
   `examples/film`) moved to [flipcard](https://github.com/mborejdo/flipcard), which reads the
   same decks. `presiterm film` is a hidden stub that says so, for one release.
 
-## 0.2.0 - unreleased
+## 0.2.0 - 2026-11-21
 
 A rewrite, now a Cargo workspace: the `presiterm` binary and five library crates.
 

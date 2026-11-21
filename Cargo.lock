@@ -413,7 +413,7 @@ dependencies = [
 
 [[package]]
 name = "colonmark"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "comrak",
  "proptest",
@@ -585,7 +585,7 @@ checksum = "be1e0bca6c3637f992fc1cc7cbc52a78c1ef6db076dbf1059c4323d6a2048376"
 
 [[package]]
 name = "deckmark"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "colonmark",
@@ -2111,7 +2111,7 @@ dependencies = [
 
 [[package]]
 name = "presiterm"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -2814,7 +2814,7 @@ dependencies = [
 
 [[package]]
 name = "swatchbook"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde",
  "toml 1.2.0+spec-1.1.0",
@@ -3483,7 +3483,7 @@ dependencies = [
 
 [[package]]
 name = "typstkit"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "swatchbook",
@@ -4210,7 +4210,7 @@ checksum = "9440ea3e5aeabb0ac63af70daf835274065238cdd0cec83418f417eae38bacee"
 
 [[package]]
 name = "xtask"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",
