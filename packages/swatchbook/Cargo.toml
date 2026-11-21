@@ -1,6 +1,6 @@
 [package]
 name = "swatchbook"
-description = "Design tokens for terminal and document tools: two palettes, font families and sizes, overridable from TOML, with Inter and Fira Code vendored."
+description = "Design tokens for terminal and document tools: two palettes, font families and sizes, a chart series, radii and spacing, overridable from TOML, with Inter and Fira Code vendored."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,7 +11,7 @@ homepage.workspace = true
 readme = "README.md"
 keywords = ["theme", "design-tokens", "palette", "fonts", "terminal"]
 categories = ["config", "rendering"]
-include = ["src/**", "fonts/**", "README.md", "Cargo.toml"]
+include = ["src/**", "fonts/**", "build.rs", "tokens.toml", "README.md", "Cargo.toml"]
 
 [lints]
 workspace = true
@@ -23,6 +23,10 @@ fonts = []
 
 [dependencies]
 serde.workspace = true
+
+# Reads tokens.toml into the defaults.
+[build-dependencies]
+toml.workspace = true
 
 [dev-dependencies]
 toml.workspace = true

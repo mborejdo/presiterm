@@ -37,7 +37,9 @@ colours = 48
 ```
 
 The palette tokens of `[theme.dark]` and `[theme.light]` are `ground`, `ink`, `muted`, `accent`,
-`surface`, `border`, `ok`, `warn` and `stop`, each a `"#rrggbb"` colour. The whole `[theme]` table
+`surface`, `border`, `ok`, `warn` and `stop`, each a `"#rrggbb"` colour. `[theme.series]`
+(`dark`, `light`: lists of colours), `[theme.radii]` (`sm`, `md`, `lg`) and `[theme.space]`
+(`gap`) are read too, so a design-token file for web pages fits unchanged. The whole `[theme]` table
 is one key for the rule below: the closest file that has one decides all of it; so are `[film]`
 and `fonts`.
 

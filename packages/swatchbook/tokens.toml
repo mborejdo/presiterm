@@ -1,0 +1,70 @@
+# panelkit's design tokens: the one source of truth for every colour, face and measure a page
+# or a terminal diagram is drawn with. swatchbook's vocabulary - two palettes of the same nine
+# names, the fonts and the diagram sizes - plus what a UI needs on top: a data-viz series,
+# the radii and the gap.
+#
+# `onepage` reads this file (`tokens = "..."` in onepage.toml) and writes every value as a CSS
+# variable (`--ground`, `--series-1`, `--radius-md`, ...), the light palette on `:root`, the
+# dark one under `prefers-color-scheme: dark` and `[data-theme=dark]`. It also teaches the
+# utility generator the colour names, so `bg-surface`, `text-muted` or `border-border` are
+# classes, not hand-written rules.
+#
+# Contrast (pagekit's `tokens` tests): ink, muted, accent, ok, warn and stop reach 4.5:1
+# (WCAG AA for text) on both ground and surface, in both schemes; ground reaches 4.5:1 on
+# accent (a filled button's label); every series colour reaches 3:1 (a graphical object) on
+# both. border is a hairline and has no contrast duty.
+
+# Dark text on a light ground.
+[light]
+ground = "#fbfaf7"   # the page
+ink = "#1d2129"      # body text
+muted = "#606a7e"    # secondary text, captions, rules
+accent = "#1d6fb8"   # links, focus, the one filled button, the selected tab
+surface = "#eef0f4"  # cards, inputs, code
+border = "#d4d8e0"   # the edges of surfaces
+ok = "#2d7a38"       # good news
+warn = "#a15c00"     # attention
+stop = "#c0392b"     # errors
+
+# Light text on a dark ground.
+[dark]
+ground = "#17191f"
+ink = "#e8e6e3"
+muted = "#8b93a7"
+accent = "#7cc4fa"
+surface = "#232733"
+border = "#363c4d"
+ok = "#8fd694"
+warn = "#f2c46d"
+stop = "#f28b82"
+
+# Family names; a page appends the system fallbacks. None is embedded: where the family is not
+# installed, the system face draws.
+[fonts]
+sans = "Inter"
+mono = "Fira Code"
+display = "Inter"
+
+# Text sizes: points in a diagram, CSS pixels on a page (`--size-text`, `--size-label`).
+[sizes]
+text = 13
+label = 11
+
+# The categorical series of a chart, in a fixed order: slot 1 is the first series, always.
+# Six hues - blue, orange, aqua, violet, magenta, ochre - each stepped per scheme and checked
+# as a set: adjacent pairs stay apart under protan, deutan and tritan simulation (OKLab
+# delta E >= 8), and every slot reaches 3:1 on ground and surface. Not the state colours: a
+# seventh series folds into "other", it does not borrow ok or stop.
+[series]
+light = ["#2a78d6", "#d0561f", "#12875f", "#6250d6", "#c4467a", "#a87200"]
+dark = ["#3987e5", "#d95926", "#199e70", "#9085e9", "#d55181", "#c98500"]
+
+# Corner radii: `--radius-sm` for a tag or code, `--radius-md` for a control or a card.
+[radii]
+sm = "4px"
+md = "8px"
+lg = "12px"
+
+# Spacing: `--space-gap`, a card's padding and the gap between stacked parts.
+[space]
+gap = "12px"
