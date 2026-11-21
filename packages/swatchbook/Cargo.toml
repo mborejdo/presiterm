@@ -1,6 +1,6 @@
 [package]
 name = "swatchbook"
-description = "Design tokens for terminal and document tools: two palettes, font families and sizes, a chart series, radii and spacing, overridable from TOML, with Inter and Fira Code vendored."
+description = "Design tokens for terminal and document tools: two palettes, fonts, sizes, a chart series, radii and spacing, overridable from TOML; Inter and Fira Code vendored."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

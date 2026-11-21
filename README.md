@@ -1,59 +1,46 @@
 # presiterm
 
-Markdown in, a WezTerm presentation out.
-
-The text on a slide is real terminal text in WezTerm's own font, so you can change the font size
-while you present. Pictures and diagrams (mermaid, Typst with fletcher, tables) are drawn
-in-process and shown as inline images. Save the Markdown file and presiterm reloads it and jumps to
-the slide you edited. Pure Rust; the only program presiterm starts is `wezterm`.
+Markdown in, a WezTerm presentation out: real terminal text you can resize while you present,
+diagrams and pictures as inline images, reload on save at the slide you edited. Pure Rust, the
+only program it starts is `wezterm`.
 
 ## Install
 
-You need [WezTerm](https://wezterm.org) and a Rust toolchain.
+Needs [WezTerm](https://wezterm.org).
 
 ```sh
 cargo install --git https://github.com/mborejdo/presiterm presiterm
-# or from a checkout
-cargo install --path apps/presiterm
+cargo install --path apps/presiterm                         # from a checkout
+cargo install --path apps/presiterm --no-default-features   # no Typst: much smaller, faster build
 ```
 
-The default build includes the Typst engine (a few minutes for a clean build). Without it:
-
-```sh
-cargo install --path apps/presiterm --no-default-features
-```
-
-That binary is much smaller. A typst fence then is an error on the slide, and tables are drawn
-as aligned text.
+Without Typst, typst fences are errors and tables are aligned text.
 
 ## Usage
 
 ```sh
 presiterm new talk                     # talk/slides.md and an example diagram
-presiterm --window talk/slides.md      # a dedicated WezTerm window, 58x20 cells at 42 pt
-presiterm talk/slides.md               # present in the WezTerm you are in
+presiterm --window talk/slides.md      # own WezTerm window, 58x20 cells at 42 pt
+presiterm talk/slides.md               # in the WezTerm you are in
 presiterm lint talk/slides.md          # does every slide fit, is every file there
 presiterm ctl goto 5                   # drive a running presentation from another terminal
 ```
 
-Keys: space, right or enter for the next step (a bullet, a lit diagram node) or slide; backspace
-or left to go back; `n` for the speaker notes; `+`, `-` and `0` for the font size; `12` then enter
-to jump; `q` to quit.
+Keys: space, right, enter next step or slide; backspace, left back; `n` notes; `+`, `-`, `0`
+font size; `12` enter jumps; `q` quits.
 
-Everything else is in the manual that ships in the binary:
+The manual is in the binary, sources in [docs/handbook/](docs/handbook/):
 
 ```sh
 presiterm --help             # commands, examples, exit codes
-presiterm handbook           # topics: quickstart, keys, dialect, diagrams, window, config, tools, troubleshooting
-presiterm handbook dialect   # one topic in full
-presiterm tldr font size     # search the manual
+presiterm handbook           # quickstart, keys, dialect, diagrams, window, config, tools, troubleshooting
+presiterm handbook dialect   # one topic
+presiterm tldr font size     # search it
 ```
 
-The topics are the Markdown files in [docs/handbook/](docs/handbook/).
+## Slides
 
-## Slide syntax
-
-A deck is one Markdown file. Slides split on `#` and `##` headings and on `---` lines.
+One file, split on `#`, `##` and `---`.
 
 ````markdown
 ---
@@ -106,14 +93,10 @@ This paragraph is only in the long version.
 :::
 ````
 
-- Every line of a paragraph stays its own line on the slide.
-- Inline: `**bold**`, `*italic*`, `` `code` ``, `==marked==` and `__marked__` (underlined).
-- `{h=N}` and `{w=N}` after a picture give its height and largest width in cells; without `h` it
-  takes the rest of the slide.
-- Colon fences in the MyST style (`:::{name} argument`, `:key: value` options) group content.
-  presiterm knows `notes`, `metrics` and `only`; any other directive shows its body.
-  `:::{only} expr` and an `:only: expr` option keep content when `expr` (tags with `and`, `or`,
-  `not`, parentheses) holds for the frontmatter's `tags:`.
+- Each paragraph line stays a line. `==marked==` and `__marked__` are underlined.
+- `{h=N}`, `{w=N}`: picture height and largest width in cells; without `h` it fills the slide.
+- MyST colon fences: `notes`, `metrics`, `only`; others show their body. `{only} expr` and
+  `:only: expr` keep content when `expr` (`and`, `or`, `not`, parentheses) holds for `tags:`.
 
 ## Diagrams
 
@@ -134,32 +117,29 @@ flowchart LR
 ```
 ````
 
-- Mermaid (fence or `.mmd` file) is drawn by mermaid-rs-renderer in the theme's colours. `steps`
-  lights one node per key press; `steps=a,b,c` picks the nodes and their order.
-- A `typst` fence is Typst source. Calls to `diagram`, `node` or `edge` import
-  [fletcher](https://typst.app/universe/package/fletcher), downloaded from Typst Universe on first
-  use and cached. The palette tokens (`ink`, `accent`, `ok`, ...) are Typst colours in the fence.
-
-`presiterm handbook diagrams` has the details.
+Mermaid (fence or `.mmd`) in the theme's colours; `steps` lights a node per key press,
+`steps=a,b,c` picks which and in what order. `typst` fences using `diagram`, `node` or `edge` get
+[fletcher](https://typst.app/universe/package/fletcher) (fetched once, cached) and the palette
+tokens as colours. More: `presiterm handbook diagrams`.
 
 ## Film
 
-The film (`presiterm film` up to 0.2.0) is its own tool now: [flipcard](https://github.com/mborejdo/flipcard). It reads the same
-decks and draws the same cards: `flipcard talk/slides.md`.
+`presiterm film` (up to 0.2.0) is [flipcard](https://github.com/mborejdo/flipcard) now:
+`flipcard talk/slides.md`.
 
 ## Config
 
-Settings you want every time go in `presiterm.toml` next to the deck (or in a folder above it), or
-in `~/.config/presiterm/config.toml`. Per key, the closest file wins; a flag beats both.
+`presiterm.toml` next to the deck or above, or `~/.config/presiterm/config.toml`. Per key the
+closest wins, a flag beats both.
 
 ```toml
 font_size = 48
 screen    = "1728x1117"   # what `presiterm lint` checks against
 grid      = "58x20"       # the --window grid, columns x rows
-logo      = "logo.svg"    # top left corner of every slide, relative to this file
+logo      = "logo.svg"    # top left of every slide, relative to this file
 fonts     = ["fonts"]     # extra font files or folders, relative to this file
 
-[theme.dark]              # any design token; the rest keep their defaults
+[theme.dark]              # any design token, the rest keep their defaults
 accent = "#ff8800"
 
 [theme.fonts]
@@ -167,39 +147,42 @@ mono = "Fira Code"        # typst diagrams and tables; Inter and Fira Code are b
 display = "Inter"         # headings in a film of the deck (flipcard)
 ```
 
-`presiterm config talk/slides.md` shows which files apply and where each value comes from.
+`presiterm config talk/slides.md` shows where each value comes from.
+
+## How it works
+
+- colonmark parses Markdown and colon fences (comrak), deckmark cuts slides of blocks.
+- Text goes onto the window's cell grid as terminal text.
+- Pictures and diagrams are drawn at their cells' pixel size, cached, sent as OSC 1337 images.
+- A font size change is a WezTerm user variable; the slide is laid out again on the new grid.
+- A 300 ms poll reloads the deck and jumps to the first changed line.
 
 ## Examples
 
-`examples/` has three decks: `intro` (the dialect), `diagrams` (mermaid and fletcher) and `media`
-(a picture on the light theme).
-
-```sh
-presiterm --window examples/intro/slides.md
-```
+`examples/intro` (the dialect), `diagrams` (mermaid, fletcher), `media` (a picture, light
+theme): `presiterm --window examples/intro/slides.md`.
 
 ## Workspace
 
 | crate | what |
 |---|---|
 | [`apps/presiterm`](apps/presiterm) | the binary: layout, pager, WezTerm glue, lint, config, manual |
-| [`packages/colonmark`](packages/colonmark) | Markdown with MyST colon-fence directives on comrak, as an owned tree; `{only}` conditions |
-| [`packages/deckmark`](packages/deckmark) | the deck dialect: slides of blocks, diagrams and pictures drawn in the deck's tokens, the Typst faces |
-| [`packages/swatchbook`](packages/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
-| [`packages/typstkit`](packages/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
-| [`xtask`](xtask) | the task runner: `cargo xtask qa` and the other checks |
+| [`packages/colonmark`](packages/colonmark) | Markdown with MyST colon fences on comrak, as an owned tree; `{only}` |
+| [`packages/deckmark`](packages/deckmark) | the deck dialect: slides, diagrams and pictures in the deck's tokens, the Typst faces |
+| [`packages/swatchbook`](packages/swatchbook) | design tokens with a TOML overlay; Inter and Fira Code vendored |
+| [`packages/typstkit`](packages/typstkit) | in-process Typst to PNG, SVG and PDF, vendored fonts, Typst Universe packages |
+| [`xtask`](xtask) | `cargo xtask qa` and the other checks |
 
 ## Development
 
 ```sh
-cargo xtask qa       # fmt-check, lint, test, doc, no-shellout: green before every commit
+cargo xtask qa       # fmt-check, lint, test, doc, no-shellout
 cargo xtask demo     # lint the example decks
 ```
 
-[docs/development.md](docs/development.md) has every task and the test conventions,
-[docs/design.md](docs/design.md) the design decisions.
+More: [docs/development.md](docs/development.md), [docs/design.md](docs/design.md).
 
 ## License
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT)
-at your option. The fonts in `packages/swatchbook/fonts` are under the SIL Open Font License 1.1.
+[Apache-2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT), at your option. The fonts in
+`packages/swatchbook/fonts` are SIL OFL 1.1.

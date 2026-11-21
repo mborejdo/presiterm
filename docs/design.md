@@ -1,54 +1,41 @@
 # Design decisions
 
-Why presiterm looks the way it does. The user manual is `presiterm handbook` (sources in
-`docs/handbook/`); this page is for whoever changes the code.
+For whoever changes the code. The manual is `presiterm handbook` (`docs/handbook/`).
 
 ## Decisions
 
-* **Workspace:** the binary in `apps/presiterm` (a library plus a thin `main.rs` for dispatch and
-  `cli.rs` for the clap CLI and its help texts) and four library crates meant to be reused:
-  `colonmark` (Markdown and MyST colon-fence directives), `deckmark` (the deck dialect, its
-  diagrams and pictures), `swatchbook` (design tokens and the vendored fonts) and `typstkit`
-  (in-process Typst). The film is flipcard's now, on deckmark.
-* **WezTerm only, OSC 1337 (iTerm2 inline image protocol):** WezTerm's own image path;
-  it sizes an image by cell height with the aspect kept, and plays animated GIFs through it. Its
-  kitty graphics support is partial, so kitty is not used. Not WezTerm: exit with one line, no
-  fallback.
-* **Pure Rust, one program started:** Markdown by comrak (through colonmark), mermaid in-process
-  (`mermaid-rs-renderer`, coloured from the tokens), SVG to PNG with `resvg`, Typst and fletcher
-  through typstkit; its own token highlighter (bash, yaml, toml, json, rust, md; syntect would add
-  about 1.5 MB and two regex engines for six languages); `rustix` for raw mode and window size; a
-  300 ms mtime poll instead of `notify`. `cargo xtask no-shellout` fails if any `Command::new`
-  other than `wezterm` appears in the app.
-* **No fallbacks:** a missing image, a broken diagram or a non-WezTerm terminal is an error (a red
-  line on the slide plus a lint error), never a degraded mode.
-* **Theme:** two palettes (dark, the default, and light) with open defaults in `swatchbook`;
-  `theme: light` in the frontmatter picks one, a `[theme]` table in `presiterm.toml` changes any
-  token. The window text uses JetBrains Mono, which WezTerm bundles.
-* **Help is part of the product:** every command's `--help` ends in Examples and Exit codes, the
-  handbook is embedded from `docs/handbook/*.md`, and tests in `apps/presiterm/src/cli.rs` fail when
-  a flag has no example or a flag or command is missing from the handbook. A new flag is not done
-  until it is documented.
-* **Exit codes:** 0 done, 1 `presiterm lint` found errors, 2 presiterm could not do what was asked
-  (the reason is one line on stderr: `presiterm: <what failed>: <why>`).
+* **Workspace:** `apps/presiterm` (a library, a thin `main.rs`, `cli.rs` for clap and help) and
+  four reusable crates: `colonmark`, `deckmark`, `swatchbook`, `typstkit`. The film is
+  flipcard's, on deckmark.
+* **WezTerm only, OSC 1337 (iTerm2 inline images):** WezTerm's own path, sizes by cell height
+  with the aspect kept, plays GIFs. Its kitty graphics are partial, so no kitty.
+* **Pure Rust, one program started:** comrak, `mermaid-rs-renderer`, `resvg`, Typst via
+  typstkit; an own highlighter for six languages (syntect: about 1.5 MB and two regex engines);
+  `rustix` for raw mode and window size; a 300 ms mtime poll, not `notify`.
+  `cargo xtask no-shellout` fails on any `Command::new` but `wezterm`.
+* **No fallbacks:** a missing image, a broken diagram or another terminal is an error (red line
+  plus lint error, or one line and exit), never a degraded mode.
+* **Theme:** dark (default) and light, open defaults in `swatchbook`, any token changed by
+  `[theme]`. Window text is JetBrains Mono, bundled with WezTerm.
+* **Help is part of the product:** every `--help` ends in Examples and Exit codes, the handbook
+  is embedded from `docs/handbook/*.md`, and tests in `apps/presiterm/src/cli.rs` fail on a flag
+  without an example or a flag or command missing from the handbook. Undocumented is not done.
+* **Exit codes:** 0 done, 1 lint errors, 2 could not do it (`presiterm: <what failed>: <why>`
+  on stderr).
 
 ## The dialect on CommonMark
 
-The slide dialect sits on CommonMark with GitHub tables. Where it differs:
+CommonMark with GitHub tables, but:
 
 * A `---` line is always a slide break: setext headings are off.
-* Every source line of a paragraph is its own line on the slide.
-* `- a` followed by `+ b` is one list on the slide (CommonMark starts a new list at a new marker);
-  `+` marks a bullet that appears on a key press.
-* `__text__` is underlined, not bold; `==text==` is underlined too.
+* Each source line of a paragraph is its own line on the slide.
+* `- a` then `+ b` is one list (CommonMark would start a new one); `+` appears on a key press.
+* `__text__` is underlined, not bold; so is `==text==`.
 * A picture alone on its line takes `{h=7,w=20}` after it.
 
 ## Supported
 
-* The highlighter colours a string on the line where it starts. Keep strings on one line.
-* Mermaid draws flowchart, sequenceDiagram, classDiagram, stateDiagram, erDiagram, pie, gantt,
-  journey, timeline, mindmap, gitGraph, quadrantChart, sankey, xychart, kanban, block,
-  architecture, requirementDiagram, packet, radar and treemap. Name `steps=a,b,c` to fix the
-  order in which nodes light up.
-* The `+` and `-` keys and the first-start font application use the same code path as
-  `presiterm ctl font`.
+* The highlighter colours a string on the line it starts on.
+* Mermaid: the kinds mermaid-rs-renderer draws (`presiterm handbook diagrams` lists them);
+  `steps=a,b,c` fixes the lighting order.
+* `+`, `-` and the font size at start share the code path of `presiterm ctl font`.

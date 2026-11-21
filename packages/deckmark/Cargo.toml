@@ -1,6 +1,6 @@
 [package]
 name = "deckmark"
-description = "The presiterm deck dialect: Markdown in, slides of blocks out, with the diagrams and pictures drawn in the deck's tokens."
+description = "The presiterm deck dialect: Markdown in, slides of blocks out, diagrams and pictures in the deck's tokens."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

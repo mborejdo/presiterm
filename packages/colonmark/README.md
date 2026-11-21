@@ -21,14 +21,13 @@ Shown only when the tag `long` is active and `draft` is not.
 ::::
 ```
 
-- `parse(source)` gives a `Document`: the frontmatter pairs and the blocks (headings, paragraphs,
-  lists, code, tables, quotes, rules, HTML and directives), every block with its 1-based line.
-- A directive is `:::{name} argument`, its `:key: value` option lines directly after the opener,
-  and its body as blocks and as raw text. More colons on the outer fence
-  nest one directive in another.
-- `only::apply` keeps or drops content by tags: `:::{only} expr` blocks and any directive with an
-  `:only: expr` option; `only::filter` does the same on the source text. `expr` is tags joined by
-  `and`, `or`, `not` and parentheses.
+- `parse(source)` gives a `Document`: frontmatter pairs and blocks (headings, paragraphs, lists,
+  code, tables, quotes, rules, HTML, directives), each with its 1-based line.
+- A directive is `:::{name} argument`, `:key: value` option lines right after the opener, and a
+  body as blocks and raw text. More colons on the outer fence nest one directive in another.
+- `only::apply` keeps or drops content by tags (`:::{only} expr` blocks and any directive with
+  `:only: expr`), `only::filter` does the same on the source text. `expr` is tags with `and`,
+  `or`, `not` and parentheses.
 - `sections` cuts blocks at headings and rules, for slides or chapters.
 
 License: MIT OR Apache-2.0.

@@ -14,8 +14,8 @@ static SCREEN_TEXT: LazyLock<String> =
 /// What the top of `--help` says: the idea in a few lines.
 const ABOUT: &str = "Markdown in, a WezTerm presentation out
 
-The text is real terminal text (WezTerm's own font, so the font size is yours to change); diagrams \
-and pictures are inline images. Pure Rust: the only program presiterm starts is `wezterm`.";
+Slide text is real terminal text in WezTerm's font, so the size is yours to change; diagrams and \
+pictures are inline images. Pure Rust, the only program it starts is `wezterm`.";
 
 /// The end of the root `--help`: examples, the manual, exit codes.
 const ROOT_FOOTER: &str = "\
@@ -28,20 +28,20 @@ Examples:
   presiterm --window talk/slides.md --reveal  every bullet is a key press
   presiterm --window talk/slides.md --no-watch --control /tmp/talk.sock
                                               no reload on save, a socket of your own
-  presiterm talk/slides.md --cell-px 21x42    cell size in pixels, for a terminal that does not report it
+  presiterm talk/slides.md --cell-px 21x42    cell size in pixels, if the terminal does not report it
   presiterm lint talk/slides.md               does every slide fit, is every file there
   presiterm config talk/slides.md             which presiterm.toml applies, and the effective settings
   presiterm ctl goto 5                        drive the running window from another terminal
   presiterm doctor                            does this WezTerm follow the font-size variable
   presiterm handbook                          the manual (keys, dialect, window); `presiterm tldr font` searches it
 
-Defaults: 42 pt, a 1728x1117 screen, a 58x20 grid. A `presiterm.toml` in the deck's folder (or above it),
-or ~/.config/presiterm/config.toml, changes them; a flag typed here beats both. See `presiterm handbook config`.
+Defaults: 42 pt, a 1728x1117 screen, a 58x20 grid. A `presiterm.toml` in the deck's folder (or above),
+or ~/.config/presiterm/config.toml, changes them; a flag beats both. See `presiterm handbook config`.
 
 Exit codes:
   0  done
   1  `presiterm lint` found errors in the deck
-  2  presiterm could not do what you asked (the reason is the one line on stderr)";
+  2  presiterm could not do what you asked (the reason is one line on stderr)";
 
 const LINT_FOOTER: &str = "\
 Examples:
@@ -63,9 +63,9 @@ Examples:
   presiterm config                     look up from the current folder
   presiterm config talk/slides.md      look up from the deck's folder
 
-Prints the files it found, closest first (the closest presiterm.toml wins, farther ones are ignored,
-then ~/.config/presiterm/config.toml), and each setting with where its value came from: a file or
-`default`. Per key, the closest file that sets it wins.
+Prints the files found, closest first (the closest presiterm.toml, farther ones ignored, then
+~/.config/presiterm/config.toml), and each setting with its source: a file or `default`. Per key,
+the closest file that sets it wins.
 
 Exit codes:
   0  printed
@@ -99,8 +99,8 @@ Exit codes:
   2  no running presenter, or it refused the command (slide out of range, unknown command)";
 
 const DOCTOR_FOOTER: &str = "\
-Run it inside the WezTerm you present in: it sets the font size to 30 pt, then back, and watches
-the window size. If nothing changed it prints the Lua handler to add to your wezterm.lua.
+Run it in the WezTerm you present in: it sets the font size to 30 pt and back and watches the
+window size. If nothing changed it prints the Lua handler for your wezterm.lua.
 
 Examples:
   presiterm doctor

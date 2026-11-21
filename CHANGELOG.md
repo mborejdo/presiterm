@@ -6,48 +6,43 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follo
 
 ### Removed
 
-- The film: `presiterm film`, `presiterm lint --film`, the `[film]` table, `packages/filmstrip`
-  and `examples/film` moved to [flipcard](https://github.com/mborejdo/flipcard), which reads the
+- The film (`presiterm film`, `presiterm lint --film`, `[film]`, `packages/filmstrip`,
+  `examples/film`) moved to [flipcard](https://github.com/mborejdo/flipcard), which reads the
   same decks. `presiterm film` is a hidden stub that says so, for one release.
 
 ## 0.2.0 - unreleased
 
-A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and five library crates.
+A rewrite, now a Cargo workspace: the `presiterm` binary and five library crates.
 
 ### Added
 
-- `presiterm film`: the deck as a looping GIF, an MP4 (pure-Rust H.264), an A4 landscape Word
-  file that plays the GIF and a PDF that plays the MP4 on page open; every key press a build-in
-  (bullets appear, marked text underlines itself, metrics count up, titles land word by word,
-  `steps` diagrams light up); `presiterm lint --film`; `[film]` in `presiterm.toml` and the
-  same keys in the frontmatter; `links:` in the frontmatter.
-- `:::{metrics}` directive: `value | label` lines as big numbers in a row.
-- `pace` (film): words per minute; a scene with more words than `hold` covers stays for its
-  reading time. `filmstrip::Scene` carries a hold per scene.
-- `transition` (film): `fade`, `wipe`, `push`, `pixelize`, `circle`, `split` or `cut` between
-  scenes, as a flag, a frontmatter key or a `[film]` key; `filmstrip::Transition`.
-- `fonts = [...]` in `presiterm.toml`: font files and folders Typst draws with, next to the
-  vendored faces; `[theme.fonts] display` for the film's headings.
-- `deckmark`: the deck dialect (slides of blocks, diagrams and pictures in the deck's tokens,
-  the Typst faces), as a crate.
-- `filmstrip`: frames to GIF (delta frames, learned palette), MP4, DOCX and PDF, as a crate.
-- `typstkit::Engine::raster` (pixels with string and byte inputs) and `Input::Bytes`.
-- Markdown slides in a WezTerm window: real terminal text, pictures and diagrams as OSC 1337
-  inline images, a live font size (`+`, `-`, `--font-size`), reload on save that jumps to the
-  edited slide, speaker notes, `+` bullets that appear per key press, a control socket
-  (`presiterm ctl`), `presiterm lint`, `presiterm new`, `presiterm doctor`, `presiterm config`
-  and a built-in manual (`presiterm handbook`, `presiterm tldr`).
-- Mermaid diagrams in-process, with `steps` that light one node per key press.
-- Typst diagrams with fletcher (feature `typst`, on by default), tables drawn as Typst pictures.
+- Slides in a WezTerm window: terminal text, OSC 1337 pictures and diagrams, live font size
+  (`+`, `-`, `--font-size`), reload on save at the edited slide, speaker notes, `+` bullets, a
+  control socket (`presiterm ctl`), `lint`, `new`, `doctor`, `config`, a built-in manual
+  (`handbook`, `tldr`).
+- Mermaid diagrams in-process, `steps` lights one node per key press.
+- Typst diagrams with fletcher (feature `typst`, default on); tables drawn as Typst pictures.
 - `presiterm.toml` (closest wins, then `~/.config/presiterm/config.toml`): font size, screen,
-  grid, a `[theme]` table over the default design tokens, and a corner `logo`.
-- MyST colon-fence directives: `:::{notes}`, and `:::{only} expr` / `:only: expr` with the
-  frontmatter's `tags:`. A fence without `{name}` is no directive: its body shows on the slide.
-- `colonmark`: Markdown with MyST colon-fence directives on comrak, as an owned tree.
-- `swatchbook`: design tokens (two palettes, font families, sizes) with a TOML overlay, Inter and
-  Fira Code vendored (OFL-1.1).
-- `typstkit`: in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe
-  packages.
+  grid, a `[theme]` table over the default tokens, a corner `logo`.
+- `fonts = [...]`: extra font files and folders for Typst; `[theme.fonts] display` for film
+  headings.
+- MyST colon fences: `:::{notes}`, `:::{only} expr` / `:only: expr` on the frontmatter's `tags:`.
+  A fence without `{name}` is no directive, its body shows.
+- `:::{metrics}`: `value | label` lines as big numbers in a row.
+- `presiterm film`: a looping GIF, an MP4 (pure-Rust H.264), an A4 landscape DOCX playing the
+  GIF, a PDF playing the MP4 on open. Each key press is a build-in (bullets appear, marks
+  underline, metrics count up, titles land word by word, `steps` light up). `lint --film`,
+  `[film]` and the same frontmatter keys, `links:`.
+- Film `pace` (words per minute: a scene with more words than `hold` covers stays its reading
+  time; per-scene hold in `filmstrip::Scene`) and `transition` (`fade`, `wipe`, `push`,
+  `pixelize`, `circle`, `split`, `cut`; flag, frontmatter or `[film]`; `filmstrip::Transition`).
+- Crates: `colonmark` (Markdown with MyST colon fences on comrak, as an owned tree), `deckmark`
+  (the dialect: slides of blocks, diagrams and pictures in the deck's tokens, the Typst faces),
+  `swatchbook` (tokens: two palettes, font families, sizes, a TOML overlay; Inter and Fira Code
+  vendored, OFL-1.1), `typstkit` (in-process Typst to PNG, SVG, PDF with the vendored fonts and
+  Typst Universe packages), `filmstrip` (frames to GIF with delta frames and a learned palette,
+  MP4, DOCX, PDF).
+- `typstkit::Engine::raster` (pixels, string and byte inputs) and `Input::Bytes`.
 
 ### Removed
 
@@ -55,4 +50,4 @@ A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and five l
 
 ## 0.1.0 - 2022
 
-- First version: RON-described slides rendered with termimad.
+- First version: RON slides rendered with termimad.

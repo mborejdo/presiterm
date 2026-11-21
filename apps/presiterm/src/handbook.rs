@@ -17,7 +17,7 @@ pub struct Topic {
 }
 
 /// What `presiterm handbook` prints above the list of topics.
-pub const OVERVIEW: &str = "presiterm turns a Markdown file into a presentation in a WezTerm window. Text is real terminal text (WezTerm's own font, so the font size is yours to change); diagrams and pictures are inline images. Start with `presiterm new talk`, present with `presiterm --window talk/slides.md`, check with `presiterm lint talk/slides.md`. The file reloads on save and jumps to the slide you edited.";
+pub const OVERVIEW: &str = "presiterm turns a Markdown file into a presentation in a WezTerm window. Text is real terminal text in WezTerm's font, so the size is yours to change; diagrams and pictures are inline images. Start with `presiterm new talk`, present with `presiterm --window talk/slides.md`, check with `presiterm lint talk/slides.md`. On save the deck reloads at the slide you edited.";
 
 macro_rules! topic {
     ($key:literal, $title:literal) => {
