@@ -1,5 +1,5 @@
 ---
-title: "presiterm in ten slides"
+title: "presiterm in eight slides"
 author: "Michael Borejdo"
 theme: dark
 tags: long
@@ -7,7 +7,7 @@ tags: long
 
 # presiterm
 
-**Markdown in, a terminal presentation out**
+**Markdown in, a WezTerm presentation out**
 
 Text is terminal text, pictures are inline images
 

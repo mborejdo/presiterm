@@ -10,7 +10,7 @@ presiterm lint talk/slides.md --film               # which cards do not fit
 ```
 
 The same deck that presents in the window renders as a film: every slide is a 16:9 card in the
-deck's tokens (the `[theme]` table, `theme: light`), drawn by Typst in process, no browser.
+deck's tokens (the `[theme]` table, `theme: light`), drawn in-process by Typst, no browser.
 Every key press of the talk is a build-in step of the film:
 
 | in the window | in the film |

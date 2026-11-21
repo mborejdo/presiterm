@@ -18,8 +18,8 @@ error (warnings and notes do not fail), 2 when the deck cannot be read or has no
 
 Prints the config files it found, closest first (`presiterm.toml` from the deck's folder upward, then
 `~/.config/presiterm/config.toml`), what it did with each, and the effective font size, screen and
-grid, the theme and the logo with their source: a file path or `default`. DECK is a deck file or its folder; default is
-the current folder. Exit 0, or 2 when a file has an unknown key or a bad value. The rules are in
+grid, the theme and the logo with their source: a file path or `default`. DECK is a deck file or
+its folder; default is the current folder. Exit 0, or 2 when a file has an unknown key or a bad value. The rules are in
 `presiterm handbook config`.
 
 ## presiterm doctor

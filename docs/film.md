@@ -36,7 +36,7 @@ Frames in, files out. Knows nothing about Markdown or Typst.
 - `gif::encode(frames, keyframes, fps, colours)`: one NeuQuant palette learned from the keyframes
   plus a transparent slot, delta frames (the changed rectangle only, unchanged pixels
   transparent), long holds split into legal delays. This is what keeps a 14-card film near 1 MB.
-- `mp4::encode(frames, fps)`: H.264 through `rusty_h264-encoder`, boxed by `mp4`, no B-frames.
+- `video::encode(frames, fps)` (feature `mp4`): H.264 through `rusty_h264-encoder`, boxed by `mp4`, no B-frames.
 - `docx::wrap(poster, gif, links)`: an A4 landscape Word file with the GIF as its only picture and
   a line of links under it (docx-rs, then a zip pass that swaps the PNG part for the GIF). Word
   plays the GIF in place.
@@ -82,15 +82,16 @@ How the deck's semantics become motion:
 | `{only}` tags | the same `--tags` as the window |
 
 Timing lives in `presiterm.toml` (`[film] fps = 10, width = 640, hold = 7, enter = 1.6,
-fade = 0.4, transition = "fade", pace = 200, colours = 48`) and in the frontmatter with the same keys; a flag beats
-both, as everywhere. `hold` is the least a scene stays; a scene with more words than that covers
-at `pace` words per minute stays for its reading time. `presiterm lint --film` checks every slide at the film's geometry (a card that
-overflows is an error, with the rows that do not fit).
+fade = 0.4, transition = "fade", pace = 200, colours = 48`) and in the frontmatter with the same
+keys; a flag beats both, as everywhere. `hold` is the least a scene stays; a scene with more words
+than that covers at `pace` words per minute stays for its reading time. `presiterm lint --film`
+checks every slide at the film's geometry (a card that overflows is an error, with the rows that
+do not fit).
 
-Two directives join the dialect because talks want them and the film gives them motion:
-`:::{metrics}` with `value | label` lines (big numbers in a row; the window draws them large,
-the film counts them up) and `:::{columns}` for a picture beside text. Both are plain blocks in
-the window and need no new rendering idea there.
+The plan had two new directives, because talks want them and the film gives them motion:
+`:::{metrics}` with `value | label` lines (big numbers in a row; the window draws them large, the
+film counts them up) and `:::{columns}` for a picture beside text. `metrics` was built;
+`columns` was left out (see below).
 
 ## What was built
 

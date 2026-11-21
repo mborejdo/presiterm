@@ -1,4 +1,4 @@
-# presiterm: Markdown in, a terminal presentation out. A thin Markdown -> WezTerm renderer and a
+# presiterm: Markdown in, a WezTerm presentation out. A thin Markdown -> WezTerm renderer and a
 # tiny pager. WezTerm is the engine (its own font, its OSC 1337 inline images); presiterm lays text
 # out as plain ANSI lines and draws diagrams and pictures as inline images.
 [workspace]

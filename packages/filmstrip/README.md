@@ -13,7 +13,7 @@ Frames in, films out. A list of RGB frames (whatever drew them) becomes:
 `sequence` turns scenes (each its build-in frames and a hold of its own) into the frame list:
 every scene's build-in, the hold on its last frame, a `Transition` into the next scene (fade,
 wipe, push, pixelize, circle, split or cut, each drawn on the CPU and readable at 10 fps), the
-last scene going back into the first so the loop is seamless.
+and the last scene going back into the first, so the loop has no jump.
 
 ```rust
 use filmstrip::{Frame, Scene, Timing, Transition};

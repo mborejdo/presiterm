@@ -272,7 +272,7 @@ pub struct Scene<'a> {
 
 /// The frames of the whole film. Every scene's build-in frames stay `ticks` frames each, the
 /// last one until the scene's `hold` is used up, then the transition into the next scene, the
-/// last into the first so the loop is seamless.
+/// last into the first so the loop has no jump.
 ///
 /// # Examples
 ///

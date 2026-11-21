@@ -9,13 +9,13 @@ Why presiterm looks the way it does. The user manual is `presiterm handbook` (so
   `cli.rs` for the clap CLI and its help texts) and four library crates meant to be reused:
   `colonmark` (Markdown and MyST colon-fence directives), `swatchbook` (design tokens and the
   vendored fonts), `typstkit` (in-process Typst) and `filmstrip` (frames to GIF, MP4, DOCX, PDF).
-* **WezTerm only, OSC 1337 (iTerm2 inline image protocol):** WezTerm's native, robust image path;
+* **WezTerm only, OSC 1337 (iTerm2 inline image protocol):** WezTerm's own image path;
   it sizes an image by cell height with the aspect kept, and plays animated GIFs through it. Its
   kitty graphics support is partial, so kitty is not used. Not WezTerm: exit with one line, no
   fallback.
 * **Pure Rust, one program started:** Markdown by comrak (through colonmark), mermaid in-process
   (`mermaid-rs-renderer`, coloured from the tokens), SVG to PNG with `resvg`, Typst and fletcher
-  through typstkit; an own token highlighter (bash, yaml, toml, json, rust, md; syntect would add
+  through typstkit; its own token highlighter (bash, yaml, toml, json, rust, md; syntect would add
   about 1.5 MB and two regex engines for six languages); `rustix` for raw mode and window size; a
   300 ms mtime poll instead of `notify`. `cargo xtask no-shellout` fails if any `Command::new`
   other than `wezterm` appears in the app.
@@ -26,8 +26,8 @@ Why presiterm looks the way it does. The user manual is `presiterm handbook` (so
   token. The window text uses JetBrains Mono, which WezTerm bundles.
 * **Help is part of the product:** every command's `--help` ends in Examples and Exit codes, the
   handbook is embedded from `docs/handbook/*.md`, and tests in `apps/presiterm/src/cli.rs` fail when
-  a flag has no example or a flag or command is missing from the handbook. Adding a flag therefore
-  means documenting it.
+  a flag has no example or a flag or command is missing from the handbook. A new flag is not done
+  until it is documented.
 * **Exit codes:** 0 done, 1 `presiterm lint` found errors, 2 presiterm could not do what was asked
   (the reason is one line on stderr: `presiterm: <what failed>: <why>`).
 

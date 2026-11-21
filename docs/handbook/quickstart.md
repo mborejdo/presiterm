@@ -8,8 +8,8 @@ presiterm film talk/slides.md           # the deck as a looping GIF (--mp4 --doc
 ```
 
 Edit `talk/slides.md` in your editor and save: the window reloads and jumps to the slide of the
-first line you changed. `presiterm deck.md` without `--window` presents in the WezTerm you ran it in;
-in any other terminal it exits with one line saying so.
+first line you changed. `presiterm deck.md` without `--window` presents in the WezTerm you ran it
+in; in any other terminal it exits with one line saying so.
 
 Variations:
 
@@ -24,9 +24,9 @@ presiterm talk/slides.md --no-watch                  # do not reload on save (ke
 Settings you always want (font size, screen, grid) can live in a `presiterm.toml` next to the deck
 instead of in flags; `presiterm config` shows which file applies (`presiterm handbook config`).
 
-Where to look next: `presiterm handbook keys`, `dialect`, `diagrams`, `window`, `film`, `config`, `tools`,
-`troubleshooting`; `presiterm tldr <words>` searches all of it; `presiterm <command> --help` has examples
-and exit codes for each command.
+Where to look next: `presiterm handbook keys`, `dialect`, `diagrams`, `window`, `film`, `config`,
+`tools`, `troubleshooting`. `presiterm tldr <words>` searches all of it; `presiterm <command> --help`
+has examples and exit codes for each command.
 
-Exit codes: 0 done, 1 `presiterm lint` found errors, 2 presiterm could not do what you asked (one line on
-stderr, `presiterm: <what failed>: <why>`).
+Exit codes: 0 done, 1 `presiterm lint` found errors, 2 presiterm could not do what you asked (one
+line on stderr, `presiterm: <what failed>: <why>`).

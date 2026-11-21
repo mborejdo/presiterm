@@ -24,11 +24,11 @@ enter: 1.2
 # Numbers count up
 
 :::{metrics}
-1 200 | cards rendered
-60 % | smaller than video
+4 | formats
+7 | transitions
 :::
 
-The palette is learned from the stills, only changed pixels are stored.
+One palette from the stills; only changed pixels are stored.
 
 ---
 

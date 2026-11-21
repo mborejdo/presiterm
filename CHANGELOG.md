@@ -4,7 +4,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follo
 
 ## 0.2.0 - unreleased
 
-A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and three library crates.
+A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and four library crates.
 
 ### Added
 

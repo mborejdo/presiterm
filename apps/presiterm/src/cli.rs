@@ -11,7 +11,7 @@ use presiterm::config::{DEFAULT_GRID, DEFAULT_SCREEN};
 static SCREEN_TEXT: LazyLock<String> =
     LazyLock::new(|| format!("{}x{}", DEFAULT_SCREEN.0, DEFAULT_SCREEN.1));
 
-/// What the top of `--help` says: the idea in a few lines, then the three ways in.
+/// What the top of `--help` says: the idea in a few lines.
 const ABOUT: &str = "Markdown in, a WezTerm presentation out
 
 The text is real terminal text (WezTerm's own font, so the font size is yours to change); diagrams \
@@ -68,11 +68,11 @@ Examples:
   presiterm film talk/slides.md --cards dist/cards   every card, fully built, as PNG (card03-007.png: slide 3, scene 7)
   presiterm film talk/slides.md --preview            play the GIF inline in this WezTerm
   presiterm film talk/slides.md --width 960 --fps 12 --hold 5 --enter 1.2 --fade 0.3 --colours 64
-  presiterm film talk/slides.md --transition wipe   # or push, pixelize, circle, split, cut
+  presiterm film talk/slides.md --transition wipe   wipe instead of fade (or push, pixelize, circle, split, cut)
 
 Every key press of the talk is a build-in of the film: `enter` seconds of animation, then `hold`
-seconds of rest. The deck's frontmatter (fps, width, hold, enter, fade, transition, pace, colours) and a `[film]`
-table in presiterm.toml set the same values; a flag typed here beats both. `links:` in the
+seconds of rest. The deck's frontmatter (fps, width, hold, enter, fade, transition, pace,
+colours) and a `[film]` table in presiterm.toml set the same values; a flag typed here beats both. `links:` in the
 frontmatter go under the picture in the Word and PDF editions. A card that does not fit is an
 error naming the slide; `presiterm lint --film` finds them all first.
 
@@ -269,16 +269,16 @@ pub(crate) struct FilmArgs {
     /// Width in pixels, even (--width 960); default 640, the height follows 16:9.
     #[arg(long, value_name = "PX")]
     pub(crate) width: Option<u32>,
-    /// Seconds every card stays, build-in included (--hold 5); default 7.
+    /// Seconds every scene stays, build-in included (--hold 5); default 7.
     #[arg(long, value_name = "S")]
     pub(crate) hold: Option<f32>,
-    /// Seconds of build-in at the start of every step (--enter 1.2); default 1.6.
+    /// Seconds of build-in at the start of every scene (--enter 1.2); default 1.6.
     #[arg(long, value_name = "S")]
     pub(crate) enter: Option<f32>,
-    /// Seconds a transition between cards takes (--fade 0.3); default 0.4.
+    /// Seconds a transition between scenes takes (--fade 0.3); default 0.4.
     #[arg(long, value_name = "S")]
     pub(crate) fade: Option<f32>,
-    /// How one card gives way to the next: fade, wipe, push, pixelize, circle, split or cut
+    /// How one scene gives way to the next: fade, wipe, push, pixelize, circle, split or cut
     /// (--transition wipe); default fade.
     #[arg(long, value_name = "NAME")]
     pub(crate) transition: Option<filmstrip::Transition>,
@@ -363,7 +363,7 @@ pub(crate) enum Command {
     /// Print the Lua handler for your own wezterm.lua.
     #[command(after_help = SNIPPET_FOOTER)]
     ConfigSnippet,
-    /// The manual: keys, dialect, diagrams, window, troubleshooting.
+    /// The manual: the list of topics, or one topic in full.
     #[command(after_help = HANDBOOK_FOOTER)]
     Handbook {
         /// A topic to print in full, e.g. keys; without one, the overview and the topics.

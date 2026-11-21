@@ -2,8 +2,8 @@
 
 Design tokens for terminal and document tools: a dark and a light palette (ground, ink, muted,
 accent, surface, border, ok, warn, stop), the font families (`sans`, `mono`, `display` for
-headings) and the diagram text sizes, with open
-defaults and a serde overlay so a TOML table can change any single token:
+headings) and the diagram text sizes. The defaults are open, and a serde overlay lets a TOML
+table change any single token:
 
 ```toml
 [dark]

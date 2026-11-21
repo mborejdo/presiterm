@@ -1,7 +1,7 @@
 # The window and the font size
 
 presiterm runs in WezTerm only: images use its OSC 1337 inline-image path (which also plays GIFs). In
-any other terminal it exits with one line and does not degrade.
+any other terminal it exits with one line; there is no degraded mode.
 
 `presiterm --window deck.md` starts `wezterm --config-file <generated> start --always-new-process`:
 no tab bar, JetBrains Mono (bundled with WezTerm), no ligatures, the theme's colours as background,
@@ -15,8 +15,8 @@ size in pixels for a terminal that does not report it.
 
 ## Font size
 
-First-class and live: `--font-size PT`, `font-size:` in the frontmatter (the flag wins), keys
-`+ - 0`, `presiterm ctl font ...`. All of them send the WezTerm user variable `presiterm_font`; a
+The font size changes live: `--font-size PT`, `font-size:` in the frontmatter (the flag wins),
+keys `+ - 0`, `presiterm ctl font ...`. All of them send the WezTerm user variable `presiterm_font`; a
 `user-var-changed` handler in the WezTerm config applies it, the window's grid changes, and presiterm
 lays the slide out again (diagrams are drawn again at the new pixel size), keeping slide and step.
 The generated window config has the handler. In your own `wezterm.lua` add what

@@ -1,11 +1,11 @@
 # presiterm
 
-Markdown in, a presentation in a WezTerm window out.
+Markdown in, a WezTerm presentation out.
 
-The text on a slide is real terminal text in WezTerm's own font, so the font size is yours to
-change while you present. Pictures and diagrams (mermaid, Typst with fletcher, tables) are drawn
-in-process and shown as inline images. Save the Markdown file and the slide reloads, on the slide
-you just edited. Pure Rust; the only program presiterm starts is `wezterm`.
+The text on a slide is real terminal text in WezTerm's own font, so you can change the font size
+while you present. Pictures and diagrams (mermaid, Typst with fletcher, tables) are drawn
+in-process and shown as inline images. Save the Markdown file and presiterm reloads it and jumps to
+the slide you edited. Pure Rust; the only program presiterm starts is `wezterm`.
 
 ## Install
 
@@ -23,8 +23,8 @@ The default build includes the Typst engine (a few minutes for a clean build). W
 cargo install --path apps/presiterm --no-default-features
 ```
 
-That binary is much smaller; a typst fence becomes an error on the slide and tables are drawn as
-aligned text.
+That binary is much smaller. A typst fence then is an error on the slide, and tables are drawn
+as aligned text.
 
 ## Usage
 
@@ -112,9 +112,9 @@ This paragraph is only in the long version.
 - `{h=N}` and `{w=N}` after a picture give its height and largest width in cells; without `h` it
   takes the rest of the slide.
 - Colon fences in the MyST style (`:::{name} argument`, `:key: value` options) group content.
-  `notes` and `only` are understood; any other directive shows its body. `:::{only} expr` and an
-  `:only: expr` option keep content when `expr` (tags with `and`, `or`, `not`, parentheses) holds
-  for the frontmatter's `tags:`.
+  presiterm knows `notes`, `metrics` and `only`; any other directive shows its body.
+  `:::{only} expr` and an `:only: expr` option keep content when `expr` (tags with `and`, `or`,
+  `not`, parentheses) holds for the frontmatter's `tags:`.
 
 ## Diagrams
 
@@ -145,15 +145,18 @@ flowchart LR
 
 ## Film
 
-`presiterm film deck.md` renders the deck as a film: every slide a 16:9 card in the deck's tokens,
-drawn by Typst in process, every key press of the talk a build-in (bullets appear, `==marked==`
-text underlines itself, `:::{metrics}` numbers count up, a title lands word by word, `steps`
-diagrams light up). Out come a looping GIF (one learned palette, delta frames, about 1 MB for a
-dozen cards), with `--mp4` an H.264 MP4 (pure Rust), with `--docx` an A4 landscape Word file that
-plays the GIF in place, with `--pdf` a PDF that plays the MP4 when the page opens in Acrobat.
-Timing in the frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `transition`, `pace`,
-`fps`, `width`, `colours`); a card that does not fit is an error, `presiterm lint --film` finds them. The
-encoders are the `filmstrip` crate (`packages/filmstrip`), usable on their own.
+`presiterm film deck.md` renders the deck as a film. Every slide is a 16:9 card in the deck's
+tokens, drawn in-process by Typst. Every key press of the talk is a build-in: bullets appear,
+`==marked==` text underlines itself, `:::{metrics}` numbers count up, a title lands word by word,
+`steps` diagrams light up.
+
+The default output is a looping GIF (one learned palette, delta frames, about 1 MB for a dozen
+cards). `--mp4` adds an H.264 MP4 (pure Rust), `--docx` an A4 landscape Word file that plays the
+GIF in place, `--pdf` a PDF that plays the MP4 when the page opens in Acrobat. Timing goes in the
+frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `transition`, `pace`, `fps`, `width`,
+`colours`). A card that does not fit is an error; `presiterm lint --film` finds them all.
+`presiterm handbook film` has the details. The encoders are the `filmstrip` crate
+(`packages/filmstrip`) and work on their own.
 
 ## Config
 
@@ -195,10 +198,17 @@ presiterm --window examples/intro/slides.md
 | [`packages/filmstrip`](packages/filmstrip) | frames to GIF (delta frames), MP4 (pure-Rust H.264), DOCX and PDF; scene transitions |
 | [`packages/swatchbook`](packages/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
 | [`packages/typstkit`](packages/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
-| [`xtask`](xtask) | `cargo xtask qa` and friends |
+| [`xtask`](xtask) | the task runner: `cargo xtask qa` and the other checks |
 
-[docs/design.md](docs/design.md) explains the decisions, [docs/development.md](docs/development.md)
-the checks and tests.
+## Development
+
+```sh
+cargo xtask qa       # fmt-check, lint, test, doc, no-shellout: green before every commit
+cargo xtask demo     # lint the example decks, render examples/film into target/demo
+```
+
+[docs/development.md](docs/development.md) has every task and the test conventions,
+[docs/design.md](docs/design.md) the design decisions.
 
 ## License
 

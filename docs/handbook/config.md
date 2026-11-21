@@ -56,14 +56,15 @@ presiterm looks at these levels, strongest first:
 
 1. A command-line flag (`--font-size`, `--cols`, `--rows`, `--screen`, `--grid`).
 2. The deck's frontmatter (`font-size:`).
-3. The closest `presiterm.toml`: presiterm starts in the deck's folder and walks up to the filesystem root;
-   the first `presiterm.toml` it finds is the one. Farther ones are ignored.
+3. The closest `presiterm.toml`: presiterm starts in the deck's folder and walks up to the
+   filesystem root; the first `presiterm.toml` it finds is the one. Farther ones are ignored.
 4. The user file `$XDG_CONFIG_HOME/presiterm/config.toml`, else `~/.config/presiterm/config.toml`.
 5. The built-in default: 42 pt, a 1728x1117 screen, a 58x20 grid.
 
 Files are not merged as wholes. Each key is decided on its own: a key the closest `presiterm.toml`
-does not set falls through to the user file, and from there to the default. So a workshop folder can
-hold `presiterm.toml` with `font_size = 54` and the user file can set the `grid` for the laptop.
+does not set falls through to the user file, and from there to the default. So a workshop folder
+can hold `presiterm.toml` with `font_size = 54` and the user file can set the `grid` for the
+laptop.
 
 Only the keys of the settings above exist; the frontmatter's other fields (title, theme, tags)
 stay in the deck. The frontmatter's `theme: light` picks the light palette of the `[theme]` table.
@@ -79,11 +80,10 @@ presiterm config talk/slides.md      look up from the deck's folder
 ```
 
 Flags and the frontmatter are not shown there: they belong to one run. The `[default: ...]` that
-`presiterm --help` prints for `--cols`, `--rows` and `--screen` is the built-in default; a config file
-changes what is used when the flag is not typed.
+`presiterm --help` prints for `--cols`, `--rows` and `--screen` is the built-in default; a config
+file changes what is used when the flag is not typed.
 
 ## lint and the grid
 
-`presiterm lint` computes the grid from the screen and the font size. When a config file sets `grid`,
-or `--grid` is typed, lint checks on exactly that grid instead, so it checks the window you will
-open.
+`presiterm lint` computes the grid from the screen and the font size. When a config file sets
+`grid`, or `--grid` is typed, lint checks on exactly that grid instead: the window you will open.
