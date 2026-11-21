@@ -13,20 +13,6 @@ ignore = [
     "RUSTSEC-2026-0194", # quick-xml, trusted XML only
     "RUSTSEC-2026-0195", # quick-xml, trusted XML only
     "RUSTSEC-2024-0449", # unsafe-libyaml (typst)
-    # zip (filmstrip's DOCX pass, docx-rs): the advisories concern extracting archives to disk
-    # (SUID bits, symlink targets, permissions); filmstrip only reads and writes zip bytes in memory.
-    "RUSTSEC-2026-0367",
-    "RUSTSEC-2026-0368",
-    "RUSTSEC-2026-0369",
-    "RUSTSEC-2026-0429",
-    # zip < 9, reader side (AES entries without the MAC check, legacy decoders preallocating,
-    # `ZipArchive::extract` symlinks, `ZipStreamReader` names): filmstrip only re-reads the .docx
-    # docx-rs just wrote, in memory - no extract, AES or stream reader. docx-rs 0.4.22 (latest)
-    # pins zip ^8; drop these once it allows zip 9.
-    "RUSTSEC-2026-0545",
-    "RUSTSEC-2026-0546",
-    "RUSTSEC-2026-0547",
-    "RUSTSEC-2026-0548",
     "RUSTSEC-2026-0543", # chrono unmaintained (typst-as-lib), dates only, no successor upstream
 ]
 
