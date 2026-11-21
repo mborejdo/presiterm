@@ -93,7 +93,9 @@ pub(super) fn typst_within_budget(source: &str, faces: &[PathBuf]) -> Result<Vec
 
 #[cfg(feature = "typst")]
 fn compile_typst(source: &str, ppi: u32, faces: &[PathBuf]) -> Result<Vec<u8>> {
-    crate::faces::engine(faces)?.png(typstkit::Main::Source(source), ppi as f32)
+    let png = crate::faces::engine(faces)?.png(typstkit::Main::Source(source), ppi as f32);
+    typstkit::Engine::evict(10);
+    png
 }
 
 #[cfg(not(feature = "typst"))]

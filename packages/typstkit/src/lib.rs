@@ -3,8 +3,12 @@
 //! An [`Engine`] holds the fonts and the file resolvers and compiles any number of documents.
 //! [`Main::Source`] compiles a string (its relative imports resolve against the root, if one is
 //! set); [`Main::File`] compiles a file under the root. `sys.inputs` takes string pairs.
+//! Compiles on one engine run side by side; Typst's cache stays until [`Engine::evict`].
 
 use std::borrow::Cow;
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, PoisonError};
 
@@ -82,7 +86,7 @@ impl Builder {
     /// Build the engine.
     #[must_use]
     pub fn build(self) -> Engine {
-        let scratch = Arc::new(Mutex::new(None));
+        let scratch = Arc::new(Mutex::default());
         let mut fonts: Vec<Vec<u8>> = if self.no_default_fonts {
             Vec::new()
         } else {
@@ -94,6 +98,7 @@ impl Builder {
         fonts.extend(self.fonts);
         let mut builder = TypstEngine::builder()
             .fonts(fonts)
+            .comemo_evict_max_age(None)
             .add_file_resolver(Scratch(Arc::clone(&scratch)));
         if let Some(root) = self.root {
             builder = builder.with_file_system_resolver(root);
@@ -105,7 +110,6 @@ impl Builder {
         Engine {
             inner: builder.build(),
             scratch,
-            turn: Mutex::new(()),
         }
     }
 }
@@ -116,15 +120,16 @@ fn project_file(path: &str) -> Result<FileId> {
     Ok(RootedPath::new(VirtualRoot::Project, vpath).intern())
 }
 
-/// The path [`Main::Source`] text is compiled under.
-const SCRATCH: &str = "/__typstkit_main.typ";
-
 fn not_found(id: FileId) -> FileError {
     FileError::NotFound(id.vpath().get_with_slash().into())
 }
 
-/// Serves the text of the [`Main::Source`] being compiled.
-struct Scratch(Arc<Mutex<Option<Source>>>);
+/// The [`Main::Source`] texts being compiled, by an id from their hash, with how many compiles use
+/// each: the same text compiles under the same id, so Typst's cache carries over.
+type Sources = Arc<Mutex<HashMap<FileId, (Source, usize)>>>;
+
+/// Serves the [`Main::Source`] texts being compiled.
+struct Scratch(Sources);
 
 impl FileResolver for Scratch {
     fn resolve_binary(&self, id: FileId) -> FileResult<Cow<'_, Bytes>> {
@@ -132,19 +137,18 @@ impl FileResolver for Scratch {
     }
 
     fn resolve_source(&self, id: FileId) -> FileResult<Cow<'_, Source>> {
-        let source = self.0.lock().unwrap_or_else(PoisonError::into_inner);
-        match source.as_ref() {
-            Some(source) if id == source.id() => Ok(Cow::Owned(source.clone())),
-            _ => Err(not_found(id)),
-        }
+        let sources = self.0.lock().unwrap_or_else(PoisonError::into_inner);
+        sources
+            .get(&id)
+            .map(|(source, _)| Cow::Owned(source.clone()))
+            .ok_or_else(|| not_found(id))
     }
 }
 
 /// Compiles Typst documents; fonts are parsed once, packages fetched once.
 pub struct Engine {
     inner: TypstEngine,
-    scratch: Arc<Mutex<Option<Source>>>,
-    turn: Mutex<()>,
+    scratch: Sources,
 }
 
 impl std::fmt::Debug for Engine {
@@ -181,30 +185,41 @@ impl Engine {
             };
             dict.insert((*key).into(), value);
         }
-        // One compile at a time: the scratch source is shared. The resolver locks `scratch` itself
-        // during the compile, so that lock is only held to swap the source.
-        let _turn = self.turn.lock().unwrap_or_else(PoisonError::into_inner);
-        let set = |source: Option<Source>| {
-            *self.scratch.lock().unwrap_or_else(PoisonError::into_inner) = source;
-        };
-        let id = match main {
+        let sources = || self.scratch.lock().unwrap_or_else(PoisonError::into_inner);
+        let (id, scratch) = match main {
             Main::Source(text) => {
-                let id = project_file(SCRATCH)?;
-                set(Some(Source::new(id, text.to_string())));
-                id
+                let mut hash = DefaultHasher::new();
+                text.hash(&mut hash);
+                let id = project_file(&format!("/__typstkit_{:016x}.typ", hash.finish()))?;
+                sources()
+                    .entry(id)
+                    .or_insert_with(|| (Source::new(id, text.to_string()), 0))
+                    .1 += 1;
+                (id, true)
             },
-            Main::File(path) => project_file(path)?,
+            Main::File(path) => (project_file(path)?, false),
         };
         let warned = self
             .inner
             .compile_with_input::<_, _, PagedDocument>(id, dict);
-        set(None);
+        if let (true, Entry::Occupied(mut entry)) = (scratch, sources().entry(id)) {
+            entry.get_mut().1 -= 1;
+            if entry.get().1 == 0 {
+                entry.remove();
+            }
+        }
         warned.output.map_err(|e| match e {
             typst_as_lib::TypstAsLibError::TypstSource(diagnostics) => {
                 anyhow!("{}", describe(&diagnostics))
             },
             other => anyhow!("{other}"),
         })
+    }
+
+    /// Drop Typst's cached work that the last `max_age` evictions didn't see used (0: all of it).
+    /// The cache is shared by every engine in the process; the typst CLI evicts at 10.
+    pub fn evict(max_age: usize) {
+        typst::comemo::evict(max_age);
     }
 
     /// Compile `main` with `inputs` and draw its first page at `ppi` pixels per inch as RGB.
@@ -327,6 +342,32 @@ mod tests {
             .png(Main::Source("#let x = (\n"), 72.0)
             .expect_err("broken");
         assert!(error.to_string().contains("unclosed"), "{error}");
+    }
+
+    #[test]
+    fn one_engine_compiles_side_by_side_and_evicts() {
+        let engine = Engine::builder().build();
+        let page = |n: u32| format!("#set page(width: {n}pt, height: 1cm)\n{n}");
+        let pngs: Vec<Vec<u8>> = std::thread::scope(|scope| {
+            let threads: Vec<_> = (0..8)
+                .map(|n| {
+                    let (engine, source) = (&engine, page(10 + n % 2));
+                    scope.spawn(move || engine.png(Main::Source(&source), 72.0).expect("compiles"))
+                })
+                .collect();
+            threads
+                .into_iter()
+                .map(|t| t.join().expect("joins"))
+                .collect()
+        });
+        assert!(pngs.iter().step_by(2).all(|png| png == &pngs[0]));
+        assert_ne!(pngs[0], pngs[1]);
+        Engine::evict(0);
+        assert!(engine.scratch.lock().expect("unlocked").is_empty());
+        assert_eq!(
+            engine.png(Main::Source(&page(10)), 72.0).expect("again"),
+            pngs[0]
+        );
     }
 
     #[test]
