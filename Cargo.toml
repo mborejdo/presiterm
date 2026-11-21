@@ -3,8 +3,8 @@
 # out as plain ANSI lines and draws diagrams and pictures as inline images.
 [workspace]
 resolver = "3"
-members = ["apps/presiterm", "packages/colonmark", "packages/filmstrip", "packages/swatchbook", "packages/typstkit", "xtask"]
-default-members = ["apps/presiterm", "packages/colonmark", "packages/filmstrip", "packages/swatchbook", "packages/typstkit"]
+members = ["apps/presiterm", "packages/colonmark", "packages/deckmark", "packages/filmstrip", "packages/swatchbook", "packages/typstkit", "xtask"]
+default-members = ["apps/presiterm", "packages/colonmark", "packages/deckmark", "packages/filmstrip", "packages/swatchbook", "packages/typstkit"]
 
 [workspace.package]
 version = "0.2.0"
@@ -51,6 +51,7 @@ serde_json = "1"
 
 # The workspace's own crates.
 colonmark = { path = "packages/colonmark", version = "0.2.0" }
+deckmark = { path = "packages/deckmark", version = "0.2.0", default-features = false }
 filmstrip = { path = "packages/filmstrip", version = "0.2.0" }
 swatchbook = { path = "packages/swatchbook", version = "0.2.0" }
 typstkit = { path = "packages/typstkit", version = "0.2.0" }

@@ -145,11 +145,9 @@ impl Pager {
     }
 
     fn reload(&mut self) {
-        match deck::read(
-            &self.options.file,
-            self.options.reveal,
-            &self.options.config,
-        ) {
+        match deck::read(&self.options.file, self.options.reveal, |d| {
+            self.options.config.dress(d);
+        }) {
             Ok(deck::Loaded { deck, base, source }) => {
                 let changed = deck != self.deck;
                 let edit = first_changed_line(&self.source, &source);
@@ -338,7 +336,7 @@ impl Pager {
 pub fn run(options: &Options) -> Result<()> {
     term::require_wezterm()?;
     let deck::Loaded { deck, base, source } =
-        deck::read(&options.file, options.reveal, &options.config)?;
+        deck::read(&options.file, options.reveal, |d| options.config.dress(d))?;
     let font_base =
         options
             .config

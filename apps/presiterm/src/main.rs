@@ -119,7 +119,7 @@ fn film(args: &FilmArgs) -> Result<i32> {
     use presiterm::film::{self, output_path};
 
     let config = Config::load(&deck_dir(&args.file))?;
-    let loaded = presiterm::deck::read(&args.file, false, &config)?;
+    let loaded = presiterm::deck::read(&args.file, false, |d| config.dress(d))?;
     let options = film::Options::resolve(args.settings(), &loaded.source, &config)?;
     let rendered = film::render(&loaded, &options)?;
     let out = args.out.as_deref();

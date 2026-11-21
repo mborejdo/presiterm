@@ -86,7 +86,8 @@ fn the_film_example_fits_its_cards() {
     use presiterm::film::{self, Options};
 
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/film/slides.md");
-    let loaded = deck::read(&path, false, &Config::default()).expect("read the film example");
+    let loaded =
+        deck::read(&path, false, |d| Config::default().dress(d)).expect("read the film example");
     let options = Options::resolve(
         presiterm::config::FilmSettings::default(),
         &loaded.source,

@@ -1,6 +1,6 @@
 //! presiterm: Markdown in, a WezTerm presentation out.
 //!
-//! A thin Markdown -> WezTerm renderer and a tiny pager: [`deck`] parses the dialect, [`render`]
+//! A thin Markdown -> WezTerm renderer and a tiny pager: [`deck`] parses the dialect (deckmark), [`render`]
 //! lays a slide out as styled cells ([`canvas`]), [`pager`] shows it with the keys, reload and
 //! control socket, [`diagram`] draws mermaid, Typst and pictures, [`window`] is the WezTerm glue,
 //! [`lint`] checks a deck, [`film`] renders it as GIF, MP4, DOCX and PDF, [`handbook`] is the manual.
@@ -18,10 +18,6 @@
 
 pub mod canvas;
 pub mod config;
-pub mod deck;
-pub mod diagram;
-#[cfg(feature = "typst")]
-pub mod faces;
 #[cfg(feature = "film")]
 pub mod film;
 pub mod handbook;
@@ -33,3 +29,7 @@ pub mod pager;
 pub mod render;
 pub mod term;
 pub mod window;
+
+#[cfg(feature = "typst")]
+pub use deckmark::faces;
+pub use deckmark::{deck, diagram};

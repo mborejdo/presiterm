@@ -19,16 +19,15 @@ workspace = true
 default = ["typst", "film"]
 # Typst (fletcher) diagrams and tables as pictures: in-process Typst. Heavy (about a thousand
 # crates); without it a typst fence is an error on the slide and tables are drawn as text.
-typst = ["dep:typstkit"]
+typst = ["deckmark/typst"]
 # `presiterm film`: the deck as GIF, MP4, DOCX and PDF (cards drawn by Typst, encoded by filmstrip).
-film = ["typst", "typstkit/pdf", "filmstrip/gif", "filmstrip/mp4", "filmstrip/docx", "filmstrip/pdf", "dep:serde_json"]
+film = ["typst", "dep:typstkit", "typstkit/pdf", "filmstrip/gif", "filmstrip/mp4", "filmstrip/docx", "filmstrip/pdf", "dep:serde_json"]
 
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
 colonmark.workspace = true
-mermaid-rs-renderer.workspace = true
-resvg.workspace = true
+deckmark.workspace = true
 rustix.workspace = true
 serde.workspace = true
 swatchbook.workspace = true

@@ -98,5 +98,5 @@ fn compile_typst(source: &str, ppi: u32, faces: &[PathBuf]) -> Result<Vec<u8>> {
 
 #[cfg(not(feature = "typst"))]
 fn compile_typst(_source: &str, _ppi: u32, _faces: &[PathBuf]) -> Result<Vec<u8>> {
-    anyhow::bail!("presiterm was built without the `typst` feature")
+    anyhow::bail!("built without the `typst` feature")
 }

@@ -241,7 +241,7 @@ pub fn run(
     screen: Option<(f64, f64)>,
     grid: Option<(usize, usize)>,
 ) -> Result<Report> {
-    let deck::Loaded { deck, base, .. } = deck::read(file, false, config)?;
+    let deck::Loaded { deck, base, .. } = deck::read(file, false, |d| config.dress(d))?;
     let font = config.resolve_font_size(font_size, deck.font_size, None);
     let screen = config.resolve_screen(screen);
     let (mut cols, mut rows, cell) = window::grid_for(font, screen);
@@ -265,7 +265,7 @@ pub fn run(
 /// (`presiterm lint --film`).
 #[cfg(feature = "film")]
 pub fn film(file: &Path, config: &Config, options: &crate::film::Options) -> Result<Vec<Finding>> {
-    let loaded = deck::read(file, false, config)?;
+    let loaded = deck::read(file, false, |d| config.dress(d))?;
     Ok(crate::film::check(&loaded, options)?
         .into_iter()
         .map(|o| Finding {

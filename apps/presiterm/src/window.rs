@@ -147,7 +147,7 @@ pub struct OpenOptions {
 /// Returns only on error (it replaces the process).
 pub fn open(options: &OpenOptions) -> Result<()> {
     let file = options.file.as_path();
-    let deck = deck::read(file, false, &options.config)?.deck;
+    let deck = deck::read(file, false, |d| options.config.dress(d))?.deck;
     let font = options
         .config
         .resolve_font_size(options.font_size, deck.font_size, None);

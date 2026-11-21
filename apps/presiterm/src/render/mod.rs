@@ -1,4 +1,4 @@
-//! Slide layout: a [`Slide`] at a step and a grid size becomes a [`Canvas`] of styled cells plus
+//! Slide layout: a [`Slide`](crate::deck::Slide) at a step and a grid size becomes a [`Canvas`] of styled cells plus
 //! the image rectangles. Every size is derived from the grid (`cols` x `rows`) and the cell size in
 //! pixels, so any font size reflows.
 //!
@@ -17,8 +17,9 @@ use std::sync::Arc;
 use swatchbook::Palette;
 
 use crate::canvas::{Canvas, Style};
-use crate::deck::{Block, Deck, Diagram, Picture, Slide};
+use crate::deck::{Block, Deck, Diagram, Picture};
 use crate::diagram::Assets;
+pub use deckmark::fragments;
 
 use chrome::{footer, heading, notes};
 use media::{Media, error_slots, logo, media_diagram, media_picture, push_media};
@@ -122,20 +123,6 @@ pub fn content_width(view: View) -> usize {
 #[must_use]
 pub const fn comfortable_rows(view: View) -> usize {
     view.rows.saturating_sub(10)
-}
-
-/// Count the key presses that reveal everything on `slide`.
-#[must_use]
-pub fn fragments(slide: &Slide) -> usize {
-    slide
-        .blocks
-        .iter()
-        .map(|b| match b {
-            Block::List(items) => items.iter().filter(|i| i.reveal).count(),
-            Block::Diagram(d) => Assets::steps(d),
-            _ => 0,
-        })
-        .sum()
 }
 
 /// Lay out slide `index` of `deck` at `step`.

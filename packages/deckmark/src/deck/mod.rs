@@ -19,8 +19,6 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, ensure};
 
-use crate::config::Config;
-
 pub use blocks::extension_is;
 pub use model::{Block, Deck, Diagram, Item, Metric, Picture, Slide, Span, Theme};
 pub use spans::{inline, plain};
@@ -44,7 +42,7 @@ fn list(value: Option<&str>) -> Vec<String> {
 /// ```
 /// use std::path::Path;
 ///
-/// let deck = presiterm::deck::parse("# One\n\ntext\n\n---\n\n# Two\n", "talk", Path::new("."), false);
+/// let deck = deckmark::deck::parse("# One\n\ntext\n\n---\n\n# Two\n", "talk", Path::new("."), false);
 /// assert_eq!(deck.slides.len(), 2);
 /// assert_eq!(deck.slides[0].title().as_deref(), Some("One"));
 /// ```
@@ -102,18 +100,18 @@ pub struct Loaded {
     pub source: String,
 }
 
-/// Read and parse the deck in `file`, in the look `config` gives it; a deck without slides is an
-/// error.
-pub fn read(file: &Path, reveal: bool, config: &Config) -> Result<Loaded> {
+/// Read and parse the deck in `file`; `dress` gives it its look (tokens, font files, logo). A deck
+/// without slides is an error.
+pub fn read(file: &Path, reveal: bool, dress: impl FnOnce(&mut Deck)) -> Result<Loaded> {
     let source =
         std::fs::read_to_string(file).with_context(|| format!("read {}", file.display()))?;
-    let base = crate::config::deck_dir(file);
+    let base = crate::deck_dir(file);
     let name = file
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or("Slides");
     let mut deck = parse(&source, name, &base, reveal);
-    config.dress(&mut deck);
+    dress(&mut deck);
     ensure!(
         !deck.slides.is_empty(),
         "{}: no slides found",

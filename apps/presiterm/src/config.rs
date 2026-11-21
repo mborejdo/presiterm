@@ -25,6 +25,7 @@ use anyhow::{Context, Result};
 use serde::Deserialize;
 
 use crate::deck::Deck;
+pub use deckmark::deck_dir;
 
 /// The file name looked up in the deck's folder and every folder above it.
 pub const PROJECT_FILE: &str = "presiterm.toml";
@@ -416,17 +417,6 @@ fn user_config_path_from(xdg: Option<OsString>, home: Option<OsString>) -> Optio
                 .map(|home| PathBuf::from(home).join(".config"))
         })?;
     Some(base.join("presiterm").join("config.toml"))
-}
-
-/// The folder config is looked up from for a deck path: the folder itself, else the file's folder.
-#[must_use]
-pub fn deck_dir(deck: &Path) -> PathBuf {
-    if deck.is_dir() {
-        return deck.to_path_buf();
-    }
-    deck.parent()
-        .filter(|parent| !parent.as_os_str().is_empty())
-        .map_or_else(|| PathBuf::from("."), Path::to_path_buf)
 }
 
 /// Parse two numbers joined by `x`, as in `1728x1117`; `what` names the flag or key in the error.

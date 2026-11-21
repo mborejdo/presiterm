@@ -107,10 +107,10 @@ fn merge(spans: Vec<Span>) -> Vec<Span> {
 /// # Examples
 ///
 /// ```
-/// let spans = presiterm::deck::inline("a **bold** word");
+/// let spans = deckmark::deck::inline("a **bold** word");
 /// assert_eq!(spans.len(), 3);
 /// assert!(spans[1].bold);
-/// assert_eq!(presiterm::deck::plain(&spans), "a bold word");
+/// assert_eq!(deckmark::deck::plain(&spans), "a bold word");
 /// ```
 #[must_use]
 pub fn inline(text: &str) -> Vec<Span> {

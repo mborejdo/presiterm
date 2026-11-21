@@ -1,0 +1,35 @@
+[package]
+name = "deckmark"
+description = "The presiterm deck dialect: Markdown in, slides of blocks out, with the diagrams and pictures drawn in the deck's tokens."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["markdown", "slides", "presentation", "mermaid", "typst"]
+categories = ["parser-implementations", "rendering"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["typst"]
+# Typst (fletcher) diagrams and tables as pictures: in-process Typst, about a thousand crates.
+# Without it a typst fence is an error on the slide and tables stay text.
+typst = ["dep:typstkit"]
+
+[dependencies]
+anyhow.workspace = true
+colonmark.workspace = true
+mermaid-rs-renderer.workspace = true
+resvg.workspace = true
+serde.workspace = true
+swatchbook.workspace = true
+typstkit = { workspace = true, optional = true, default-features = false, features = ["packages"] }
+
+[dev-dependencies]
+proptest.workspace = true
+tempfile.workspace = true

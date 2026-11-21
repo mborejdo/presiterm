@@ -289,7 +289,8 @@ impl Assets {
 }
 
 /// FNV-1a over `bytes`: the cache keys of pictures, and how the pager tells two images apart.
-pub(crate) fn fnv(bytes: &[u8]) -> u64 {
+#[must_use]
+pub fn fnv(bytes: &[u8]) -> u64 {
     bytes.iter().fold(0xcbf2_9ce4_8422_2325, |h, b| {
         (h ^ u64::from(*b)).wrapping_mul(0x0100_0000_01b3)
     })

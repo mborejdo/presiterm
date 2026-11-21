@@ -258,8 +258,8 @@ fn fence_block(info: &str, body: Vec<String>, line: usize) -> Block {
 /// # Examples
 ///
 /// ```
-/// assert!(presiterm::deck::extension_is("flow.MMD", &["mmd", "mermaid"]));
-/// assert!(!presiterm::deck::extension_is("flow.png", &["mmd", "mermaid"]));
+/// assert!(deckmark::deck::extension_is("flow.MMD", &["mmd", "mermaid"]));
+/// assert!(!deckmark::deck::extension_is("flow.png", &["mmd", "mermaid"]));
 /// ```
 #[must_use]
 pub fn extension_is(path: &str, extensions: &[&str]) -> bool {
