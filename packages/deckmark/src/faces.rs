@@ -1,6 +1,6 @@
 //! The Typst engine a deck draws with: the vendored Inter and Fira Code plus the font files its
 //! config names (`fonts = ["fonts", "extra/Face.otf"]`). Fonts are parsed once per distinct list
-//! and the engine is shared by the window's diagrams and the film.
+//! and the engine is shared by everything that draws with it.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};

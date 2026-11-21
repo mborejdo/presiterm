@@ -17,31 +17,20 @@ accent = "#ff8800"
 ink = "#101010"
 
 [theme.fonts]
-sans = "Inter"          # text on the film's cards
+sans = "Inter"          # text in a film of the deck (flipcard)
 mono = "Fira Code"      # typst diagrams, tables, code
-display = "Inter"       # headings on the film's cards, in the heaviest weight the family has
+display = "Inter"       # headings in a film of the deck, in the heaviest weight the family has
 
 [theme.sizes]
 text = 13               # points of diagram text
 label = 11              # points of edge labels
-
-[film]                  # presiterm film (presiterm handbook film); every key optional
-width = 640
-fps = 10
-hold = 7
-enter = 1.6
-fade = 0.4
-transition = "fade"   # or wipe, push, pixelize, circle, split, cut
-pace = 200
-colours = 48
 ```
 
 The palette tokens of `[theme.dark]` and `[theme.light]` are `ground`, `ink`, `muted`, `accent`,
 `surface`, `border`, `ok`, `warn` and `stop`, each a `"#rrggbb"` colour. `[theme.series]`
 (`dark`, `light`: lists of colours), `[theme.radii]` (`sm`, `md`, `lg`) and `[theme.space]`
 (`gap`) are read too, so a design-token file for web pages fits unchanged. The whole `[theme]` table
-is one key for the rule below: the closest file that has one decides all of it; so are `[film]`
-and `fonts`.
+is one key for the rule below: the closest file that has one decides all of it; so is `fonts`.
 
 Inter (regular, bold, italic) and Fira Code (regular, bold) are built in; a family `[theme.fonts]`
 names beyond those must come from `fonts`: a file is loaded as it is, a folder by its `.otf`,

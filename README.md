@@ -33,7 +33,6 @@ presiterm new talk                     # talk/slides.md and an example diagram
 presiterm --window talk/slides.md      # a dedicated WezTerm window, 58x20 cells at 42 pt
 presiterm talk/slides.md               # present in the WezTerm you are in
 presiterm lint talk/slides.md          # does every slide fit, is every file there
-presiterm film talk/slides.md          # the same deck as a looping GIF; --mp4 --docx --pdf for the others
 presiterm ctl goto 5                   # drive a running presentation from another terminal
 ```
 
@@ -45,7 +44,7 @@ Everything else is in the manual that ships in the binary:
 
 ```sh
 presiterm --help             # commands, examples, exit codes
-presiterm handbook           # topics: quickstart, keys, dialect, diagrams, window, film, config, tools, troubleshooting
+presiterm handbook           # topics: quickstart, keys, dialect, diagrams, window, config, tools, troubleshooting
 presiterm handbook dialect   # one topic in full
 presiterm tldr font size     # search the manual
 ```
@@ -145,18 +144,8 @@ flowchart LR
 
 ## Film
 
-`presiterm film deck.md` renders the deck as a film. Every slide is a 16:9 card in the deck's
-tokens, drawn in-process by Typst. Every key press of the talk is a build-in: bullets appear,
-`==marked==` text underlines itself, `:::{metrics}` numbers count up, a title lands word by word,
-`steps` diagrams light up.
-
-The default output is a looping GIF (one learned palette, delta frames, about 1 MB for a dozen
-cards). `--mp4` adds an H.264 MP4 (pure Rust), `--docx` an A4 landscape Word file that plays the
-GIF in place, `--pdf` a PDF that plays the MP4 when the page opens in Acrobat. Timing goes in the
-frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `transition`, `pace`, `fps`, `width`,
-`colours`). A card that does not fit is an error; `presiterm lint --film` finds them all.
-`presiterm handbook film` has the details. The encoders are the `filmstrip` crate
-(`packages/filmstrip`) and work on their own.
+The film (`presiterm film` up to 0.2.0) is its own tool now: [flipcard](https://github.com/mborejdo/flipcard). It reads the same
+decks and draws the same cards: `flipcard talk/slides.md`.
 
 ## Config
 
@@ -175,15 +164,15 @@ accent = "#ff8800"
 
 [theme.fonts]
 mono = "Fira Code"        # typst diagrams and tables; Inter and Fira Code are built in
-display = "Inter"         # the film's headings
+display = "Inter"         # headings in a film of the deck (flipcard)
 ```
 
 `presiterm config talk/slides.md` shows which files apply and where each value comes from.
 
 ## Examples
 
-`examples/` has four decks: `intro` (the dialect), `diagrams` (mermaid and fletcher), `media`
-(a picture on the light theme) and `film` (the build-ins `presiterm film` animates).
+`examples/` has three decks: `intro` (the dialect), `diagrams` (mermaid and fletcher) and `media`
+(a picture on the light theme).
 
 ```sh
 presiterm --window examples/intro/slides.md
@@ -196,7 +185,6 @@ presiterm --window examples/intro/slides.md
 | [`apps/presiterm`](apps/presiterm) | the binary: layout, pager, WezTerm glue, lint, config, manual |
 | [`packages/colonmark`](packages/colonmark) | Markdown with MyST colon-fence directives on comrak, as an owned tree; `{only}` conditions |
 | [`packages/deckmark`](packages/deckmark) | the deck dialect: slides of blocks, diagrams and pictures drawn in the deck's tokens, the Typst faces |
-| [`packages/filmstrip`](packages/filmstrip) | frames to GIF (delta frames), MP4 (pure-Rust H.264), DOCX and PDF; scene transitions |
 | [`packages/swatchbook`](packages/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
 | [`packages/typstkit`](packages/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
 | [`xtask`](xtask) | the task runner: `cargo xtask qa` and the other checks |
@@ -205,7 +193,7 @@ presiterm --window examples/intro/slides.md
 
 ```sh
 cargo xtask qa       # fmt-check, lint, test, doc, no-shellout: green before every commit
-cargo xtask demo     # lint the example decks, render examples/film into target/demo
+cargo xtask demo     # lint the example decks
 ```
 
 [docs/development.md](docs/development.md) has every task and the test conventions,

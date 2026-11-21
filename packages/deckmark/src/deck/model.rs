@@ -147,7 +147,7 @@ pub struct Deck {
     pub title: String,
     /// `author:`.
     pub author: String,
-    /// `links:`, comma-separated URLs; the film's Word and PDF editions show them.
+    /// `links:`, comma-separated URLs; a film of the deck shows them under the picture.
     pub links: Vec<String>,
     /// `theme:`.
     pub theme: Theme,

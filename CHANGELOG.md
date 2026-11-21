@@ -2,6 +2,14 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow semver.
 
+## Unreleased
+
+### Removed
+
+- The film: `presiterm film`, `presiterm lint --film`, the `[film]` table, `packages/filmstrip`
+  and `examples/film` moved to [flipcard](https://github.com/mborejdo/flipcard), which reads the
+  same decks. `presiterm film` is a hidden stub that says so, for one release.
+
 ## 0.2.0 - unreleased
 
 A rewrite. presiterm is now a Cargo workspace: the `presiterm` binary and five library crates.

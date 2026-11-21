@@ -1,13 +1,11 @@
 # lint, config, doctor, new, config-snippet
 
-## presiterm lint DECK [--font-size PT] [--screen WxH] [--grid COLSxROWS] [--film]
+## presiterm lint DECK [--font-size PT] [--screen WxH] [--grid COLSxROWS]
 
 Lays out every slide at the chosen size and reports, one line each:
-`slide 4 (The chain): error: ...`. With `--film` it also draws every card of the film
-(`presiterm handbook film`) and reports the ones that overflow.
+`slide 4 (The chain): error: ...`.
 
-* error: a picture or diagram file that is missing or broken, a slide that does not fit its rows,
-  a film card that overflows.
+* error: a picture or diagram file that is missing or broken, a slide that does not fit its rows.
 * warning: more body rows than leave room to breathe, a line wider than the content (it wraps).
 * note: no speaker notes.
 
@@ -31,11 +29,6 @@ doctor prints it. Exit 0 when it follows, 2 when not.
 ## presiterm config-snippet
 
 Prints the Lua handler for your own `wezterm.lua`. WezTerm config is Lua: comments are `--`.
-
-## presiterm film DECK [--gif] [--mp4] [--docx] [--pdf] [--cards DIR] [--out DIR] [--preview]
-
-Renders the deck as a film: `presiterm handbook film`. Timing flags: `--fps`, `--width`,
-`--hold`, `--enter`, `--fade`, `--transition`, `--pace`, `--colours`.
 
 ## presiterm new NAME
 

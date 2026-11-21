@@ -15,8 +15,7 @@ theme: dark          # dark (default) or light
 font-size: 54        # points; --font-size beats it
 reveal: true         # every bullet is a key press
 tags: long, demo     # the active tags for {only} blocks
-links: https://example.org, mailto:me@example.org   # under the picture in the film's Word and PDF
-hold: 5              # film timing (fps, width, hold, enter, fade, transition, pace, colours): presiterm handbook film
+links: https://example.org, mailto:me@example.org   # under the picture in a film of the deck (flipcard)
 ---
 ```
 
@@ -47,8 +46,7 @@ lines, the body, and a closing `:::`. A fence with more colons holds one with fe
 knows three names; any other directive shows its body as if the fence were not there.
 
 * `:::{notes}`: speaker notes.
-* `:::{metrics}`: one `value | label` per line, big numbers in a row (`1 200 | commits`);
-  the film counts them up.
+* `:::{metrics}`: one `value | label` per line, big numbers in a row (`1 200 | commits`).
 * `:::{only} expr`: the body is on the slide only when `expr` holds for the `tags:` of the
   frontmatter. `expr` is tags joined by `and`, `or`, `not` and parentheses (`long and not demo`).
   Any directive takes the same condition as an option: `:only: demo`.
