@@ -171,6 +171,8 @@ fn run(task: Task) -> Result<()> {
                     "clippy",
                     "-p",
                     "presiterm",
+                    "-p",
+                    "deckmark",
                     "--all-targets",
                     "--no-default-features",
                     "--",
@@ -182,7 +184,17 @@ fn run(task: Task) -> Result<()> {
         },
         Task::Test => {
             cargo(&["test", "--workspace", "--all-features"], &[])?;
-            cargo(&["test", "-p", "presiterm", "--no-default-features"], &[])
+            cargo(
+                &[
+                    "test",
+                    "-p",
+                    "presiterm",
+                    "-p",
+                    "deckmark",
+                    "--no-default-features",
+                ],
+                &[],
+            )
         },
         Task::Doc => cargo(
             &["doc", "--workspace", "--no-deps", "--all-features"],
