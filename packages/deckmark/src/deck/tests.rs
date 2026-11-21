@@ -75,11 +75,41 @@ fn lists_number_from_their_start_and_nest_by_level() {
 }
 
 #[test]
-fn marked_text_is_underlined() {
-    let spans = inline("a ==b== c __d__ snake_case");
-    assert_eq!(plain(&spans), "a b c d snake_case");
-    assert!(spans[1].underline && spans[3].underline);
-    assert!(!spans[0].underline && !spans[2].underline && !spans[4].underline);
+fn highlight_underline_and_strike_stay_apart() {
+    let spans = inline("a ==b== c __d__ e ~~f~~ snake_case");
+    assert_eq!(plain(&spans), "a b c d e f snake_case");
+    let marks: Vec<_> = spans
+        .iter()
+        .map(|s| (s.highlight, s.underline, s.strike))
+        .collect();
+    let none = (false, false, false);
+    assert_eq!(
+        marks,
+        [
+            none,
+            (true, false, false),
+            none,
+            (false, true, false),
+            none,
+            (false, false, true),
+            none
+        ]
+    );
+}
+
+#[test]
+fn a_spaced_double_slash_is_a_pause_and_urls_and_code_keep_theirs() {
+    let spans = inline("ship // often //**now** and https://x.y // `a // b` //");
+    assert_eq!(plain(&spans), "ship often now and https://x.y a // b ");
+    let paused: Vec<_> = spans
+        .iter()
+        .filter(|s| s.pause)
+        .map(|s| s.text.as_str())
+        .collect();
+    assert_eq!(paused, ["often ", "now", "a // b", ""]);
+    assert!(spans[2].bold && spans[2].pause);
+    let link = inline("[see // this](http://a.b//c) a//b");
+    assert_eq!(plain(&link), "see this a//b");
 }
 
 #[test]
@@ -95,7 +125,7 @@ fn inline_markup_and_hard_breaks() {
 fn heading_markup_is_kept_as_spans() {
     let d = deck("# The ==one== thing\n");
     let heading = d.slides[0].heading.as_ref().expect("heading");
-    assert!(heading[1].underline);
+    assert!(heading[1].highlight);
     assert_eq!(d.slides[0].title().as_deref(), Some("The one thing"));
 }
 

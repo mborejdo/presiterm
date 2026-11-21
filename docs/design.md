@@ -30,7 +30,7 @@ CommonMark with GitHub tables, but:
 * A `---` line is always a slide break: setext headings are off.
 * Each source line of a paragraph is its own line on the slide.
 * `- a` then `+ b` is one list (CommonMark would start a new one); `+` appears on a key press.
-* `__text__` is underlined, not bold; so is `==text==`.
+* `__text__` is underlined, not bold; so is `==text==`. A spaced `//` is a pause, not text.
 * A picture alone on its line takes `{h=7,w=20}` after it.
 
 ## Supported

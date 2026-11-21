@@ -69,7 +69,7 @@ pub(super) fn spans_to_cells(spans: &[Span], pal: &Palette, base: Style) -> Vec<
         if span.code {
             style = style.fg(pal.warn).bg(pal.surface);
         }
-        if span.underline {
+        if span.underline || span.highlight {
             style = style.underline(pal.warn);
         }
         cells.extend(span.text.chars().map(|c| (c, style)));

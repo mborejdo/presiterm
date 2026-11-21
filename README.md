@@ -93,7 +93,8 @@ This paragraph is only in the long version.
 :::
 ````
 
-- Each paragraph line stays a line. `==marked==` and `__marked__` are underlined.
+- Each paragraph line stays a line. `==marked==` and `__marked__` are underlined; `//` with
+  spaces around it is a pause, not shown.
 - `{h=N}`, `{w=N}`: picture height and largest width in cells; without `h` it fills the slide.
 - MyST colon fences: `notes`, `metrics`, `only`; others show their body. `{only} expr` and
   `:only: expr` keep content when `expr` (`and`, `or`, `not`, parentheses) holds for `tags:`.

@@ -17,8 +17,14 @@ pub struct Span {
     pub italic: bool,
     /// `` `code` ``.
     pub code: bool,
-    /// `==marked==` or `__marked__`: underlined in the warn colour.
+    /// `__underlined__`.
     pub underline: bool,
+    /// `==highlighted==`.
+    pub highlight: bool,
+    /// `~~struck~~`.
+    pub strike: bool,
+    /// A `//` (a pause, whitespace on both sides) stood before it; the mark itself is gone.
+    pub pause: bool,
 }
 
 /// A bullet or numbered item.

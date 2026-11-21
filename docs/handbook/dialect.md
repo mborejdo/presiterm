@@ -25,7 +25,8 @@ links: https://example.org, mailto:me@example.org   # under the picture in a fil
   one per key press (`reveal: true` or `--reveal`: all bullets). Hidden bullets keep their rows,
   nothing jumps.
 * Inline: `**bold**`, `*italic*`, `` `inline code` ``, `==marked==` and `__marked__` (an
-  underline in the warn colour, the text keeps its colour), `[links](show only their text)`.
+  underline in the warn colour, the text keeps its colour), `~~struck~~` (shown plain),
+  `[links](show only their text)`. A `//` with spaces around it is a pause for a film; not shown.
   Headings take the same markup: `# The ==one== thing` underlines one word of a title.
 * Fenced code is coloured by its tag (bash, yaml, toml, json, rust, md), per line: a multi-line
   string is coloured on its first line only.
