@@ -2,6 +2,13 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow semver.
 
+## Unreleased
+
+### Added
+
+- typstkit `Engine::query`: every `metadata("...") <label>` of a compiled document with its page
+  and position, for a caller that needs to know where things landed.
+
 ## 0.3.0 - 2026-11-21
 
 ### Changed

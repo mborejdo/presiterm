@@ -4,6 +4,7 @@
 //! [`Main::Source`] compiles a string (its relative imports resolve against the root, if one is
 //! set); [`Main::File`] compiles a file under the root. `sys.inputs` takes string pairs.
 //! Compiles on one engine run side by side; Typst's cache stays until [`Engine::evict`].
+//! [`Engine::query`] finds labelled `metadata` and where it sits on the page.
 
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -14,8 +15,10 @@ use std::sync::{Arc, Mutex, PoisonError};
 
 use anyhow::{Context, Result, anyhow};
 use typst::diag::{FileError, FileResult, SourceDiagnostic};
-use typst::foundations::{Bytes, Dict, IntoValue, Str};
+use typst::foundations::{Bytes, Dict, IntoValue, Label, Selector, Str, Value};
+use typst::introspection::MetadataElem;
 use typst::syntax::{FileId, RootedPath, Source, VirtualPath, VirtualRoot};
+use typst::utils::PicoStr;
 use typst_as_lib::TypstEngine;
 use typst_as_lib::file_resolver::FileResolver;
 use typst_layout::{Page, PagedDocument};
@@ -51,6 +54,19 @@ pub struct Raster {
     pub rgb: Vec<u8>,
     /// How many pages the document has (more than one means the content overflowed).
     pub pages: usize,
+}
+
+/// A labelled `metadata` of a compiled document, and where it is.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Found {
+    /// The value (only string values are found).
+    pub value: String,
+    /// The page, from 1.
+    pub page: usize,
+    /// Right from the page's left edge, in points.
+    pub x: f64,
+    /// Down from the page's top edge, in points.
+    pub y: f64,
 }
 
 /// Builds an [`Engine`].
@@ -214,6 +230,48 @@ impl Engine {
             },
             other => anyhow!("{other}"),
         })
+    }
+
+    /// Compile `main` with `inputs` and find every `metadata("..") <label>` with a string, in
+    /// document order.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use typstkit::{Input, Main};
+    ///
+    /// let engine = typstkit::Engine::builder().build();
+    /// let source = "#set page(margin: 1in)\n#metadata(sys.inputs.word) <here>";
+    /// let found = engine
+    ///     .query(Main::Source(source), &[("word", Input::Text("hi"))], "here")
+    ///     .expect("compiles");
+    /// assert_eq!((found[0].value.as_str(), found[0].page, found[0].x), ("hi", 1, 72.0));
+    /// ```
+    pub fn query(
+        &self,
+        main: Main<'_>,
+        inputs: &[(&str, Input<'_>)],
+        label: &str,
+    ) -> Result<Vec<Found>> {
+        let document = self.document_with(main, inputs)?;
+        let label = Label::new(PicoStr::intern(label)).context("an empty label")?;
+        let introspector = document.introspector();
+        let found = introspector.elements().query(&Selector::Label(label));
+        Ok(found
+            .iter()
+            .filter_map(|content| {
+                let Value::Str(value) = &content.to_packed::<MetadataElem>()?.value else {
+                    return None;
+                };
+                let at = introspector.position(content.location()?)?;
+                Some(Found {
+                    value: value.to_string(),
+                    page: at.page.get(),
+                    x: at.point.x.to_pt(),
+                    y: at.point.y.to_pt(),
+                })
+            })
+            .collect())
     }
 
     /// Drop Typst's cached work that the last `max_age` evictions didn't see used (0: all of it).
