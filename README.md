@@ -153,7 +153,7 @@ dozen cards), with `--mp4` an H.264 MP4 (pure Rust), with `--docx` an A4 landsca
 plays the GIF in place, with `--pdf` a PDF that plays the MP4 when the page opens in Acrobat.
 Timing in the frontmatter or a `[film]` table (`hold`, `enter`, `fade`, `transition`, `pace`,
 `fps`, `width`, `colours`); a card that does not fit is an error, `presiterm lint --film` finds them. The
-encoders are the `filmstrip` crate (`crates/filmstrip`), usable on their own.
+encoders are the `filmstrip` crate (`packages/filmstrip`), usable on their own.
 
 ## Config
 
@@ -191,10 +191,10 @@ presiterm --window examples/intro/slides.md
 | crate | what |
 |---|---|
 | [`apps/presiterm`](apps/presiterm) | the binary: layout, pager, WezTerm glue, lint, config, manual |
-| [`crates/colonmark`](crates/colonmark) | Markdown with MyST colon-fence directives on comrak, as an owned tree; `{only}` conditions |
-| [`crates/filmstrip`](crates/filmstrip) | frames to GIF (delta frames), MP4 (pure-Rust H.264), DOCX and PDF; scene transitions |
-| [`crates/swatchbook`](crates/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
-| [`crates/typstkit`](crates/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
+| [`packages/colonmark`](packages/colonmark) | Markdown with MyST colon-fence directives on comrak, as an owned tree; `{only}` conditions |
+| [`packages/filmstrip`](packages/filmstrip) | frames to GIF (delta frames), MP4 (pure-Rust H.264), DOCX and PDF; scene transitions |
+| [`packages/swatchbook`](packages/swatchbook) | design tokens (palettes, font families, sizes) with a TOML overlay; Inter and Fira Code vendored |
+| [`packages/typstkit`](packages/typstkit) | in-process Typst to PNG, SVG and PDF with the vendored fonts and Typst Universe packages |
 | [`xtask`](xtask) | `cargo xtask qa` and friends |
 
 [docs/design.md](docs/design.md) explains the decisions, [docs/development.md](docs/development.md)
@@ -203,4 +203,4 @@ the checks and tests.
 ## License
 
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT)
-at your option. The fonts in `crates/swatchbook/fonts` are under the SIL Open Font License 1.1.
+at your option. The fonts in `packages/swatchbook/fonts` are under the SIL Open Font License 1.1.

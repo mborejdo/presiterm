@@ -1,6 +1,6 @@
 # The film: a deck as GIF, MP4, DOCX and PDF
 
-Design note, 06.11.2026, built the same day (`presiterm film`, `crates/filmstrip`,
+Design note, 06.11.2026, built the same day (`presiterm film`, `packages/filmstrip`,
 `presiterm handbook film`). `presiterm film` renders a deck to files that play on their own: a
 looping GIF for a README or a chat, an MP4 for a post, a Word file for a mail attachment, a PDF
 that starts the film when the page opens in Acrobat. Every key press of the talk becomes a
@@ -24,7 +24,7 @@ same tokens.
 
 ## Shape
 
-### Crate `filmstrip` (`crates/filmstrip`)
+### Crate `filmstrip` (`packages/filmstrip`)
 
 Frames in, files out. Knows nothing about Markdown or Typst.
 

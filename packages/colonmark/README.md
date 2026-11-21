@@ -1,6 +1,6 @@
 # colonmark
 
-Markdown with MyST-style colon-fence directives, parsed by [comrak](https://crates.io/crates/comrak)
+Markdown with MyST-style colon-fence directives, parsed by [comrak](https://crates.io/packages/comrak)
 into a small owned tree that is easy to walk.
 
 ```markdown

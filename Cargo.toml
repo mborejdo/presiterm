@@ -3,8 +3,8 @@
 # out as plain ANSI lines and draws diagrams and pictures as inline images.
 [workspace]
 resolver = "3"
-members = ["apps/presiterm", "crates/colonmark", "crates/filmstrip", "crates/swatchbook", "crates/typstkit", "xtask"]
-default-members = ["apps/presiterm", "crates/colonmark", "crates/filmstrip", "crates/swatchbook", "crates/typstkit"]
+members = ["apps/presiterm", "packages/colonmark", "packages/filmstrip", "packages/swatchbook", "packages/typstkit", "xtask"]
+default-members = ["apps/presiterm", "packages/colonmark", "packages/filmstrip", "packages/swatchbook", "packages/typstkit"]
 
 [workspace.package]
 version = "0.2.0"
@@ -50,10 +50,10 @@ lopdf = { version = "0.46", default-features = false }
 serde_json = "1"
 
 # The workspace's own crates.
-colonmark = { path = "crates/colonmark", version = "0.2.0" }
-filmstrip = { path = "crates/filmstrip", version = "0.2.0" }
-swatchbook = { path = "crates/swatchbook", version = "0.2.0" }
-typstkit = { path = "crates/typstkit", version = "0.2.0" }
+colonmark = { path = "packages/colonmark", version = "0.2.0" }
+filmstrip = { path = "packages/filmstrip", version = "0.2.0" }
+swatchbook = { path = "packages/swatchbook", version = "0.2.0" }
+typstkit = { path = "packages/typstkit", version = "0.2.0" }
 
 # Dev-dependencies, declared once; a crate takes them with `workspace = true`.
 vt100 = "0.15"
