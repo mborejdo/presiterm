@@ -205,7 +205,10 @@ fn embed_gif(docx: &[u8], poster_png: &[u8], gif: &[u8]) -> Result<Vec<u8>> {
                 if !xml.contains(&old_rel) {
                     bail!("the relationship to {old_rel} is missing");
                 }
-                (name, xml.replace(&old_rel, &new_rel).into_bytes())
+                (
+                    name,
+                    links_in_id_order(&xml.replace(&old_rel, &new_rel)).into_bytes(),
+                )
             } else {
                 (name, data)
             };
@@ -215,6 +218,38 @@ fn embed_gif(docx: &[u8], poster_png: &[u8], gif: &[u8]) -> Result<Vec<u8>> {
         zout.finish()?;
     }
     Ok(out)
+}
+
+/// docx-rs collects the hyperlinks in a `HashMap`, so their relationships come out in a
+/// different order on every run; put them in Id order, so the same document is the same bytes.
+fn links_in_id_order(xml: &str) -> String {
+    const TAG: &str = "<Relationship ";
+    let is_link = |rel: &&str| rel.contains("/relationships/hyperlink\"");
+    let Some(start) = xml.find(TAG) else {
+        return xml.to_owned();
+    };
+    let end = xml.rfind("</Relationships>").unwrap_or(xml.len());
+    let rels: Vec<&str> = xml[start..end].split(TAG).skip(1).collect();
+    let mut links: Vec<&str> = rels.iter().copied().filter(is_link).collect();
+    links.sort_by_key(|rel| {
+        let id = rel
+            .split_once("Id=\"")
+            .and_then(|(_, rest)| rest.split('"').next())
+            .unwrap_or_default();
+        (id.len(), id)
+    });
+    let mut links = links.into_iter();
+    let mut out = xml[..start].to_owned();
+    for rel in rels {
+        out.push_str(TAG);
+        out.push_str(if is_link(&rel) {
+            links.next().unwrap_or(rel)
+        } else {
+            rel
+        });
+    }
+    out.push_str(&xml[end..]);
+    out
 }
 
 #[cfg(test)]
@@ -255,6 +290,31 @@ mod tests {
         let body = String::from_utf8(part(&docx, "word/document.xml").unwrap()).unwrap();
         assert!(body.contains("a.example"));
         assert!(body.contains("w:orient=\"landscape\""));
+    }
+
+    #[test]
+    fn the_links_of_a_docx_are_in_id_order_every_time() {
+        let poster = Frame::solid(32, 18, [20, 30, 40]);
+        let gif = crate::gif::encode(std::slice::from_ref(&poster), &[], 10, 4).unwrap();
+        let links: Vec<Link> = (0..12)
+            .map(|i| Link {
+                label: format!("l{i}"),
+                url: format!("https://{i}.example"),
+            })
+            .collect();
+        // every build gets a fresh HashMap seed inside docx-rs (and the next Ids of its counter)
+        for _ in 0..8 {
+            let docx = wrap(&poster, &gif, &links, &Style::default()).unwrap();
+            let rels =
+                String::from_utf8(part(&docx, "word/_rels/document.xml.rels").unwrap()).unwrap();
+            let ids: Vec<usize> = rels
+                .split("Id=\"rIdHyperlink")
+                .skip(1)
+                .filter_map(|rest| rest.split('"').next()?.parse().ok())
+                .collect();
+            assert_eq!(ids.len(), 12);
+            assert!(ids.is_sorted(), "{ids:?}");
+        }
     }
 
     #[test]
