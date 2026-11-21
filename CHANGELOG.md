@@ -2,7 +2,7 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow semver.
 
-## Unreleased
+## 0.4.0 - 2026-11-21
 
 ### Added
 
