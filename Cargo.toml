@@ -14,6 +14,8 @@ authors = ["Michael Borejdo <mborejdo@gmail.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/mborejdo/presiterm"
 homepage = "https://github.com/mborejdo/presiterm"
+# Shared from git (tags), never from crates.io.
+publish = false
 
 [workspace.dependencies]
 anyhow = "1"
