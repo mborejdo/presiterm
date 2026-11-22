@@ -26,17 +26,17 @@ unicode-width = { version = "0.2", default-features = false }
 serde = { version = "1", features = ["derive"] }
 toml = { version = "1", default-features = false, features = ["std", "serde", "parse"] }
 # Markdown: CommonMark + GFM tables, the AST the colon-fence directives sit on.
-comrak = { version = "0.56", default-features = false }
+comrak = { version = "1.0", default-features = false }
 # Diagrams, pure Rust: mermaid in-process, drawn to PNG by resvg.
 mermaid-rs-renderer = { version = "=0.3.1", default-features = false }
-resvg = { version = "0.45", default-features = false, features = ["text"] }
+resvg = { version = "0.47", default-features = false, features = ["text"] }
 # In-process Typst (feature-gated in the app: about a thousand crates).
 typst = "0.15"
 typst-render = "0.15"
 typst-pdf = "0.15"
 typst-svg = "0.15"
 typst-layout = "0.15"
-typst-as-lib = { version = "0.17", default-features = false }
+typst-as-lib = { version = "0.18", default-features = false }
 
 # The workspace's own crates.
 colonmark = { path = "packages/colonmark", version = "0.4.0" }
@@ -45,7 +45,7 @@ swatchbook = { path = "packages/swatchbook", version = "0.4.0" }
 typstkit = { path = "packages/typstkit", version = "0.4.0" }
 
 # Dev-dependencies, declared once; a crate takes them with `workspace = true`.
-vt100 = "0.15"
+vt100 = "0.18"
 proptest = "1"
 insta = { version = "1", features = ["json", "redactions"] }
 tempfile = "3"
