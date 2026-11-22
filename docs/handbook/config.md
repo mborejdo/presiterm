@@ -3,7 +3,7 @@
 Settings you would otherwise type as flags each time. TOML, every key optional.
 
 ```toml
-font_size = 48          # points
+font-size = 48          # points
 screen    = "1728x1117" # points; what `presiterm lint` checks the deck against
 grid      = "58x20"     # the window in cells, columns x rows (`--window`; fixed grid for lint)
 logo      = "logo.svg"  # a picture top left on every slide, relative to this file
@@ -35,8 +35,9 @@ Built in: Inter (regular, bold, italic), Fira Code (regular, bold). Other famili
 `fonts`: a file as is, a folder by its `.otf`, `.ttf`, `.ttc` files; a missing path is an error.
 Typst picks the closest weight, so plain `display = "Inter"` is Inter Bold.
 
-An unknown key (`font_sise`) is an error naming file and key; a malformed value names file,
-key and expected form. A missing file is skipped.
+An unknown key (`font-sise`) is an error naming file and key; a malformed value names file,
+key and expected form. A missing file is skipped. `font_size`, the spelling up to 0.4, is still
+read as `font-size`.
 
 ## Closest wins, strongest first
 
@@ -47,7 +48,7 @@ key and expected form. A missing file is skipped.
 5. The default: 42 pt, a 1728x1117 screen, a 58x20 grid.
 
 Each key is decided on its own: one the closest `presiterm.toml` does not set falls through to
-the user file, then the default. So a workshop folder can set `font_size = 54` and the user file
+the user file, then the default. So a workshop folder can set `font-size = 54` and the user file
 the laptop's `grid`. Frontmatter fields (title, theme, tags) stay in the deck; `theme: light`
 picks the light palette of `[theme]`.
 

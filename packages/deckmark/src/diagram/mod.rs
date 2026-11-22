@@ -69,7 +69,7 @@ impl Look {
     }
 }
 
-/// Loads and caches everything that is not text.
+/// The loader and cache of everything that is not text.
 #[derive(Debug)]
 pub struct Assets {
     base: PathBuf,

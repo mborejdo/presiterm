@@ -50,10 +50,10 @@ pub enum Source {
 }
 
 impl fmt::Display for Source {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Default => write!(out, "default"),
-            Self::File(path) => write!(out, "{}", path.display()),
+            Self::Default => write!(f, "default"),
+            Self::File(path) => write!(f, "{}", path.display()),
         }
     }
 }
@@ -87,8 +87,8 @@ pub enum FileState {
 }
 
 impl fmt::Display for FileState {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-        out.write_str(match self {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
             Self::Used => "used",
             Self::Shadowed => "ignored (a closer presiterm.toml wins)",
             Self::Missing => "not found",
@@ -146,6 +146,9 @@ impl Default for Config {
 #[derive(Debug, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct RawLayer {
+    /// Kebab-case like the frontmatter key and `--font-size`; `font_size` is the name released
+    /// files use.
+    #[serde(rename = "font-size", alias = "font_size")]
     font_size: Option<toml::Value>,
     screen: Option<toml::Value>,
     grid: Option<toml::Value>,
@@ -230,7 +233,7 @@ impl RawLayer {
                     .filter(|p| p.is_finite() && *p > 0.0)
                     .with_context(|| {
                         format!(
-                            "{}: font_size: expected a positive number of points like 42, got {}",
+                            "{}: font-size: expected a positive number of points like 42, got {}",
                             path.display(),
                             got(value)
                         )
@@ -382,7 +385,7 @@ impl Config {
     /// use presiterm::config::Config;
     ///
     /// let folder = tempfile::tempdir().expect("tempdir");
-    /// std::fs::write(folder.path().join("presiterm.toml"), "font_size = 54\n").expect("write");
+    /// std::fs::write(folder.path().join("presiterm.toml"), "font-size = 54\n").expect("write");
     /// let config = Config::load(folder.path()).expect("load");
     /// assert_eq!(config.font_size, 54.0);
     /// ```
@@ -505,35 +508,35 @@ impl Config {
 }
 
 impl fmt::Display for Config {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(out, "config files, closest first:")?;
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "config files, closest first:")?;
         if self.files.is_empty() {
-            writeln!(out, "  (none)")?;
+            writeln!(f, "  (none)")?;
         }
         for file in &self.files {
-            writeln!(out, "  {}  {}", file.path.display(), file.state)?;
+            writeln!(f, "  {}  {}", file.path.display(), file.state)?;
         }
         writeln!(
-            out,
+            f,
             "effective values (a command-line flag beats the deck's frontmatter, which beats these):"
         )?;
         writeln!(
-            out,
-            "  font_size = {}  ({})",
+            f,
+            "  font-size = {}  ({})",
             self.font_size, self.sources.font_size
         )?;
         writeln!(
-            out,
+            f,
             "  screen    = {}x{}  ({})",
             self.screen.0, self.screen.1, self.sources.screen
         )?;
         writeln!(
-            out,
+            f,
             "  grid      = {}x{}  ({})",
             self.grid.0, self.grid.1, self.sources.grid
         )?;
         writeln!(
-            out,
+            f,
             "  theme     = {}  ({})",
             if self.sources.theme == Source::Default {
                 "built-in"
@@ -543,7 +546,7 @@ impl fmt::Display for Config {
             self.sources.theme
         )?;
         writeln!(
-            out,
+            f,
             "  logo      = {}  ({})",
             self.logo
                 .as_deref()
@@ -551,7 +554,7 @@ impl fmt::Display for Config {
             self.sources.logo
         )?;
         write!(
-            out,
+            f,
             "  fonts     = {}  ({})",
             if self.faces.is_empty() {
                 "built-in".to_string()

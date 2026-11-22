@@ -2,6 +2,20 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow semver.
 
+## Unreleased
+
+### Changed
+
+- The config key is `font-size`, as in the frontmatter and `--font-size`; `font_size` is still
+  read. `presiterm config` prints `font-size = ...`.
+- `presiterm new` prints `made talk; next: presiterm --window talk/slides.md`.
+- `presiterm ctl` prints a refused command once, `presiterm: slide must be 1..9`, without a
+  second `error:`.
+- Messages put a value you typed in quotes (`no handbook topic "x"`, `font: expected a number,
+  got "x"`) and a hint after `; ` (`no running presenter found; start one, or pass --control
+  PATH`).
+- `--help` shows a default that comes from elsewhere as `[default: ...]`, like the built-in ones.
+
 ## 0.4.0 - 2026-11-21
 
 ### Added

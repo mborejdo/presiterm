@@ -32,8 +32,8 @@ pub struct ExprError {
 }
 
 impl fmt::Display for ExprError {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(out, "`{}`: {}", self.expr, self.reason)
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "`{}`: {}", self.expr, self.reason)
     }
 }
 

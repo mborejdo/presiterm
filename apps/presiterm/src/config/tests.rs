@@ -1,3 +1,5 @@
+//! Unit tests of config loading, precedence and the `presiterm config` report.
+
 use std::ffi::OsString;
 
 use proptest::prelude::*;
@@ -52,8 +54,8 @@ fn load_without_any_file_gives_the_defaults() {
 #[test]
 fn load_closest_presiterm_toml_wins_over_a_farther_one() {
     let (root, deck) = tree();
-    write(root.path(), "presiterm.toml", "font_size = 20\n");
-    let near = write(&root.path().join("a"), "presiterm.toml", "font_size = 30\n");
+    write(root.path(), "presiterm.toml", "font-size = 20\n");
+    let near = write(&root.path().join("a"), "presiterm.toml", "font-size = 30\n");
 
     let config = Config::load_from(&deck, None).expect("load");
 
@@ -68,7 +70,7 @@ fn load_closest_presiterm_toml_wins_over_a_farther_one() {
 fn load_closest_file_does_not_borrow_keys_from_a_farther_presiterm_toml() {
     let (root, deck) = tree();
     write(root.path(), "presiterm.toml", "grid = \"90x30\"\n");
-    write(&root.path().join("a"), "presiterm.toml", "font_size = 30\n");
+    write(&root.path().join("a"), "presiterm.toml", "font-size = 30\n");
 
     let config = Config::load_from(&deck, None).expect("load");
 
@@ -78,11 +80,11 @@ fn load_closest_file_does_not_borrow_keys_from_a_farther_presiterm_toml() {
 #[test]
 fn load_key_missing_in_the_closest_file_falls_through_to_the_user_file() {
     let (root, deck) = tree();
-    let project = write(&deck, "presiterm.toml", "font_size = 54\n");
+    let project = write(&deck, "presiterm.toml", "font-size = 54\n");
     let user = write(
         root.path(),
         "home/config.toml",
-        "font_size = 20\nscreen = \"1440x900\"\n",
+        "font-size = 20\nscreen = \"1440x900\"\n",
     );
 
     let config = Config::load_from(&deck, Some(&user)).expect("load");
@@ -98,9 +100,17 @@ fn load_key_missing_in_the_closest_file_falls_through_to_the_user_file() {
 #[test]
 fn load_reads_font_size_given_as_integer_or_float() {
     let (_root, deck) = tree();
-    write(&deck, "presiterm.toml", "font_size = 36.5\n");
+    write(&deck, "presiterm.toml", "font-size = 36.5\n");
     let config = Config::load_from(&deck, None).expect("load");
     assert!((config.font_size - 36.5).abs() < 1e-6);
+}
+
+#[test]
+fn load_reads_the_released_font_size_spelling() {
+    let (_root, deck) = tree();
+    write(&deck, "presiterm.toml", "font_size = 36\n");
+    let config = Config::load_from(&deck, None).expect("load");
+    assert!((config.font_size - 36.0).abs() < 1e-6);
 }
 
 #[test]
@@ -119,7 +129,7 @@ fn load_reads_screen_and_grid() {
 #[test]
 fn load_unknown_key_is_an_error_naming_the_file_and_the_key() {
     let (_root, deck) = tree();
-    let file = write(&deck, "presiterm.toml", "font_size = 40\nfont_sise = 12\n");
+    let file = write(&deck, "presiterm.toml", "font-size = 40\nfont-sise = 12\n");
 
     let message = format!(
         "{:#}",
@@ -127,7 +137,7 @@ fn load_unknown_key_is_an_error_naming_the_file_and_the_key() {
     );
 
     assert!(message.contains(&file.display().to_string()), "{message}");
-    assert!(message.contains("font_sise"), "{message}");
+    assert!(message.contains("font-sise"), "{message}");
     assert!(message.contains("unknown field"), "{message}");
 }
 
@@ -149,16 +159,16 @@ fn load_unknown_key_in_the_user_file_is_an_error_naming_that_file() {
 fn load_bad_value_is_an_error_naming_file_key_and_expected_form() {
     let cases = [
         (
-            "font_size = \"big\"",
-            "font_size: expected a positive number of points like 42, got \"big\"",
+            "font-size = \"big\"",
+            "font-size: expected a positive number of points like 42, got \"big\"",
         ),
         (
-            "font_size = -3",
-            "font_size: expected a positive number of points like 42, got integer",
+            "font-size = -3",
+            "font-size: expected a positive number of points like 42, got integer",
         ),
         (
-            "font_size = true",
-            "font_size: expected a positive number of points like 42, got boolean",
+            "font-size = true",
+            "font-size: expected a positive number of points like 42, got boolean",
         ),
         (
             "screen = 1728",
@@ -198,7 +208,7 @@ fn load_bad_value_is_an_error_naming_file_key_and_expected_form() {
 #[test]
 fn load_syntax_error_is_an_error_naming_the_file() {
     let (_root, deck) = tree();
-    let file = write(&deck, "presiterm.toml", "font_size = = 3\n");
+    let file = write(&deck, "presiterm.toml", "font-size = = 3\n");
 
     let message = format!("{:#}", Config::load_from(&deck, None).expect_err("syntax"));
 
@@ -218,7 +228,7 @@ fn load_a_folder_named_presiterm_toml_is_skipped() {
 #[test]
 fn resolve_precedence_is_flag_then_deck_then_file_then_default() {
     let (_root, deck) = tree();
-    write(&deck, "presiterm.toml", "font_size = 50\n");
+    write(&deck, "presiterm.toml", "font-size = 50\n");
     let config = Config::load_from(&deck, None).expect("load");
 
     assert!((config.resolve_font_size(Some(60.0), Some(40.0), None) - 60.0).abs() < 1e-6);
@@ -261,7 +271,7 @@ fn lint_grid_is_none_until_a_file_or_a_flag_sets_it() {
 fn font_override_is_set_only_by_a_file() {
     let (_root, deck) = tree();
     assert_eq!(Config::default().font_override(), None);
-    write(&deck, "presiterm.toml", "font_size = 50\n");
+    write(&deck, "presiterm.toml", "font-size = 50\n");
     let config = Config::load_from(&deck, None).expect("load");
     assert_eq!(config.font_override(), Some(50.0));
 }
@@ -269,8 +279,8 @@ fn font_override_is_set_only_by_a_file() {
 #[test]
 fn display_lists_files_closest_first_and_the_source_of_each_value() {
     let (root, deck) = tree();
-    let near = write(&deck, "presiterm.toml", "font_size = 50\n");
-    let far = write(root.path(), "presiterm.toml", "font_size = 20\n");
+    let near = write(&deck, "presiterm.toml", "font-size = 50\n");
+    let far = write(root.path(), "presiterm.toml", "font-size = 20\n");
     let user = root.path().join("home").join("config.toml");
 
     let text = Config::load_from(&deck, Some(&user))
@@ -282,7 +292,7 @@ fn display_lists_files_closest_first_and_the_source_of_each_value() {
     assert!(near_at < far_at, "{text}");
     assert!(text.contains("not found"), "{text}");
     assert!(
-        text.contains(&format!("font_size = 50  ({})", near.display())),
+        text.contains(&format!("font-size = 50  ({})", near.display())),
         "{text}"
     );
     assert!(text.contains("screen    = 1728x1117  (default)"), "{text}");

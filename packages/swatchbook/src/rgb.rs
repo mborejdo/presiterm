@@ -15,12 +15,8 @@ pub struct Rgb(pub u8, pub u8, pub u8);
 pub struct ParseRgbError(String);
 
 impl fmt::Display for ParseRgbError {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            out,
-            "expected a colour like \"#1d6fb8\", got \"{}\"",
-            self.0
-        )
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "expected a colour like \"#1d6fb8\", got \"{}\"", self.0)
     }
 }
 
@@ -60,8 +56,8 @@ impl TryFrom<String> for Rgb {
 
 impl fmt::Display for Rgb {
     /// Print as `#rrggbb`.
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(out, "#{:02x}{:02x}{:02x}", self.0, self.1, self.2)
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "#{:02x}{:02x}{:02x}", self.0, self.1, self.2)
     }
 }
 

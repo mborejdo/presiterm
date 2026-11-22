@@ -85,7 +85,7 @@ return config
 }
 
 /// Open a presiterm window on `deck`: WezTerm with the generated config, running this binary.
-/// Returns only on error (it replaces the process).
+/// It comes back only on error, as it replaces the process.
 pub fn launch(
     deck: &Path,
     geometry: Geometry,
@@ -115,7 +115,7 @@ pub fn launch(
         .arg(geometry.font_size.to_string())
         .args(inner_args)
         .exec();
-    Err(anyhow::Error::new(error).context("start wezterm (is it installed and on PATH?)"))
+    Err(anyhow::Error::new(error).context("start wezterm; is it installed and on PATH?"))
 }
 
 /// What `presiterm --window` forwards to the window it opens, as plain values.
@@ -144,7 +144,7 @@ pub struct OpenOptions {
 }
 
 /// Start a dedicated WezTerm window that runs a deck, passing the presenting flags on.
-/// Returns only on error (it replaces the process).
+/// It comes back only on error, as it replaces the process.
 pub fn open(options: &OpenOptions) -> Result<()> {
     let file = options.file.as_path();
     let deck = deck::read(file, false, |d| options.config.dress(d))?.deck;
@@ -190,14 +190,14 @@ pub enum Diagnosis {
 }
 
 impl fmt::Display for Diagnosis {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Follows => write!(
-                out,
+                f,
                 "ok: this WezTerm follows presiterm_font (cell size changed, then restored)"
             ),
             Self::NeedsHandler => write!(
-                out,
+                f,
                 "The font keys need this handler in your wezterm.lua (before `return config`):\n\n{HANDLER}\n\n`presiterm --window` has it built in."
             ),
         }

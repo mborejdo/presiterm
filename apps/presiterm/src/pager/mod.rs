@@ -193,10 +193,12 @@ impl Pager {
             a if a.starts_with('+') || a.starts_with('-') => {
                 let delta: f32 = a
                     .parse()
-                    .map_err(|_| format!("font: {a} is not a number"))?;
+                    .map_err(|_| format!("font: expected a number, got \"{a}\""))?;
                 self.font_now + delta
             },
-            a => a.parse().map_err(|_| format!("font: {a} is not a size"))?,
+            a => a
+                .parse()
+                .map_err(|_| format!("font: expected a number, got \"{a}\""))?,
         };
         self.set_font(target, out).map_err(|e| e.to_string())?;
         Ok(format!("font {} pt", self.font_now))
@@ -243,7 +245,7 @@ impl Pager {
         Ok(())
     }
 
-    /// Returns true to quit.
+    /// Handle a key press; `true` means quit.
     fn key(&mut self, key: Key, out: &mut impl Write) -> io::Result<bool> {
         self.status.clear();
         self.status_until = None;
@@ -342,7 +344,7 @@ pub fn run(options: &Options) -> Result<()> {
             .config
             .resolve_font_size(options.font_size, deck.font_size, options.window_font);
     let size = term::size()
-        .context("read the terminal size (stdout is not a terminal; run presiterm in WezTerm)")?;
+        .context("read the terminal size; stdout is not a terminal, run presiterm in WezTerm")?;
     let mut pager = Pager {
         options: options.clone(),
         assets: Assets::new(&base, &deck),
@@ -426,7 +428,7 @@ fn event_loop(pager: &mut Pager, listener: &UnixListener, out: &mut io::Stdout) 
         {
             pager.font_check = None;
             if term::size().is_ok_and(|now| now == before) {
-                pager.say("font: no WezTerm handler (run `presiterm doctor`)");
+                pager.say("font: no WezTerm handler; run `presiterm doctor`");
             }
         }
         if pager.status_until.is_some_and(|t| Instant::now() > t) {

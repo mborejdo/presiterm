@@ -134,7 +134,7 @@ tokens as colours. More: `presiterm handbook diagrams`.
 closest wins, a flag beats both.
 
 ```toml
-font_size = 48
+font-size = 48
 screen    = "1728x1117"   # what `presiterm lint` checks against
 grid      = "58x20"       # the --window grid, columns x rows
 logo      = "logo.svg"    # top left of every slide, relative to this file

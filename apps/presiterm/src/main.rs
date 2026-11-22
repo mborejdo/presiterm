@@ -11,6 +11,7 @@
 mod cli;
 
 use std::path::{Path, PathBuf};
+use std::process::ExitCode;
 
 use anyhow::{Result, bail};
 use presiterm::config::{Config, deck_dir, pair};
@@ -18,7 +19,7 @@ use presiterm::{handbook, lint, new_deck, pager, window};
 
 use crate::cli::{Command, Given, PresentArgs};
 
-fn run() -> Result<i32> {
+fn run() -> Result<u8> {
     let (cli, given) = cli::parse();
     match cli.command {
         Some(Command::Lint {
@@ -35,7 +36,7 @@ fn run() -> Result<i32> {
                 .transpose()?;
             let report = lint::run(&file, &config, font_size, screen, grid)?;
             println!("{report}");
-            Ok(i32::from(report.errors() > 0))
+            Ok(u8::from(report.errors() > 0))
         },
         Some(Command::Film { .. }) => bail!(MOVED),
         Some(Command::Config { path }) => {
@@ -71,7 +72,7 @@ fn run() -> Result<i32> {
         },
         Some(Command::Handbook { topic: Some(key) }) => {
             let Some(topic) = handbook::topic(&key) else {
-                bail!("no handbook topic `{key}`; `presiterm handbook` lists them")
+                bail!("no handbook topic \"{key}\"; `presiterm handbook` lists them")
             };
             println!("{}", topic.body.trim_end());
             Ok(0)
@@ -93,7 +94,7 @@ const MOVED: &str = "`presiterm film` moved to flipcard: https://github.com/mbor
 (`cargo install --git https://github.com/mborejdo/flipcard flipcard`, then `flipcard talk/slides.md`)";
 
 /// Present the deck: in a dedicated WezTerm window (`--window`) or in the terminal we are in.
-fn present(file: Option<PathBuf>, args: PresentArgs, given: Given) -> Result<i32> {
+fn present(file: Option<PathBuf>, args: PresentArgs, given: Given) -> Result<u8> {
     let Some(file) = file else {
         bail!(
             "no deck given: run `presiterm talk/slides.md`, `presiterm new talk` to make one, or see `presiterm --help`"
@@ -134,13 +135,12 @@ fn present(file: Option<PathBuf>, args: PresentArgs, given: Given) -> Result<i32
     Ok(0)
 }
 
-fn main() {
+fn main() -> ExitCode {
     match run() {
-        Ok(0) => {},
-        Ok(code) => std::process::exit(code),
+        Ok(code) => ExitCode::from(code),
         Err(e) => {
             eprintln!("presiterm: {e:#}");
-            std::process::exit(2);
+            ExitCode::from(2)
         },
     }
 }

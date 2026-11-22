@@ -66,16 +66,24 @@ const FLOW: &str = "flowchart LR
   a[One] --> b[Two] --> c[Three]
 ";
 
-/// Create `name/slides.md` and `name/assets/flow.mmd`, and return the line to tell the user.
-pub fn run(name: &str) -> Result<String> {
-    let dir = Path::new(name);
-    ensure!(!dir.exists(), "{name} exists already");
-    std::fs::create_dir_all(dir.join("assets")).with_context(|| format!("create {name}"))?;
-    let title = dir.file_name().and_then(|n| n.to_str()).unwrap_or(name);
-    std::fs::write(dir.join("slides.md"), SLIDES.replace("@TITLE@", title))?;
-    std::fs::write(dir.join("assets/flow.mmd"), FLOW)?;
+/// Create `dir/slides.md` and `dir/assets/flow.mmd`, and return the line to tell the user.
+pub fn run(dir: &Path) -> Result<String> {
+    ensure!(!dir.exists(), "{} exists already", dir.display());
+    std::fs::create_dir_all(dir.join("assets"))
+        .with_context(|| format!("create {}", dir.display()))?;
+    let title = dir
+        .file_name()
+        .and_then(|n| n.to_str())
+        .map_or_else(|| dir.to_string_lossy().into_owned(), str::to_string);
+    let slides = dir.join("slides.md");
+    std::fs::write(&slides, SLIDES.replace("@TITLE@", &title))
+        .with_context(|| format!("write {}", slides.display()))?;
+    let flow = dir.join("assets/flow.mmd");
+    std::fs::write(&flow, FLOW).with_context(|| format!("write {}", flow.display()))?;
     Ok(format!(
-        "created {name}/slides.md - present it with: presiterm --window {name}/slides.md"
+        "made {}; next: presiterm --window {}",
+        dir.display(),
+        slides.display()
     ))
 }
 
@@ -88,12 +96,13 @@ mod tests {
     fn the_scaffold_parses_without_errors() {
         let root = tempfile::tempdir().expect("temp dir");
         let dir = root.path().join("talk");
-        let name = dir.to_str().expect("utf-8 temp dir");
-        let message = run(name).expect("scaffold");
+        let message = run(&dir).expect("scaffold");
         assert_eq!(
             message,
             format!(
-                "created {name}/slides.md - present it with: presiterm --window {name}/slides.md"
+                "made {}; next: presiterm --window {}",
+                dir.display(),
+                dir.join("slides.md").display()
             )
         );
         let slides = dir.join("slides.md");

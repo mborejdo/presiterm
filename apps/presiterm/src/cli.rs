@@ -162,7 +162,7 @@ pub(crate) fn parse() -> (Cli, Given) {
 }
 
 /// The `presiterm` command line: a deck to present, or one of the subcommands.
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[command(
     name = "presiterm",
     version,
@@ -180,7 +180,7 @@ pub(crate) struct Cli {
 }
 
 /// The flags that present a deck.
-#[derive(clap::Args)]
+#[derive(Debug, clap::Args)]
 pub(crate) struct PresentArgs {
     /// Start at slide N, 1-based (--slide 7).
     #[arg(long, value_name = "N")]
@@ -200,7 +200,7 @@ pub(crate) struct PresentArgs {
     /// Window height in cells, with --window (--rows 24).
     #[arg(long, default_value_t = DEFAULT_GRID.1, value_name = "ROWS")]
     pub(crate) rows: usize,
-    /// Control socket path (--control /tmp/talk.sock); default: <tmp>/presiterm-<pid>.sock.
+    /// Control socket path (--control /tmp/talk.sock) [default: <tmp>/presiterm-<pid>.sock].
     #[arg(long, value_name = "PATH")]
     pub(crate) control: Option<PathBuf>,
     /// Do not reload when the deck or a file it points at changes; key r still works.
@@ -215,14 +215,15 @@ pub(crate) struct PresentArgs {
 }
 
 /// The subcommands.
-#[derive(Subcommand)]
+#[derive(Debug, Subcommand)]
 pub(crate) enum Command {
     /// Check that every slide fits and everything it points at exists.
     #[command(after_help = LINT_FOOTER)]
     Lint {
         /// The deck, e.g. talk/slides.md.
         file: PathBuf,
-        /// Font size in points to check at (--font-size 54); default: the deck's, else presiterm.toml, else 42.
+        /// Font size in points to check at (--font-size 54) [default: the deck's, else presiterm.toml,
+        /// else 42].
         #[arg(long, value_name = "PT")]
         font_size: Option<f32>,
         /// Screen size in points a window must fit (--screen 1440x900).
@@ -242,19 +243,19 @@ pub(crate) enum Command {
     /// Show which config files apply and the effective settings with their source.
     #[command(after_help = CONFIG_FOOTER)]
     Config {
-        /// A deck (or its folder) to look up from; default: the current folder.
+        /// A deck (or its folder) to look up from [default: the current folder].
         path: Option<PathBuf>,
     },
     /// Make a deck folder: slides.md and an example diagram.
     #[command(after_help = NEW_FOOTER)]
     New {
         /// Folder to make, e.g. talk; it must not exist.
-        name: String,
+        name: PathBuf,
     },
     /// Drive a running presentation from another terminal.
     #[command(after_help = CTL_FOOTER)]
     Ctl {
-        /// Control socket (--control /tmp/talk.sock); default: the newest running presenter.
+        /// Control socket (--control /tmp/talk.sock) [default: the newest running presenter].
         #[arg(long, value_name = "PATH")]
         control: Option<PathBuf>,
         /// goto N | next | prev | reload | status | quit | font <pt|+N|-N|reset>

@@ -186,9 +186,9 @@ impl Report {
 }
 
 impl fmt::Display for Report {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
-            out,
+            f,
             "{}: {} slides, {} pt, {}x{} cells",
             self.file.display(),
             self.slides,
@@ -204,29 +204,24 @@ impl fmt::Display for Report {
             };
             let title = finding.heading.as_deref().unwrap_or("-");
             writeln!(
-                out,
+                f,
                 "  slide {} ({title}): {tag}: {}",
                 finding.slide, finding.message
             )?;
         }
         match self.biggest_font {
             Some(points) => writeln!(
-                out,
+                f,
                 "biggest font size at which the whole deck fits a {}x{} pt screen: {points} pt",
                 self.screen.0, self.screen.1
             )?,
             None => writeln!(
-                out,
+                f,
                 "the deck does not fit a {}x{} pt screen even at 8 pt",
                 self.screen.0, self.screen.1
             )?,
         }
-        write!(
-            out,
-            "{} errors, {} warnings",
-            self.errors(),
-            self.warnings()
-        )
+        write!(f, "{} errors, {} warnings", self.errors(), self.warnings())
     }
 }
 
@@ -340,7 +335,7 @@ mod tests {
     #[test]
     fn run_takes_font_size_screen_and_grid_from_the_config_file() {
         let (_root, file, config) = deck_with_config(
-            "font_size = 50\nscreen = \"1440x900\"\ngrid = \"70x22\"\n",
+            "font-size = 50\nscreen = \"1440x900\"\ngrid = \"70x22\"\n",
             "",
         );
 
@@ -354,7 +349,7 @@ mod tests {
     #[test]
     fn run_font_size_prefers_flag_then_deck_then_config_file() {
         let (_root, file, config) =
-            deck_with_config("font_size = 50\n", "---\nfont-size: 36\n---\n");
+            deck_with_config("font-size = 50\n", "---\nfont-size: 36\n---\n");
 
         let from_deck = run(&file, &config, None, None, None).expect("lint");
         let from_flag = run(&file, &config, Some(60.0), None, None).expect("lint");

@@ -5,7 +5,7 @@ with one line, no degraded mode.
 
 `presiterm --window deck.md` starts `wezterm --config-file <generated> start --always-new-process`:
 no tab bar, JetBrains Mono (bundled), no ligatures, theme background, padding, no close prompt,
-58x20 cells at 42 pt. `--cols`, `--rows`, `--font-size` change that, so do `grid` and `font_size`
+58x20 cells at 42 pt. `--cols`, `--rows`, `--font-size` change that, so do `grid` and `font-size`
 in `presiterm.toml`. A bigger font means fewer cells, not a bigger window.
 
 Odd setups: `--control PATH` moves the control socket (default `<tmp>/presiterm-<pid>.sock`,
