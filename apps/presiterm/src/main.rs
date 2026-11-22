@@ -90,8 +90,8 @@ fn run() -> Result<u8> {
 }
 
 /// What the hidden `presiterm film` says, for one release.
-const MOVED: &str = "`presiterm film` moved to flipcard: https://github.com/mborejdo/flipcard \
-(`cargo install --git https://github.com/mborejdo/flipcard flipcard`, then `flipcard talk/slides.md`)";
+const MOVED: &str = "`presiterm film` moved to flipcard: https://github.com/mborejdo/flipcard; \
+`cargo install --git https://github.com/mborejdo/flipcard flipcard`, then `flipcard talk/slides.md`";
 
 /// Present the deck: in a dedicated WezTerm window (`--window`) or in the terminal we are in.
 fn present(file: Option<PathBuf>, args: PresentArgs, given: Given) -> Result<u8> {

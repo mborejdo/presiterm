@@ -144,7 +144,7 @@ fn not_found(id: FileId) -> FileError {
 /// each: the same text compiles under the same id, so Typst's cache carries over.
 type Sources = Arc<Mutex<HashMap<FileId, (Source, usize)>>>;
 
-/// Serves the [`Main::Source`] texts being compiled.
+/// The [`Main::Source`] texts being compiled, served to Typst.
 struct Scratch(Sources);
 
 impl FileResolver for Scratch {
@@ -161,7 +161,7 @@ impl FileResolver for Scratch {
     }
 }
 
-/// Compiles Typst documents; fonts are parsed once, packages fetched once.
+/// The Typst compiler: fonts are parsed once, packages fetched once.
 pub struct Engine {
     inner: TypstEngine,
     scratch: Sources,

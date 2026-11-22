@@ -98,7 +98,7 @@ impl Drop for RawMode {
     }
 }
 
-/// Polls stdin for keys and the window for size changes.
+/// The key and resize events: stdin polled for keys, the window for size changes.
 #[derive(Debug)]
 pub struct Events {
     last: Option<Size>,

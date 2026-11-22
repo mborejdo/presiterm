@@ -456,7 +456,7 @@ mod tests {
         };
         assert_eq!(
             text, TOKENS,
-            "tokens.toml differs from {canonical}; copy it over (see README)"
+            "tokens.toml differs from {canonical}; copy it over, see README"
         );
     }
 

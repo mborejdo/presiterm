@@ -37,7 +37,7 @@ pub fn ctl(control: Option<&Path>, command: &[String]) -> Result<String> {
     Ok(reply.trim().to_string())
 }
 
-pub(super) fn newest_presenter() -> Result<UnixStream> {
+fn newest_presenter() -> Result<UnixStream> {
     let dir = std::env::temp_dir();
     let mut socks: Vec<_> = std::fs::read_dir(&dir)
         .with_context(|| format!("read {}", dir.display()))?
